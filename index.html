@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Cutle Unlimited</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <div class="title">CUT<span class="accent">LE</span> UNLIMITED</div>
+
+  <div class="top-icons">
+    <button id="help-btn" title="How to play" aria-label="Help">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.4-1 1-1 1.7"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>
+    </button>
+    <button id="stats-btn" title="Stats" aria-label="Stats">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="6" y1="20" x2="6" y2="12"/><line x1="12" y1="20" x2="12" y2="6"/><line x1="18" y1="20" x2="18" y2="14"/></svg>
+    </button>
+  </div>
+
+  <div class="stage">
+    <svg id="board" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
+      <rect class="hit-pad" id="hit-pad" x="0" y="0" width="400" height="400"/>
+      <circle class="ring" cx="200" cy="200" r="180" pointer-events="none"/>
+      <g id="shape-layer"></g>
+      <g id="cut-layer"></g>
+      <g id="label-layer"></g>
+      <line id="cut-preview" class="cut-line preview" style="display:none"/>
+    </svg>
+  </div>
+
+  <div class="score-line" id="score-line">
+    <div class="hint" id="hint">Drag a line that fully crosses the shape</div>
+  </div>
+
+  <div class="actions">
+    <button class="btn secondary" id="gamemode-btn">Change Gamemode</button>
+    <button class="btn" id="new-btn">New Shape</button>
+  </div>
+
+  <div class="modal-back" id="help-modal">
+    <div class="modal">
+      <h2>HOW TO PLAY</h2>
+      <p>Cut the shape with one straight line — as close to <b>50/50</b> by area as you can.</p>
+      <ul>
+        <li>Press &amp; drag — your stroke must fully cross the shape</li>
+        <li>Release to score the cut</li>
+        <li>One shape = one attempt</li>
+      </ul>
+      <div class="close-row"><button class="btn" id="close-help">Got it</button></div>
+    </div>
+  </div>
+
+  <div class="modal-back" id="stats-modal">
+    <div class="modal">
+      <h2>STATS</h2>
+      <p>Cuts made: <b id="s-attempts">0</b></p>
+      <p>Best cut: <b id="s-best">—</b></p>
+      <p>Average diff: <b id="s-avg">—</b></p>
+      <p>Perfect cuts (&lt;0.5%): <b id="s-perfect">0</b></p>
+      <div class="close-row">
+        <button class="btn secondary" id="reset-stats">Reset</button>
+        <button class="btn" id="close-stats">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-back" id="gamemode-modal">
+    <div class="modal">
+      <h2>CHANGE GAMEMODE</h2>
+      <p>Coming soon.</p>
+      <div class="close-row"><button class="btn" id="close-gamemode">Close</button></div>
+    </div>
+  </div>
+</div>
+
+<script src="js/constants.js"></script>
+<script src="js/random.js"></script>
+<script src="js/geometry.js"></script>
+<script src="js/shapes.js"></script>
+<script src="js/stats.js"></script>
+<script src="js/modals.js"></script>
+<script src="js/render.js"></script>
+<script src="js/input.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
