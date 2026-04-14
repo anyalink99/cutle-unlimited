@@ -51,9 +51,14 @@ function performCut(p0, p1) {
   drawCutFlash(p0, p1);
 
   const offset = 22;
+  pieceA.style.transform = 'translate(0px, 0px)';
+  pieceB.style.transform = 'translate(0px, 0px)';
+  pieceA.getBoundingClientRect();
   requestAnimationFrame(() => {
-    pieceA.style.transform = `translate(${(nx * offset).toFixed(2)}px, ${(ny * offset).toFixed(2)}px)`;
-    pieceB.style.transform = `translate(${(-nx * offset).toFixed(2)}px, ${(-ny * offset).toFixed(2)}px)`;
+    requestAnimationFrame(() => {
+      pieceA.style.transform = `translate(${(nx * offset).toFixed(2)}px, ${(ny * offset).toFixed(2)}px)`;
+      pieceB.style.transform = `translate(${(-nx * offset).toFixed(2)}px, ${(-ny * offset).toFixed(2)}px)`;
+    });
   });
 
   const cA = polygonCentroid(sideA.outer);

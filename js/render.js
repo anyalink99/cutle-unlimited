@@ -27,10 +27,13 @@ function renderShape(shape) {
 }
 
 function makePiece(shape) {
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'piece');
   const p = document.createElementNS(SVG_NS, 'path');
-  p.setAttribute('class', 'shape piece');
+  p.setAttribute('class', 'shape');
   p.setAttribute('d', shapeToPath(shape));
-  return p;
+  g.appendChild(p);
+  return g;
 }
 
 function drawCutFlash(p0, p1) {

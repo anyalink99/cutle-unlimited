@@ -98,8 +98,8 @@ body {
 }
 
 .piece {
-  transform-box: fill-box; transform-origin: center;
   transition: transform 0.95s var(--s-curve);
+  will-change: transform;
 }
 
 .label-leader {
