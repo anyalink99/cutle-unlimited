@@ -10,3 +10,5 @@ const TARGET_AREA = 30000;
 
 const MOVE_THRESHOLD = 6;
 const STATS_KEY = 'cutle.stats.v1';
+const MODE_KEY = 'cutle.mode.v1';
+const POINT_GRAB_R = 11;

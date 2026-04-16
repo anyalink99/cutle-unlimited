@@ -187,6 +187,85 @@ body {
 @keyframes fadeScaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 @keyframes backdropFadeIn { from { opacity: 0; } to { opacity: 1; } }
 
+/* ---- square mode ---- */
+body[data-mode="cut"]    .help-square { display: none; }
+body[data-mode="square"] .help-cut    { display: none; }
+
+.square-point { pointer-events: none; }
+.sp-halo {
+  fill: var(--accent);
+  fill-opacity: 0.14;
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-opacity: 0.55;
+}
+.sp-dot {
+  fill: white;
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 6px rgba(192,132,252,0.55));
+}
+.sp-hover {
+  fill: var(--pink);
+  fill-opacity: 0.9;
+  stroke: white;
+  stroke-width: 1.5;
+  opacity: 0.85;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(244,114,182,0.55));
+}
+
+.square-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 5px rgba(192,132,252,0.45));
+  pointer-events: none;
+}
+
+.ideal-square { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+.ideal-square.show { opacity: 1; }
+.ideal-edge {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  filter: drop-shadow(0 0 6px rgba(74,222,128,0.5));
+}
+.ideal-corner {
+  fill: var(--good);
+  filter: drop-shadow(0 0 4px rgba(74,222,128,0.7));
+}
+
+.mode-picker {
+  display: flex; flex-direction: column; gap: 10px;
+  margin: 6px 0 14px;
+}
+.mode-card {
+  text-align: left;
+  background: #2a232f;
+  border: 1.5px solid #3a3340;
+  color: #e5e7eb;
+  padding: 12px 14px;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s, transform 0.15s, background 0.2s;
+  font-family: inherit;
+}
+.mode-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.mode-card.active {
+  border-color: var(--accent);
+  background: linear-gradient(180deg, #35233e 0%, #2a1f34 100%);
+  box-shadow: 0 0 0 2px rgba(192,132,252,0.22);
+}
+.mode-title {
+  font-weight: 800; letter-spacing: 1px;
+  color: var(--accent); font-size: 0.95rem; margin-bottom: 3px;
+}
+.mode-desc { font-size: 0.88rem; color: #d1d5db; line-height: 1.35; }
+
 .modal-back.closing { display: flex; animation: backdropFadeOut 0.22s ease forwards; }
 .modal-back.closing .modal { animation: fadeScaleOut 0.22s var(--s-curve) forwards; }
 @keyframes backdropFadeOut { from { opacity: 1; } to { opacity: 0; } }

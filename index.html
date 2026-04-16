@@ -6,7 +6,7 @@
 <title>Cutle Unlimited</title>
 <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body data-mode="cut">
 <div class="app">
   <div class="title">CUT<span class="accent">LE</span> UNLIMITED</div>
 
@@ -25,6 +25,10 @@
       <circle class="ring" cx="200" cy="200" r="180" pointer-events="none"/>
       <g id="shape-layer"></g>
       <g id="cut-layer"></g>
+      <g id="square-ideal-layer"></g>
+      <g id="square-lines-layer"></g>
+      <g id="square-points-layer"></g>
+      <g id="square-hover-layer"></g>
       <g id="label-layer"></g>
       <line id="cut-preview" class="cut-line preview" style="display:none"/>
     </svg>
@@ -36,18 +40,28 @@
 
   <div class="actions">
     <button class="btn secondary" id="gamemode-btn">Change Gamemode</button>
-    <button class="btn" id="new-btn">New Shape</button>
+    <button class="btn" id="new-btn" data-action="new">New Shape</button>
   </div>
 
   <div class="modal-back" id="help-modal">
     <div class="modal">
       <h2>HOW TO PLAY</h2>
-      <p>Cut the shape with one straight line — as close to <b>50/50</b> by area as you can.</p>
-      <ul>
-        <li>Press &amp; drag — your stroke must fully cross the shape</li>
-        <li>Release to score the cut</li>
-        <li>One shape = one attempt</li>
-      </ul>
+      <div class="help-cut">
+        <p>Cut the shape with one straight line — as close to <b>50/50</b> by area as you can.</p>
+        <ul>
+          <li>Press &amp; drag — your stroke must fully cross the shape</li>
+          <li>Release to score the cut</li>
+          <li>One shape = one attempt</li>
+        </ul>
+      </div>
+      <div class="help-square">
+        <p>Place <b>four points</b> on the outline to form a square — the closer to a perfect square, the better.</p>
+        <ul>
+          <li>The nearest point on the outline follows your cursor</li>
+          <li>Tap / click to drop — drag points any time to adjust</li>
+          <li>After four points, press <b>Confirm</b> to score</li>
+        </ul>
+      </div>
       <div class="close-row"><button class="btn" id="close-help">Got it</button></div>
     </div>
   </div>
@@ -69,7 +83,17 @@
   <div class="modal-back" id="gamemode-modal">
     <div class="modal">
       <h2>CHANGE GAMEMODE</h2>
-      <p>Coming soon.</p>
+      <p>Pick how you want to play.</p>
+      <div class="mode-picker">
+        <button class="mode-card" data-mode="cut">
+          <div class="mode-title">Cut</div>
+          <div class="mode-desc">Slice the shape in half — one line, 50/50 by area.</div>
+        </button>
+        <button class="mode-card" data-mode="square">
+          <div class="mode-title">Square</div>
+          <div class="mode-desc">Place 4 points on the outline — make the cleanest square you can.</div>
+        </button>
+      </div>
       <div class="close-row"><button class="btn" id="close-gamemode">Close</button></div>
     </div>
   </div>
@@ -83,6 +107,7 @@
 <script src="js/modals.js"></script>
 <script src="js/render.js"></script>
 <script src="js/input.js"></script>
+<script src="js/square.js"></script>
 <script src="js/game.js"></script>
 <script src="js/main.js"></script>
 </body>

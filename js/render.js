@@ -7,12 +7,20 @@ const dom = {
   cutPreview: document.getElementById('cut-preview'),
   scoreLine: document.getElementById('score-line'),
   newBtn: document.getElementById('new-btn'),
+  squareLines: document.getElementById('square-lines-layer'),
+  squarePoints: document.getElementById('square-points-layer'),
+  squareHover: document.getElementById('square-hover-layer'),
+  squareIdeal: document.getElementById('square-ideal-layer'),
 };
 
 function clearLayers() {
   dom.shapeLayer.innerHTML = '';
   dom.cutLayer.innerHTML = '';
   dom.labelLayer.innerHTML = '';
+  dom.squareLines.innerHTML = '';
+  dom.squarePoints.innerHTML = '';
+  dom.squareHover.innerHTML = '';
+  dom.squareIdeal.innerHTML = '';
 }
 
 function renderShape(shape) {

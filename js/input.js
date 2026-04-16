@@ -34,6 +34,7 @@ function initInput(ctx) {
   }
 
   hitPad.addEventListener('pointerdown', e => {
+    if (ctx.isActive && !ctx.isActive()) return;
     if (ctx.isLocked()) return;
     if (activePointerId !== null) return;
     e.preventDefault();
@@ -46,6 +47,7 @@ function initInput(ctx) {
   });
 
   hitPad.addEventListener('pointermove', e => {
+    if (ctx.isActive && !ctx.isActive()) return;
     if (e.pointerId !== activePointerId) return;
     e.preventDefault();
     p1 = svgPoint(e);
