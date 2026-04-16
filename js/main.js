@@ -71,9 +71,32 @@ initMassInput();
 
 loadStats();
 
-let savedMode = 'cut';
-try { savedMode = localStorage.getItem(MODE_KEY) || 'cut'; } catch (e) {}
-state.mode = ['cut', 'square', 'mass'].includes(savedMode) ? savedMode : 'cut';
+const initialRoute = parseLocation();
+BASE_PATH = initialRoute.base;
+
+let initialMode = initialRoute.mode;
+if (!initialMode) {
+  try { initialMode = localStorage.getItem(MODE_KEY); } catch (e) {}
+  if (!initialMode || !['cut', 'square', 'mass'].includes(initialMode)) initialMode = 'cut';
+}
+state.mode = initialMode;
+try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
 document.body.dataset.mode = state.mode;
 refreshModeCards();
-newShape();
+newShape(initialRoute.hash || undefined, 'replace');
+
+window.addEventListener('popstate', () => {
+  const loc = parseLocation();
+  if (!loc.mode) return;
+  if (loc.mode !== state.mode) {
+    state.mode = loc.mode;
+    document.body.dataset.mode = state.mode;
+    try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
+    refreshModeCards();
+  }
+  if (loc.hash && loc.hash !== state.hash) {
+    newShape(loc.hash, 'skip');
+  } else if (!loc.hash) {
+    newShape(undefined, 'replace');
+  }
+});

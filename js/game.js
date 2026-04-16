@@ -2,6 +2,7 @@ const state = {
   mode: 'cut',
   shape: { outer: [], holes: [] },
   locked: false,
+  hash: null,
 };
 
 function updateActionButton() {
@@ -33,8 +34,10 @@ function generateShapeForMode() {
   return generateShape();
 }
 
-function newShape() {
-  state.shape = generateShapeForMode();
+function newShape(hash, nav = 'push') {
+  const h = hash || generateHash();
+  state.hash = h;
+  state.shape = withSeed(seedFromString(h), generateShapeForMode);
   state.locked = false;
   cutReset();
   renderShape(state.shape);
@@ -52,6 +55,8 @@ function newShape() {
   }
   dom.newBtn.classList.remove('pulse');
   updateActionButton();
+  if (nav === 'replace') replaceRoute(state.mode, state.hash);
+  else if (nav === 'push') pushRoute(state.mode, state.hash);
 }
 
 function setMode(m) {
