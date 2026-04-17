@@ -8,7 +8,6 @@
   --accent-deep: #6b2ea0;
   --pink: #f472b6;
   --muted: #9ca3af;
-  --ring: #4a3f50;
   --good: #4ade80;
   --warn: #f87171;
   --s-curve: cubic-bezier(0.83, 0, 0.17, 1);
@@ -58,8 +57,6 @@ body {
   touch-action: none;
   -webkit-touch-callout: none;
 }
-
-.ring { fill: none; stroke: var(--ring); stroke-width: 4; }
 
 .hit-pad { fill: transparent; cursor: crosshair; }
 
