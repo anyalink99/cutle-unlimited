@@ -228,6 +228,10 @@ body.modals-open::before { opacity: 1; }
   animation: fadeScaleIn 0.25s var(--pop);
 }
 .modal h2 { margin: 0 0 10px; font-size: 1.2rem; color: var(--accent); letter-spacing: 1px; }
+.modal .stats-subtitle {
+  margin: -4px 0 12px; font-size: 0.82rem; color: #9ca3af;
+  letter-spacing: 0.6px; text-transform: uppercase;
+}
 .modal p, .modal li { color: #d1d5db; line-height: 1.5; font-size: 0.95rem; }
 .modal ul { padding-left: 18px; margin: 6px 0 14px; }
 .modal .close-row { display: flex; justify-content: flex-end; gap: 8px; }
@@ -235,13 +239,13 @@ body.modals-open::before { opacity: 1; }
 
 @keyframes fadeScaleIn { from { opacity: 0; transform: scale(0.92); } to { opacity: 1; transform: scale(1); } }
 
-/* ---- square mode ---- */
-body[data-mode="cut"]    .help-square,
-body[data-mode="cut"]    .help-mass   { display: none; }
-body[data-mode="square"] .help-cut,
-body[data-mode="square"] .help-mass   { display: none; }
-body[data-mode="mass"]   .help-cut,
-body[data-mode="mass"]   .help-square { display: none; }
+/* ---- inscribe mode ---- */
+body[data-mode="cut"]      .help-inscribe,
+body[data-mode="cut"]      .help-mass     { display: none; }
+body[data-mode="inscribe"] .help-cut,
+body[data-mode="inscribe"] .help-mass     { display: none; }
+body[data-mode="mass"]     .help-cut,
+body[data-mode="mass"]     .help-inscribe { display: none; }
 
 body[data-mode="cut"] .help-cut > div { display: none; }
 body[data-mode="cut"][data-cut-variation="half"]  .help-cut-half,
@@ -250,9 +254,9 @@ body[data-mode="cut"][data-cut-variation="quad"]  .help-cut-quad,
 body[data-mode="cut"][data-cut-variation="tri"]   .help-cut-tri,
 body[data-mode="cut"][data-cut-variation="angle"] .help-cut-angle { display: block; }
 
-body[data-mode="square"] .help-square > div { display: none; }
-body[data-mode="square"][data-square-variation="square"]   .help-square-square,
-body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle { display: block; }
+body[data-mode="inscribe"] .help-inscribe > div { display: none; }
+body[data-mode="inscribe"][data-inscribe-variation="square"]   .help-inscribe-square,
+body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-triangle { display: block; }
 
 .math-note {
   font-size: 0.82rem;
@@ -265,7 +269,7 @@ body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle
 .math-note b { color: var(--accent); font-weight: 700; }
 .math-note i { color: #d1d5db; font-style: italic; }
 
-.square-point { pointer-events: none; }
+.inscribe-point { pointer-events: none; }
 .sp-halo {
   fill: var(--accent);
   fill-opacity: 0.14;
@@ -289,7 +293,7 @@ body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle
   filter: drop-shadow(0 0 6px rgba(244,114,182,0.55));
 }
 
-.square-line {
+.inscribe-line {
   fill: none;
   stroke: var(--accent);
   stroke-width: 2.4;
@@ -299,8 +303,8 @@ body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle
   pointer-events: none;
 }
 
-.ideal-square { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
-.ideal-square.show { opacity: 1; }
+.ideal-inscribe { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+.ideal-inscribe.show { opacity: 1; }
 .ideal-edge {
   fill: none;
   stroke: var(--good);
@@ -317,7 +321,7 @@ body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle
   display: flex; flex-direction: column; gap: 10px;
   margin: 6px 0 14px;
 }
-.mode-card, .var-card, .sq-var-card {
+.mode-card, .var-card, .inscribe-var-card {
   text-align: left;
   background: #2a232f;
   border: 1.5px solid #3a3340;
@@ -328,8 +332,8 @@ body[data-mode="square"][data-square-variation="triangle"] .help-square-triangle
   transition: border-color 0.2s, transform 0.15s, background 0.2s;
   font-family: inherit;
 }
-.mode-card:hover, .var-card:hover, .sq-var-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.mode-card.active, .var-card.active, .sq-var-card.active {
+.mode-card:hover, .var-card:hover, .inscribe-var-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.mode-card.active, .var-card.active, .inscribe-var-card.active {
   border-color: var(--accent);
   background: linear-gradient(180deg, #35233e 0%, #2a1f34 100%);
   box-shadow: 0 0 0 2px rgba(192,132,252,0.22);

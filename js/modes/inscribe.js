@@ -1,4 +1,4 @@
-const squareState = {
+const inscribeState = {
   points: [],
   hover: null,
   hoverRaw: null,
@@ -14,12 +14,12 @@ const squareState = {
   generation: 0,
 };
 
-function squareVariation() {
-  return state.squareVariation || 'square';
+function inscribeVariation() {
+  return state.inscribeVariation || 'square';
 }
 
-function squareN() {
-  return squareVariation() === 'triangle' ? 3 : 4;
+function inscribeN() {
+  return inscribeVariation() === 'triangle' ? 3 : 4;
 }
 
 function shapeLabel(N) {
@@ -28,8 +28,8 @@ function shapeLabel(N) {
 
 function pickExistingPoint(p, grabR) {
   let idx = -1, bestD = grabR ?? POINT_GRAB_R;
-  for (let i = 0; i < squareState.points.length; i++) {
-    const d = Math.hypot(p.x - squareState.points[i].x, p.y - squareState.points[i].y);
+  for (let i = 0; i < inscribeState.points.length; i++) {
+    const d = Math.hypot(p.x - inscribeState.points[i].x, p.y - inscribeState.points[i].y);
     if (d < bestD) { bestD = d; idx = i; }
   }
   return idx;
@@ -83,11 +83,11 @@ function ngonEdges(pts, N) {
   return out;
 }
 
-function pickSquareLine(p, threshold) {
+function pickInscribeLine(p, threshold) {
   const thr = threshold ?? LINE_GRAB_THRESHOLD;
   let bestD = thr, bestPair = null;
-  const pts = squareState.points;
-  for (const [i, j] of ngonEdges(pts, squareN())) {
+  const pts = inscribeState.points;
+  for (const [i, j] of ngonEdges(pts, inscribeN())) {
     const pr = closestOnSegment(p, pts[i], pts[j]);
     const d = Math.hypot(p.x - pr.x, p.y - pr.y);
     if (d < bestD) { bestD = d; bestPair = [i, j]; }
@@ -95,10 +95,10 @@ function pickSquareLine(p, threshold) {
   return bestPair;
 }
 
-function translateSquareLine(delta) {
-  if (!squareState.dragLineIdxs || !squareState.dragInitialPoints) return;
-  const [iA, iB] = squareState.dragLineIdxs;
-  const [A0, B0] = squareState.dragInitialPoints;
+function translateInscribeLine(delta) {
+  if (!inscribeState.dragLineIdxs || !inscribeState.dragInitialPoints) return;
+  const [iA, iB] = inscribeState.dragLineIdxs;
+  const [A0, B0] = inscribeState.dragInitialPoints;
   const dx = B0.x - A0.x, dy = B0.y - A0.y;
   const L = Math.hypot(dx, dy);
   if (L < 1e-6) return;
@@ -136,58 +136,58 @@ function translateSquareLine(delta) {
   }
   if (bestA === null || bestB === null) return;
 
-  squareState.points[iA] = { x: mx + ux * bestA, y: my + uy * bestA };
-  squareState.points[iB] = { x: mx + ux * bestB, y: my + uy * bestB };
+  inscribeState.points[iA] = { x: mx + ux * bestA, y: my + uy * bestA };
+  inscribeState.points[iB] = { x: mx + ux * bestB, y: my + uy * bestB };
 }
 
-function squareReset() {
-  squareState.points = [];
-  squareState.hover = null;
-  squareState.hoverRaw = null;
-  squareState.dragIdx = -1;
-  squareState.dragLineIdxs = null;
-  squareState.dragInitialPoints = null;
-  squareState.dragOrigin = null;
-  squareState.confirmed = false;
-  squareState.activePointerId = null;
-  squareState.idealCorners = null;
-  squareState.idealDrawn = false;
-  squareState.generation++;
-  dom.squareLines.innerHTML = '';
-  dom.squarePoints.innerHTML = '';
-  dom.squareHover.innerHTML = '';
-  dom.squareIdeal.innerHTML = '';
+function inscribeReset() {
+  inscribeState.points = [];
+  inscribeState.hover = null;
+  inscribeState.hoverRaw = null;
+  inscribeState.dragIdx = -1;
+  inscribeState.dragLineIdxs = null;
+  inscribeState.dragInitialPoints = null;
+  inscribeState.dragOrigin = null;
+  inscribeState.confirmed = false;
+  inscribeState.activePointerId = null;
+  inscribeState.idealCorners = null;
+  inscribeState.idealDrawn = false;
+  inscribeState.generation++;
+  dom.inscribeLines.innerHTML = '';
+  dom.inscribePoints.innerHTML = '';
+  dom.inscribeHover.innerHTML = '';
+  dom.inscribeIdeal.innerHTML = '';
 }
 
-let squareWorker = null;
+let inscribeWorker = null;
 
-function ensureSquareWorker() {
-  if (squareWorker) return squareWorker;
+function ensureInscribeWorker() {
+  if (inscribeWorker) return inscribeWorker;
   try {
-    squareWorker = new Worker('js/workers/square-worker.js');
-    squareWorker.onmessage = (e) => {
-      if (e.data.gen !== squareState.generation) return;
-      squareState.idealCorners = e.data.corners;
-      if (squareState.confirmed && e.data.corners && !squareState.idealDrawn) {
-        drawIdealSquare(e.data.corners);
-        squareState.idealDrawn = true;
+    inscribeWorker = new Worker('js/workers/inscribe-worker.js');
+    inscribeWorker.onmessage = (e) => {
+      if (e.data.gen !== inscribeState.generation) return;
+      inscribeState.idealCorners = e.data.corners;
+      if (inscribeState.confirmed && e.data.corners && !inscribeState.idealDrawn) {
+        drawIdealInscribe(e.data.corners);
+        inscribeState.idealDrawn = true;
       }
     };
-    squareWorker.onerror = () => { squareWorker = null; };
+    inscribeWorker.onerror = () => { inscribeWorker = null; };
   } catch (e) {
-    squareWorker = null;
+    inscribeWorker = null;
   }
-  return squareWorker;
+  return inscribeWorker;
 }
 
 function precomputeIdeal(outer) {
-  squareState.idealCorners = null;
-  const gen = ++squareState.generation;
-  const w = ensureSquareWorker();
-  if (w) w.postMessage({ outer, gen, N: squareN() });
+  inscribeState.idealCorners = null;
+  const gen = ++inscribeState.generation;
+  const w = ensureInscribeWorker();
+  if (w) w.postMessage({ outer, gen, N: inscribeN() });
 }
 
-function drawSquareLine(a, b, cls = 'square-line') {
+function drawInscribeLine(a, b, cls = 'inscribe-line') {
   const ln = document.createElementNS(SVG_NS, 'line');
   ln.setAttribute('class', cls);
   ln.setAttribute('x1', a.x.toFixed(2));
@@ -197,9 +197,9 @@ function drawSquareLine(a, b, cls = 'square-line') {
   return ln;
 }
 
-function drawSquarePoint(p, idx) {
+function drawInscribePoint(p, idx) {
   const g = document.createElementNS(SVG_NS, 'g');
-  g.setAttribute('class', 'square-point');
+  g.setAttribute('class', 'inscribe-point');
   const halo = document.createElementNS(SVG_NS, 'circle');
   halo.setAttribute('cx', p.x); halo.setAttribute('cy', p.y);
   halo.setAttribute('r', 11);
@@ -214,67 +214,67 @@ function drawSquarePoint(p, idx) {
   return g;
 }
 
-function renderSquareLines() {
-  dom.squareLines.innerHTML = '';
-  const pts = squareState.points;
-  for (const [i, j] of ngonEdges(pts, squareN())) {
-    dom.squareLines.appendChild(drawSquareLine(pts[i], pts[j]));
+function renderInscribeLines() {
+  dom.inscribeLines.innerHTML = '';
+  const pts = inscribeState.points;
+  for (const [i, j] of ngonEdges(pts, inscribeN())) {
+    dom.inscribeLines.appendChild(drawInscribeLine(pts[i], pts[j]));
   }
 }
 
-function renderSquarePoints() {
-  dom.squarePoints.innerHTML = '';
-  squareState.points.forEach((p, i) => {
-    dom.squarePoints.appendChild(drawSquarePoint(p, i));
+function renderInscribePoints() {
+  dom.inscribePoints.innerHTML = '';
+  inscribeState.points.forEach((p, i) => {
+    dom.inscribePoints.appendChild(drawInscribePoint(p, i));
   });
 }
 
-function updateSquareCursor(overGrabbable, dragging) {
-  if (state.mode !== 'square') { dom.hitPad.style.cursor = ''; return; }
-  if (squareState.confirmed) { dom.hitPad.style.cursor = 'default'; return; }
+function updateInscribeCursor(overGrabbable, dragging) {
+  if (state.mode !== 'inscribe') { dom.hitPad.style.cursor = ''; return; }
+  if (inscribeState.confirmed) { dom.hitPad.style.cursor = 'default'; return; }
   if (dragging) dom.hitPad.style.cursor = 'grabbing';
   else if (overGrabbable) dom.hitPad.style.cursor = 'grab';
-  else if (squareState.points.length >= squareN()) dom.hitPad.style.cursor = 'default';
+  else if (inscribeState.points.length >= inscribeN()) dom.hitPad.style.cursor = 'default';
   else dom.hitPad.style.cursor = 'crosshair';
 }
 
-function isSquareDragging() {
-  return squareState.dragIdx >= 0 || !!squareState.dragLineIdxs;
+function isInscribeDragging() {
+  return inscribeState.dragIdx >= 0 || !!inscribeState.dragLineIdxs;
 }
 
-function renderSquareHover() {
-  dom.squareHover.innerHTML = '';
-  if (squareState.confirmed) return;
-  const dragging = isSquareDragging();
-  const raw = squareState.hoverRaw;
-  if (!raw) { updateSquareCursor(false, dragging); return; }
-  if (squareState.pointerType && squareState.pointerType !== 'mouse') return;
+function renderInscribeHover() {
+  dom.inscribeHover.innerHTML = '';
+  if (inscribeState.confirmed) return;
+  const dragging = isInscribeDragging();
+  const raw = inscribeState.hoverRaw;
+  if (!raw) { updateInscribeCursor(false, dragging); return; }
+  if (inscribeState.pointerType && inscribeState.pointerType !== 'mouse') return;
   const overExisting = pickExistingPoint(raw) >= 0;
-  const overLine = !overExisting && pickSquareLine(raw) !== null;
-  updateSquareCursor(overExisting || overLine, dragging);
+  const overLine = !overExisting && pickInscribeLine(raw) !== null;
+  updateInscribeCursor(overExisting || overLine, dragging);
   if (overExisting || overLine) return;
-  if (squareState.points.length >= squareN()) return;
-  if (!squareState.hover) return;
+  if (inscribeState.points.length >= inscribeN()) return;
+  if (!inscribeState.hover) return;
   const c = document.createElementNS(SVG_NS, 'circle');
-  c.setAttribute('cx', squareState.hover.x);
-  c.setAttribute('cy', squareState.hover.y);
+  c.setAttribute('cx', inscribeState.hover.x);
+  c.setAttribute('cy', inscribeState.hover.y);
   c.setAttribute('r', 5);
   c.setAttribute('class', 'sp-hover');
-  dom.squareHover.appendChild(c);
+  dom.inscribeHover.appendChild(c);
 }
 
-function renderSquareAll() {
-  renderSquareLines();
-  renderSquarePoints();
-  renderSquareHover();
-  updateSquareHint();
+function renderInscribeAll() {
+  renderInscribeLines();
+  renderInscribePoints();
+  renderInscribeHover();
+  updateInscribeHint();
   updateActionButton();
 }
 
-function updateSquareHint() {
-  if (squareState.confirmed) return;
-  const N = squareN();
-  const n = squareState.points.length;
+function updateInscribeHint() {
+  if (inscribeState.confirmed) return;
+  const N = inscribeN();
+  const n = inscribeState.points.length;
   const label = shapeLabel(N).toLowerCase();
   let msg;
   if (n === 0) msg = 'Tap on the outline to place your first point';
@@ -363,10 +363,10 @@ function evaluateNgon(pts, N) {
   return { ideal, sides, meanSide, angles, angleErr, worstAngle, rms, rel, score, sideRatio, idealAngle };
 }
 
-function drawIdealSquare(corners) {
-  dom.squareIdeal.innerHTML = '';
+function drawIdealInscribe(corners) {
+  dom.inscribeIdeal.innerHTML = '';
   const g = document.createElementNS(SVG_NS, 'g');
-  g.setAttribute('class', 'ideal-square');
+  g.setAttribute('class', 'ideal-inscribe');
   const N = corners.length;
   for (let i = 0; i < N; i++) {
     const a = corners[i], b = corners[(i + 1) % N];
@@ -383,14 +383,14 @@ function drawIdealSquare(corners) {
     d.setAttribute('class', 'ideal-corner');
     g.appendChild(d);
   }
-  dom.squareIdeal.appendChild(g);
-  dom.squareIdeal.getBoundingClientRect();
+  dom.inscribeIdeal.appendChild(g);
+  dom.inscribeIdeal.getBoundingClientRect();
   requestAnimationFrame(() => {
     requestAnimationFrame(() => g.classList.add('show'));
   });
 }
 
-function showSquareVerdict(res, N) {
+function showInscribeVerdict(res, N) {
   let cls;
   if (res.score > 96)       cls = 'perfect';
   else if (res.score >= 90) cls = 'great';
@@ -428,22 +428,22 @@ function findInscribedFallback(outer, N) {
   });
 }
 
-function confirmSquare() {
-  if (squareState.confirmed) return;
-  const N = squareN();
-  if (squareState.points.length !== N) return;
-  squareState.confirmed = true;
-  squareState.hover = null;
-  dom.squareHover.innerHTML = '';
-  const res = evaluateNgon(squareState.points, N);
-  const inscribed = squareState.idealCorners || findInscribedFallback(state.shape.outer, N);
+function confirmInscribe() {
+  if (inscribeState.confirmed) return;
+  const N = inscribeN();
+  if (inscribeState.points.length !== N) return;
+  inscribeState.confirmed = true;
+  inscribeState.hover = null;
+  dom.inscribeHover.innerHTML = '';
+  const res = evaluateNgon(inscribeState.points, N);
+  const inscribed = inscribeState.idealCorners || findInscribedFallback(state.shape.outer, N);
   if (inscribed) {
-    squareState.idealCorners = inscribed;
-    drawIdealSquare(inscribed);
-    squareState.idealDrawn = true;
+    inscribeState.idealCorners = inscribed;
+    drawIdealInscribe(inscribed);
+    inscribeState.idealDrawn = true;
   }
-  showSquareVerdict(res, N);
-  recordSquareScore(res.score);
+  showInscribeVerdict(res, N);
+  recordInscribeScore(inscribeVariation(), res.score);
   state.locked = true;
   updateActionButton();
   setTimeout(() => dom.newBtn.classList.add('pulse'), 900);

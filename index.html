@@ -17,7 +17,7 @@
       path = window.location.pathname;
     }
     var parts = path.split('/').filter(Boolean);
-    var modes = { cut: 1, square: 1, mass: 1 };
+    var modes = { cut: 1, inscribe: 1, mass: 1 };
     if (parts.length >= 2 && modes[parts[parts.length - 2]]) {
       parts = parts.slice(0, -2);
     } else if (parts.length >= 1 && modes[parts[parts.length - 1]]) {
@@ -51,10 +51,10 @@
       <g id="cut-layer"></g>
       <g id="cut-lines-layer"></g>
       <g id="cut-points-layer"></g>
-      <g id="square-ideal-layer"></g>
-      <g id="square-lines-layer"></g>
-      <g id="square-points-layer"></g>
-      <g id="square-hover-layer"></g>
+      <g id="inscribe-ideal-layer"></g>
+      <g id="inscribe-lines-layer"></g>
+      <g id="inscribe-points-layer"></g>
+      <g id="inscribe-hover-layer"></g>
       <g id="mass-ideal-layer"></g>
       <g id="mass-point-layer"></g>
       <g id="mass-hover-layer"></g>
@@ -118,8 +118,8 @@
           <p class="math-note"><b>Math:</b> for any direction there is <i>exactly one</i> line of that direction bisecting the area — uniqueness and existence both from IVT.</p>
         </div>
       </div>
-      <div class="help-square">
-        <div class="help-square-square">
+      <div class="help-inscribe">
+        <div class="help-inscribe-square">
           <p>Place <b>four points</b> on the outline to form a square — the closer to a perfect square, the better.</p>
           <ul>
             <li>The nearest point on the outline follows your cursor</li>
@@ -128,7 +128,7 @@
           </ul>
           <p class="math-note"><b>Math:</b> Toeplitz's Inscribed Square Problem (1911) — does every closed curve contain 4 points forming a square? Proven for polygons and smooth curves; for arbitrary Jordan curves it's still <i>open</i> after 110+ years.</p>
         </div>
-        <div class="help-square-triangle">
+        <div class="help-inscribe-triangle">
           <p>Place <b>three points</b> on the outline to form an equilateral triangle.</p>
           <ul>
             <li>Same controls as Square — tap, drop, and drag to adjust</li>
@@ -154,17 +154,18 @@
   <div class="modal-back" id="stats-modal">
     <div class="modal">
       <h2>STATS</h2>
+      <p class="stats-subtitle" id="stats-subtitle">Cut · Half</p>
       <div id="stats-cut-section">
         <p>Cuts made: <b id="s-attempts">0</b></p>
         <p>Best cut: <b id="s-best">—</b></p>
         <p>Average off by: <b id="s-avg">—</b></p>
         <p>Perfect cuts (&lt;0.5%): <b id="s-perfect">0</b></p>
       </div>
-      <div id="stats-square-section">
-        <p>Squares played: <b id="sq-attempts">0</b></p>
+      <div id="stats-inscribe-section">
+        <p>Rounds played: <b id="sq-attempts">0</b></p>
         <p>Best score: <b id="sq-best">—</b></p>
         <p>Average score: <b id="sq-avg">—</b></p>
-        <p>Perfect squares (&gt;96%): <b id="sq-perfect">0</b></p>
+        <p>Perfect (&gt;96%): <b id="sq-perfect">0</b></p>
       </div>
       <div id="stats-mass-section">
         <p>Shapes played: <b id="ms-attempts">0</b></p>
@@ -188,7 +189,7 @@
           <div class="mode-title">Cut</div>
           <div class="mode-desc">Slice the shape.</div>
         </button>
-        <button class="mode-card" data-mode="square">
+        <button class="mode-card" data-mode="inscribe">
           <div class="mode-title">Inscribe</div>
           <div class="mode-desc">Align the shape.</div>
         </button>
@@ -230,12 +231,12 @@
           <div class="mode-desc">Line is pre-placed at a fixed angle. Drag it to find the 50/50 sweet spot.</div>
         </button>
       </div>
-      <div class="mode-picker" id="square-var-picker">
-        <button class="sq-var-card" data-sqvar="square">
+      <div class="mode-picker" id="inscribe-var-picker">
+        <button class="inscribe-var-card" data-inscvar="square">
           <div class="mode-title">Square</div>
           <div class="mode-desc">Four points forming a regular square — the classic inscribed-square challenge.</div>
         </button>
-        <button class="sq-var-card" data-sqvar="triangle">
+        <button class="inscribe-var-card" data-inscvar="triangle">
           <div class="mode-title">Equilateral Triangle</div>
           <div class="mode-desc">Three points with equal sides and 60° angles.</div>
         </button>
@@ -256,7 +257,7 @@
 <script src="js/ui/modals.js"></script>
 <script src="js/ui/render.js"></script>
 <script src="js/modes/cut.js"></script>
-<script src="js/modes/square.js"></script>
+<script src="js/modes/inscribe.js"></script>
 <script src="js/modes/mass.js"></script>
 <script src="js/ui/input.js"></script>
 <script src="js/game.js"></script>

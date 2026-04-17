@@ -181,98 +181,98 @@ function initCutInput() {
   hitPad.addEventListener('pointercancel', e => endCutStroke(e, true));
 }
 
-function initSquareInput() {
+function initInscribeInput() {
   const hit = dom.hitPad;
 
   hit.addEventListener('pointerdown', e => {
-    if (state.mode !== 'square') return;
-    if (squareState.confirmed) return;
-    if (squareState.activePointerId !== null) return;
+    if (state.mode !== 'inscribe') return;
+    if (inscribeState.confirmed) return;
+    if (inscribeState.activePointerId !== null) return;
     e.preventDefault();
     const p = svgPoint(e);
-    squareState.pointerType = e.pointerType;
+    inscribeState.pointerType = e.pointerType;
     const outer = state.shape.outer;
     const grabR = e.pointerType !== 'mouse' ? POINT_GRAB_R * 3 : POINT_GRAB_R;
     const lineThr = e.pointerType !== 'mouse' ? LINE_GRAB_THRESHOLD * 1.5 : LINE_GRAB_THRESHOLD;
     const existing = pickExistingPoint(p, grabR);
-    const linePair = existing >= 0 ? null : pickSquareLine(p, lineThr);
+    const linePair = existing >= 0 ? null : pickInscribeLine(p, lineThr);
     if (existing >= 0) {
-      squareState.dragIdx = existing;
+      inscribeState.dragIdx = existing;
     } else if (linePair) {
-      squareState.dragLineIdxs = linePair;
-      squareState.dragInitialPoints = [
-        { ...squareState.points[linePair[0]] },
-        { ...squareState.points[linePair[1]] },
+      inscribeState.dragLineIdxs = linePair;
+      inscribeState.dragInitialPoints = [
+        { ...inscribeState.points[linePair[0]] },
+        { ...inscribeState.points[linePair[1]] },
       ];
-      squareState.dragOrigin = { x: p.x, y: p.y };
-    } else if (squareState.points.length < squareN()) {
+      inscribeState.dragOrigin = { x: p.x, y: p.y };
+    } else if (inscribeState.points.length < inscribeN()) {
       const proj = projectToOutline(p, outer);
       if (!proj) return;
-      squareState.points.push(proj);
-      squareState.dragIdx = squareState.points.length - 1;
+      inscribeState.points.push(proj);
+      inscribeState.dragIdx = inscribeState.points.length - 1;
     } else {
       return;
     }
-    squareState.activePointerId = e.pointerId;
+    inscribeState.activePointerId = e.pointerId;
     hit.setPointerCapture(e.pointerId);
-    squareState.hover = null;
-    squareState.hoverRaw = null;
-    renderSquareAll();
+    inscribeState.hover = null;
+    inscribeState.hoverRaw = null;
+    renderInscribeAll();
   });
 
   hit.addEventListener('pointermove', e => {
-    if (state.mode !== 'square') return;
-    if (squareState.confirmed) return;
+    if (state.mode !== 'inscribe') return;
+    if (inscribeState.confirmed) return;
     e.preventDefault();
-    squareState.pointerType = e.pointerType;
+    inscribeState.pointerType = e.pointerType;
     const p = svgPoint(e);
     const outer = state.shape.outer;
-    if (e.pointerId === squareState.activePointerId) {
-      if (squareState.dragLineIdxs) {
+    if (e.pointerId === inscribeState.activePointerId) {
+      if (inscribeState.dragLineIdxs) {
         const delta = {
-          x: p.x - squareState.dragOrigin.x,
-          y: p.y - squareState.dragOrigin.y,
+          x: p.x - inscribeState.dragOrigin.x,
+          y: p.y - inscribeState.dragOrigin.y,
         };
-        translateSquareLine(delta);
-        renderSquareLines();
-        renderSquarePoints();
-      } else if (squareState.dragIdx >= 0) {
+        translateInscribeLine(delta);
+        renderInscribeLines();
+        renderInscribePoints();
+      } else if (inscribeState.dragIdx >= 0) {
         const proj = projectToOutline(p, outer);
         if (proj) {
-          squareState.points[squareState.dragIdx] = proj;
-          renderSquareLines();
-          renderSquarePoints();
+          inscribeState.points[inscribeState.dragIdx] = proj;
+          renderInscribeLines();
+          renderInscribePoints();
         }
       }
     } else if (e.pointerType === 'mouse') {
-      squareState.hoverRaw = p;
-      squareState.hover = projectToOutline(p, outer);
-      renderSquareHover();
+      inscribeState.hoverRaw = p;
+      inscribeState.hover = projectToOutline(p, outer);
+      renderInscribeHover();
     }
   });
 
-  function endSquareDrag(e) {
-    if (state.mode !== 'square') return;
-    if (e.pointerId !== squareState.activePointerId) return;
+  function endInscribeDrag(e) {
+    if (state.mode !== 'inscribe') return;
+    if (e.pointerId !== inscribeState.activePointerId) return;
     if (hit.hasPointerCapture && hit.hasPointerCapture(e.pointerId)) {
       hit.releasePointerCapture(e.pointerId);
     }
-    squareState.activePointerId = null;
-    squareState.dragIdx = -1;
-    squareState.dragLineIdxs = null;
-    squareState.dragInitialPoints = null;
-    squareState.dragOrigin = null;
-    renderSquareAll();
+    inscribeState.activePointerId = null;
+    inscribeState.dragIdx = -1;
+    inscribeState.dragLineIdxs = null;
+    inscribeState.dragInitialPoints = null;
+    inscribeState.dragOrigin = null;
+    renderInscribeAll();
   }
-  hit.addEventListener('pointerup', endSquareDrag);
-  hit.addEventListener('pointercancel', endSquareDrag);
+  hit.addEventListener('pointerup', endInscribeDrag);
+  hit.addEventListener('pointercancel', endInscribeDrag);
 
   hit.addEventListener('pointerleave', e => {
-    if (state.mode !== 'square') return;
+    if (state.mode !== 'inscribe') return;
     if (e.pointerType !== 'mouse') return;
-    squareState.hover = null;
-    squareState.hoverRaw = null;
-    renderSquareHover();
+    inscribeState.hover = null;
+    inscribeState.hoverRaw = null;
+    renderInscribeHover();
   });
 }
 

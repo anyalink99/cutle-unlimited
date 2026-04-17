@@ -550,7 +550,7 @@ function finalizeCut() {
   }, 60);
 
   showCutVerdict(res.text, res.sub);
-  recordDiff(res.off);
+  recordCutDiff(v, res.off);
   updateActionButton();
   setTimeout(() => dom.newBtn.classList.add('pulse'), 1000);
 }

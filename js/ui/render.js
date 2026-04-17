@@ -9,10 +9,10 @@ const dom = {
   cutPreview: document.getElementById('cut-preview'),
   scoreLine: document.getElementById('score-line'),
   newBtn: document.getElementById('new-btn'),
-  squareLines: document.getElementById('square-lines-layer'),
-  squarePoints: document.getElementById('square-points-layer'),
-  squareHover: document.getElementById('square-hover-layer'),
-  squareIdeal: document.getElementById('square-ideal-layer'),
+  inscribeLines: document.getElementById('inscribe-lines-layer'),
+  inscribePoints: document.getElementById('inscribe-points-layer'),
+  inscribeHover: document.getElementById('inscribe-hover-layer'),
+  inscribeIdeal: document.getElementById('inscribe-ideal-layer'),
   massPoint: document.getElementById('mass-point-layer'),
   massHover: document.getElementById('mass-hover-layer'),
   massIdeal: document.getElementById('mass-ideal-layer'),
@@ -34,10 +34,10 @@ function clearLayers() {
   dom.cutLines.innerHTML = '';
   dom.cutPoints.innerHTML = '';
   dom.labelLayer.innerHTML = '';
-  dom.squareLines.innerHTML = '';
-  dom.squarePoints.innerHTML = '';
-  dom.squareHover.innerHTML = '';
-  dom.squareIdeal.innerHTML = '';
+  dom.inscribeLines.innerHTML = '';
+  dom.inscribePoints.innerHTML = '';
+  dom.inscribeHover.innerHTML = '';
+  dom.inscribeIdeal.innerHTML = '';
   dom.massPoint.innerHTML = '';
   dom.massHover.innerHTML = '';
   dom.massIdeal.innerHTML = '';

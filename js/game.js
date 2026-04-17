@@ -1,7 +1,7 @@
 const state = {
   mode: 'cut',
   cutVariation: 'half',
-  squareVariation: 'square',
+  inscribeVariation: 'square',
   shape: { outer: [], holes: [] },
   locked: false,
   hash: null,
@@ -10,7 +10,7 @@ const state = {
 function updateActionButton() {
   const btn = dom.newBtn;
   let needsConfirm = false;
-  if (state.mode === 'square' && squareState.points.length === squareN() && !squareState.confirmed) needsConfirm = true;
+  if (state.mode === 'inscribe' && inscribeState.points.length === inscribeN() && !inscribeState.confirmed) needsConfirm = true;
   else if (state.mode === 'mass' && massState.guess && !massState.confirmed) needsConfirm = true;
   else if (state.mode === 'cut' && !cutState.confirmed) {
     const v = cutVariation();
@@ -28,7 +28,7 @@ function updateActionButton() {
 }
 
 function generateShapeForMode() {
-  if (state.mode === 'square') {
+  if (state.mode === 'inscribe') {
     for (let i = 0; i < 40; i++) {
       const s = generateShape();
       if (!s.holes || s.holes.length === 0) return s;
@@ -49,9 +49,9 @@ function newShape(hash, nav = 'push') {
   state.locked = false;
   cutReset();
   renderShape(state.shape);
-  if (state.mode === 'square') {
-    squareReset();
-    renderSquareAll();
+  if (state.mode === 'inscribe') {
+    inscribeReset();
+    renderInscribeAll();
     precomputeIdeal(state.shape.outer);
   } else if (state.mode === 'mass') {
     massReset();
@@ -68,7 +68,7 @@ function newShape(hash, nav = 'push') {
 }
 
 function setMode(m) {
-  if (m !== 'cut' && m !== 'square' && m !== 'mass') return;
+  if (m !== 'cut' && m !== 'inscribe' && m !== 'mass') return;
   state.mode = m;
   document.body.dataset.mode = m;
   try { localStorage.setItem(MODE_KEY, m); } catch (e) {}
@@ -90,17 +90,17 @@ function setCutVariation(v) {
   }
 }
 
-function setSquareVariation(v) {
-  if (!SQUARE_VARIATIONS.includes(v)) return;
-  state.squareVariation = v;
-  document.body.dataset.squareVariation = v;
-  try { localStorage.setItem(SQUARE_VARIATION_KEY, v); } catch (e) {}
-  if (state.mode === 'square') {
+function setInscribeVariation(v) {
+  if (!INSCRIBE_VARIATIONS.includes(v)) return;
+  state.inscribeVariation = v;
+  document.body.dataset.inscribeVariation = v;
+  try { localStorage.setItem(INSCRIBE_VARIATION_KEY, v); } catch (e) {}
+  if (state.mode === 'inscribe') {
     state.locked = false;
-    squareReset();
+    inscribeReset();
     renderShape(state.shape);
     precomputeIdeal(state.shape.outer);
-    renderSquareAll();
+    renderInscribeAll();
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
   }
