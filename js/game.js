@@ -2,16 +2,24 @@ const state = {
   mode: 'cut',
   cutVariation: 'half',
   inscribeVariation: 'square',
+  massVariation: 'centroid',
   shape: { outer: [], holes: [] },
   locked: false,
   hash: null,
 };
 
+function massVariation() {
+  return state.massVariation || 'centroid';
+}
+
 function updateActionButton() {
   const btn = dom.newBtn;
   let needsConfirm = false;
   if (state.mode === 'inscribe' && inscribeState.points.length === inscribeN() && !inscribeState.confirmed) needsConfirm = true;
-  else if (state.mode === 'mass' && massState.guess && !massState.confirmed) needsConfirm = true;
+  else if (state.mode === 'mass') {
+    if (massVariation() === 'balance') needsConfirm = !balanceState.confirmed && balanceState.pole != null;
+    else needsConfirm = !massState.confirmed && massState.guess != null;
+  }
   else if (state.mode === 'cut' && !cutState.confirmed) {
     const v = cutVariation();
     const placed = cutState.cuts.length;
@@ -57,6 +65,7 @@ function newShape(hash, nav = 'push') {
     massReset();
     updateMassHint();
     dom.hitPad.style.cursor = 'crosshair';
+    if (massVariation() === 'balance') onBalanceShapeReady();
   } else {
     cutOnNewShape();
     dom.hitPad.style.cursor = '';
@@ -85,6 +94,23 @@ function setCutVariation(v) {
     cutReset();
     renderShape(state.shape);
     cutOnNewShape();
+    dom.newBtn.classList.remove('pulse');
+    updateActionButton();
+  }
+}
+
+function setMassVariation(v) {
+  if (!MASS_VARIATIONS.includes(v)) return;
+  state.massVariation = v;
+  document.body.dataset.massVariation = v;
+  try { localStorage.setItem(MASS_VARIATION_KEY, v); } catch (e) {}
+  if (state.mode === 'mass') {
+    state.locked = false;
+    massReset();
+    renderShape(state.shape);
+    if (v === 'balance') onBalanceShapeReady();
+    updateMassHint();
+    dom.hitPad.style.cursor = 'crosshair';
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
   }

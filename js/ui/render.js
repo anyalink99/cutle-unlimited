@@ -16,6 +16,7 @@ const dom = {
   massPoint: document.getElementById('mass-point-layer'),
   massHover: document.getElementById('mass-hover-layer'),
   massIdeal: document.getElementById('mass-ideal-layer'),
+  massPole: document.getElementById('mass-pole-layer'),
 };
 
 function svgPoint(evt) {
@@ -41,6 +42,7 @@ function clearLayers() {
   dom.massPoint.innerHTML = '';
   dom.massHover.innerHTML = '';
   dom.massIdeal.innerHTML = '';
+  dom.massPole.innerHTML = '';
 }
 
 function makeShapeGroup(shape, groupClass) {

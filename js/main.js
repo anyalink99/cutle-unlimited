@@ -39,7 +39,7 @@ const variationsTitle = document.getElementById('variations-title');
 const variationsDesc = document.getElementById('variations-desc');
 
 function refreshVariationsBtn() {
-  variationsBtn.style.display = (state.mode === 'cut' || state.mode === 'inscribe') ? '' : 'none';
+  variationsBtn.style.display = (state.mode === 'cut' || state.mode === 'inscribe' || state.mode === 'mass') ? '' : 'none';
 }
 variationsBtn.addEventListener('click', () => {
   refreshVarCards();
@@ -60,23 +60,39 @@ document.querySelectorAll('.inscribe-var-card').forEach(card => {
     setInscribeVariation(v);
   });
 });
+document.querySelectorAll('.mass-var-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const v = card.dataset.massvar;
+    closeModal('variations-modal');
+    setMassVariation(v);
+  });
+});
+const massVarPicker = document.getElementById('mass-var-picker');
 function refreshVarCards() {
   const isCut = state.mode === 'cut';
   const isInscribe = state.mode === 'inscribe';
+  const isMass = state.mode === 'mass';
   cutVarPicker.style.display = isCut ? '' : 'none';
   inscribeVarPicker.style.display = isInscribe ? '' : 'none';
+  massVarPicker.style.display = isMass ? '' : 'none';
   if (isCut) {
     variationsTitle.textContent = 'CUT VARIATIONS';
     variationsDesc.textContent = 'Same cut mechanics, new goals.';
   } else if (isInscribe) {
     variationsTitle.textContent = 'INSCRIBE VARIATIONS';
     variationsDesc.textContent = 'Same placement mechanics, different inscribed shape.';
+  } else if (isMass) {
+    variationsTitle.textContent = 'CENTER OF MASS VARIATIONS';
+    variationsDesc.textContent = 'Same shape, different way to find the balance.';
   }
   document.querySelectorAll('.var-card').forEach(c => {
     c.classList.toggle('active', c.dataset.var === state.cutVariation);
   });
   document.querySelectorAll('.inscribe-var-card').forEach(c => {
     c.classList.toggle('active', c.dataset.inscvar === state.inscribeVariation);
+  });
+  document.querySelectorAll('.mass-var-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.massvar === state.massVariation);
   });
 }
 const statsCutSection = document.getElementById('stats-cut-section');
@@ -95,10 +111,15 @@ const INSCRIBE_VARIATION_LABELS = {
   square: 'Square',
   triangle: 'Equilateral Triangle',
 };
+const MASS_VARIATION_LABELS = {
+  centroid: 'Centroid',
+  balance: 'Pole Balance',
+};
 
 function currentStatsVariation() {
   if (state.mode === 'cut') return state.cutVariation;
   if (state.mode === 'inscribe') return state.inscribeVariation;
+  if (state.mode === 'mass') return state.massVariation;
   return null;
 }
 
@@ -109,7 +130,7 @@ function updateStatsSubtitle() {
   } else if (state.mode === 'inscribe') {
     statsSubtitle.textContent = 'Inscribe · ' + (INSCRIBE_VARIATION_LABELS[state.inscribeVariation] || state.inscribeVariation);
   } else if (state.mode === 'mass') {
-    statsSubtitle.textContent = 'Center of Mass';
+    statsSubtitle.textContent = 'Center of Mass · ' + (MASS_VARIATION_LABELS[state.massVariation] || state.massVariation);
   }
 }
 
@@ -182,6 +203,14 @@ try {
 } catch (e) {}
 state.inscribeVariation = initialInscVar;
 document.body.dataset.inscribeVariation = initialInscVar;
+
+let initialMassVar = 'centroid';
+try {
+  const v = localStorage.getItem(MASS_VARIATION_KEY);
+  if (v && MASS_VARIATIONS.includes(v)) initialMassVar = v;
+} catch (e) {}
+state.massVariation = initialMassVar;
+document.body.dataset.massVariation = initialMassVar;
 
 refreshModeCards();
 newShape(initialRoute.hash || undefined, 'replace');

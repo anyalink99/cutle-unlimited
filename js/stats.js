@@ -8,15 +8,14 @@ for (const v of INSCRIBE_VARIATIONS) {
   inscribeStats[v] = { attempts: 0, perfect: 0, sumScore: 0, bestScore: -Infinity };
 }
 
-const massStats = {
-  attempts: 0,
-  perfect: 0,
-  sumDist: 0,
-  bestDist: Infinity,
-};
+const massStats = {};
+for (const v of MASS_VARIATIONS) {
+  massStats[v] = { attempts: 0, perfect: 0, sumDist: 0, bestDist: Infinity };
+}
 
 function cutStatsKey(v) { return CUT_STATS_PREFIX + v + '.v1'; }
 function inscribeStatsKey(v) { return INSCRIBE_STATS_PREFIX + v + '.v1'; }
+function massStatsKey(v) { return MASS_STATS_PREFIX + v + '.v1'; }
 
 function loadStats() {
   for (const v of CUT_VARIATIONS) {
@@ -45,14 +44,30 @@ function loadStats() {
       }
     } catch (e) {}
   }
+  for (const v of MASS_VARIATIONS) {
+    try {
+      const raw = localStorage.getItem(massStatsKey(v));
+      if (raw) {
+        const s = JSON.parse(raw);
+        const bucket = massStats[v];
+        bucket.attempts = s.attempts || 0;
+        bucket.perfect = s.perfect || 0;
+        bucket.sumDist = s.sumDist || 0;
+        bucket.bestDist = (s.bestDist != null && isFinite(s.bestDist)) ? s.bestDist : Infinity;
+      }
+    } catch (e) {}
+  }
   try {
-    const raw = localStorage.getItem(MASS_STATS_KEY);
-    if (raw) {
-      const s = JSON.parse(raw);
-      massStats.attempts = s.attempts || 0;
-      massStats.perfect = s.perfect || 0;
-      massStats.sumDist = s.sumDist || 0;
-      massStats.bestDist = (s.bestDist != null && isFinite(s.bestDist)) ? s.bestDist : Infinity;
+    const legacy = localStorage.getItem(MASS_STATS_LEGACY_KEY);
+    if (legacy && !localStorage.getItem(massStatsKey('centroid'))) {
+      const s = JSON.parse(legacy);
+      const bucket = massStats.centroid;
+      bucket.attempts = s.attempts || 0;
+      bucket.perfect = s.perfect || 0;
+      bucket.sumDist = s.sumDist || 0;
+      bucket.bestDist = (s.bestDist != null && isFinite(s.bestDist)) ? s.bestDist : Infinity;
+      saveMassStats('centroid');
+      localStorage.removeItem(MASS_STATS_LEGACY_KEY);
     }
   } catch (e) {}
 }
@@ -83,13 +98,15 @@ function saveInscribeStats(v) {
   } catch (e) {}
 }
 
-function saveMassStats() {
+function saveMassStats(v) {
+  const b = massStats[v];
+  if (!b) return;
   try {
-    localStorage.setItem(MASS_STATS_KEY, JSON.stringify({
-      attempts: massStats.attempts,
-      perfect: massStats.perfect,
-      sumDist: massStats.sumDist,
-      bestDist: massStats.bestDist === Infinity ? null : massStats.bestDist,
+    localStorage.setItem(massStatsKey(v), JSON.stringify({
+      attempts: b.attempts,
+      perfect: b.perfect,
+      sumDist: b.sumDist,
+      bestDist: b.bestDist === Infinity ? null : b.bestDist,
     }));
   } catch (e) {}
 }
@@ -104,11 +121,13 @@ function resetStats(mode, variation) {
     b.bestScore = -Infinity;
     saveInscribeStats(variation);
   } else if (mode === 'mass') {
-    massStats.attempts = 0;
-    massStats.perfect = 0;
-    massStats.sumDist = 0;
-    massStats.bestDist = Infinity;
-    saveMassStats();
+    const b = massStats[variation];
+    if (!b) return;
+    b.attempts = 0;
+    b.perfect = 0;
+    b.sumDist = 0;
+    b.bestDist = Infinity;
+    saveMassStats(variation);
   } else if (mode === 'cut') {
     const b = cutStats[variation];
     if (!b) return;
@@ -140,12 +159,15 @@ function recordInscribeScore(variation, score) {
   saveInscribeStats(variation);
 }
 
-function recordMassDist(dist) {
-  massStats.attempts++;
-  massStats.sumDist += dist;
-  if (dist < massStats.bestDist) massStats.bestDist = dist;
-  if (dist <= 5) massStats.perfect++;
-  saveMassStats();
+function recordMassDist(variation, dist) {
+  const b = massStats[variation];
+  if (!b) return;
+  b.attempts++;
+  b.sumDist += dist;
+  if (dist < b.bestDist) b.bestDist = dist;
+  const threshold = variation === 'balance' ? BALANCE_PERFECT_THRESHOLD : 5;
+  if (dist <= threshold) b.perfect++;
+  saveMassStats(variation);
 }
 
 function renderStatsInto(els, mode, variation) {
@@ -162,9 +184,10 @@ function renderStatsInto(els, mode, variation) {
     els.sqAvg.textContent = b.attempts ? (b.sumScore / b.attempts).toFixed(1) + '%' : '—';
     els.sqPerfect.textContent = b.perfect;
   } else if (mode === 'mass') {
-    els.msAttempts.textContent = massStats.attempts;
-    els.msBest.textContent = massStats.bestDist === Infinity ? '—' : massStats.bestDist.toFixed(1);
-    els.msAvg.textContent = massStats.attempts ? (massStats.sumDist / massStats.attempts).toFixed(1) : '—';
-    els.msPerfect.textContent = massStats.perfect;
+    const b = massStats[variation] || { attempts: 0, perfect: 0, sumDist: 0, bestDist: Infinity };
+    els.msAttempts.textContent = b.attempts;
+    els.msBest.textContent = b.bestDist === Infinity ? '—' : b.bestDist.toFixed(1);
+    els.msAvg.textContent = b.attempts ? (b.sumDist / b.attempts).toFixed(1) : '—';
+    els.msPerfect.textContent = b.perfect;
   }
 }

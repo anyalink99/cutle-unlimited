@@ -6,6 +6,12 @@ const MAX_R = 196;
 const BASE_R = 167;
 const TAU = Math.PI * 2;
 
+const BOARD_W = 400;
+const BOARD_TOP_Y = -80;
+const BOARD_BOTTOM_Y = 480;
+const BOARD_H = BOARD_BOTTOM_Y - BOARD_TOP_Y;
+const FLOOR_Y = BOARD_BOTTOM_Y;
+
 const TARGET_AREA = 60000;
 
 const MOVE_THRESHOLD = 6;
@@ -15,10 +21,15 @@ const LINE_GRAB_THRESHOLD = 10;
 
 const CUT_STATS_PREFIX = 'geometric.games.stats.cut.';
 const INSCRIBE_STATS_PREFIX = 'geometric.games.stats.inscribe.';
-const MASS_STATS_KEY = 'geometric.games.stats.mass.v1';
+const MASS_STATS_PREFIX = 'geometric.games.stats.mass.';
+const MASS_STATS_LEGACY_KEY = 'geometric.games.stats.mass.v1';
 
 const CUT_VARIATION_KEY = 'geometric.games.cut.variation.v1';
 const CUT_VARIATIONS = ['half', 'ratio', 'quad', 'tri', 'angle'];
 const INSCRIBE_VARIATION_KEY = 'geometric.games.inscribe.variation.v1';
 const INSCRIBE_VARIATIONS = ['square', 'triangle'];
+const MASS_VARIATION_KEY = 'geometric.games.mass.variation.v1';
+const MASS_VARIATIONS = ['centroid', 'balance'];
 const CUT_HANDLE_PAD = 22;
+
+const BALANCE_PERFECT_THRESHOLD = 5;

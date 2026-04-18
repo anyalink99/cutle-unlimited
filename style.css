@@ -59,6 +59,11 @@ body {
 }
 
 .hit-pad { fill: transparent; cursor: crosshair; }
+.stage, .stage svg, #board { overflow: visible; }
+#shape-layer, #mass-pole-layer, #mass-point-layer, #mass-hover-layer,
+#mass-ideal-layer, #cut-layer, #cut-lines-layer, #cut-points-layer,
+#inscribe-ideal-layer, #inscribe-lines-layer, #inscribe-points-layer,
+#inscribe-hover-layer, #label-layer { overflow: visible; }
 
 .shape-fill, .shape-outline, .piece, .label-leader, .label-dot, .label-text, .cut-line {
   pointer-events: none;
@@ -75,7 +80,6 @@ body {
   filter: drop-shadow(0 0 12px rgba(192,132,252,0.28));
 }
 .shape-group {
-  transform-box: fill-box; transform-origin: center;
   animation: shapeIn 0.55s var(--pop);
 }
 
@@ -258,6 +262,10 @@ body[data-mode="inscribe"] .help-inscribe > div { display: none; }
 body[data-mode="inscribe"][data-inscribe-variation="square"]   .help-inscribe-square,
 body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-triangle { display: block; }
 
+body[data-mode="mass"] .help-mass > div { display: none; }
+body[data-mode="mass"][data-mass-variation="centroid"] .help-mass-centroid,
+body[data-mode="mass"][data-mass-variation="balance"]  .help-mass-balance  { display: block; }
+
 .math-note {
   font-size: 0.82rem;
   color: #9ca3af;
@@ -321,7 +329,7 @@ body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-tr
   display: flex; flex-direction: column; gap: 10px;
   margin: 6px 0 14px;
 }
-.mode-card, .var-card, .inscribe-var-card {
+.mode-card, .var-card, .inscribe-var-card, .mass-var-card {
   text-align: left;
   background: #2a232f;
   border: 1.5px solid #3a3340;
@@ -332,8 +340,8 @@ body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-tr
   transition: border-color 0.2s, transform 0.15s, background 0.2s;
   font-family: inherit;
 }
-.mode-card:hover, .var-card:hover, .inscribe-var-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.mode-card.active, .var-card.active, .inscribe-var-card.active {
+.mode-card:hover, .var-card:hover, .inscribe-var-card:hover, .mass-var-card:hover { border-color: var(--accent); transform: translateY(-1px); }
+.mode-card.active, .var-card.active, .inscribe-var-card.active, .mass-var-card.active {
   border-color: var(--accent);
   background: linear-gradient(180deg, #35233e 0%, #2a1f34 100%);
   box-shadow: 0 0 0 2px rgba(192,132,252,0.22);
@@ -391,6 +399,27 @@ body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-tr
   stroke: var(--good);
   stroke-width: 2;
   filter: drop-shadow(0 0 6px rgba(74,222,128,0.7));
+}
+
+.balance-pole { pointer-events: none; }
+.bp-shaft {
+  fill: var(--accent);
+  opacity: 0.92;
+  filter: drop-shadow(0 0 6px rgba(192,132,252,0.55));
+}
+.bp-tip {
+  fill: white;
+  stroke: var(--accent);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 5px rgba(192,132,252,0.65));
+}
+.bp-hover {
+  stroke: var(--pink);
+  stroke-width: 2;
+  stroke-dasharray: 4 4;
+  opacity: 0.7;
+  pointer-events: none;
+  filter: drop-shadow(0 0 4px rgba(244,114,182,0.5));
 }
 
 .modal-back.closing { display: flex; }

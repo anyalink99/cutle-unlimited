@@ -45,8 +45,9 @@
   </div>
 
   <div class="stage">
-    <svg id="board" viewBox="0 0 400 400" preserveAspectRatio="xMidYMid meet">
-      <rect class="hit-pad" id="hit-pad" x="0" y="0" width="400" height="400"/>
+    <svg id="board" viewBox="0 -80 400 560" preserveAspectRatio="xMidYMid meet">
+      <rect class="hit-pad" id="hit-pad" x="0" y="-80" width="400" height="560"/>
+      <g id="mass-pole-layer"></g>
       <g id="shape-layer"></g>
       <g id="cut-layer"></g>
       <g id="cut-lines-layer"></g>
@@ -139,13 +140,24 @@
         </div>
       </div>
       <div class="help-mass">
-        <p>Find the <b>center of mass</b> of the shape — tap anywhere to place your guess.</p>
-        <ul>
-          <li>Shapes with holes shift the center of mass</li>
-          <li>Tap anywhere on the board to drop your guess</li>
-          <li>Drag the point to fine-tune, then press <b>Confirm</b></li>
-        </ul>
-        <p class="math-note"><b>Math:</b> the centroid doesn't have to lie <i>inside</i> the shape — for an annulus it sits at the empty center. Non-convex outlines and holes are where intuition breaks.</p>
+        <div class="help-mass-centroid">
+          <p>Find the <b>center of mass</b> of the shape — tap anywhere to place your guess.</p>
+          <ul>
+            <li>Shapes with holes shift the center of mass</li>
+            <li>Tap anywhere on the board to drop your guess</li>
+            <li>Drag the point to fine-tune, then press <b>Confirm</b></li>
+          </ul>
+          <p class="math-note"><b>Math:</b> the centroid doesn't have to lie <i>inside</i> the shape — for an annulus it sits at the empty center. Non-convex outlines and holes are where intuition breaks.</p>
+        </div>
+        <div class="help-mass-balance">
+          <p>Slide a <b>pole</b> under the shape so it <b>balances</b>. Miss by more than 5 and the shape tips over.</p>
+          <ul>
+            <li>Tap anywhere to place the pole's X position</li>
+            <li>Drag to fine-tune, then press <b>Confirm</b></li>
+            <li>Gravity punishes imbalance — the bigger the miss, the faster it falls</li>
+          </ul>
+          <p class="math-note"><b>Math:</b> only the horizontal offset between the pole and the centroid's X matters for tipping — it's an inverted pendulum whose torque is <i>m·g·Δx</i>.</p>
+        </div>
       </div>
       <div class="close-row"><button class="btn" id="close-help">Got it</button></div>
     </div>
@@ -239,6 +251,16 @@
         <button class="inscribe-var-card" data-inscvar="triangle">
           <div class="mode-title">Equilateral Triangle</div>
           <div class="mode-desc">Three points with equal sides and 60° angles.</div>
+        </button>
+      </div>
+      <div class="mode-picker" id="mass-var-picker">
+        <button class="mass-var-card" data-massvar="centroid">
+          <div class="mode-title">Centroid</div>
+          <div class="mode-desc">Tap the board where you think the center of mass is.</div>
+        </button>
+        <button class="mass-var-card" data-massvar="balance">
+          <div class="mode-title">Pole Balance</div>
+          <div class="mode-desc">Slide a pole under the shape so it doesn't tip. Miss by &gt;5 and physics takes over.</div>
         </button>
       </div>
       <div class="close-row"><button class="btn" id="close-variations">Close</button></div>
