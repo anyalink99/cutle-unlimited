@@ -1,12 +1,3 @@
-const massState = {
-  guess: null,
-  hover: null,
-  confirmed: false,
-  pointerType: null,
-  dragging: false,
-  activePointerId: null,
-};
-
 const balanceState = {
   pole: null,
   hover: null,
@@ -20,13 +11,9 @@ const balanceState = {
   animFrame: 0,
 };
 
-function massReset() {
-  massState.guess = null;
-  massState.hover = null;
-  massState.confirmed = false;
-  massState.pointerType = null;
-  massState.dragging = false;
-  massState.activePointerId = null;
+const POLE_HALF_W = 2.5;
+
+function balanceReset() {
   balanceState.pole = null;
   balanceState.hover = null;
   balanceState.confirmed = false;
@@ -38,147 +25,9 @@ function massReset() {
     cancelAnimationFrame(balanceState.animFrame);
     balanceState.animFrame = 0;
   }
-  dom.massPoint.innerHTML = '';
-  dom.massHover.innerHTML = '';
-  dom.massIdeal.innerHTML = '';
   dom.massPole.innerHTML = '';
   const g = dom.shapeLayer.firstElementChild;
   if (g) g.removeAttribute('transform');
-}
-
-function isNearGuess(p, grabR) {
-  if (!massState.guess) return false;
-  const d = Math.hypot(p.x - massState.guess.x, p.y - massState.guess.y);
-  return d < (grabR ?? POINT_GRAB_R);
-}
-
-function updateMassCursor(overExisting) {
-  if (state.mode !== 'mass') { dom.hitPad.style.cursor = ''; return; }
-  if (massState.confirmed) { dom.hitPad.style.cursor = 'default'; return; }
-  if (massState.dragging) dom.hitPad.style.cursor = 'grabbing';
-  else if (overExisting)  dom.hitPad.style.cursor = 'grab';
-  else                    dom.hitPad.style.cursor = 'crosshair';
-}
-
-function clampToBoard(p) {
-  return {
-    x: Math.max(4, Math.min(396, p.x)),
-    y: Math.max(4, Math.min(396, p.y)),
-  };
-}
-
-function drawMassGuessPoint(p) {
-  dom.massPoint.innerHTML = '';
-  const g = document.createElementNS(SVG_NS, 'g');
-  g.setAttribute('class', 'mass-guess');
-  const halo = document.createElementNS(SVG_NS, 'circle');
-  halo.setAttribute('cx', p.x); halo.setAttribute('cy', p.y);
-  halo.setAttribute('r', 13); halo.setAttribute('class', 'mg-halo');
-  const dot = document.createElementNS(SVG_NS, 'circle');
-  dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
-  dot.setAttribute('r', 6); dot.setAttribute('class', 'mg-dot');
-  g.appendChild(halo);
-  g.appendChild(dot);
-  dom.massPoint.appendChild(g);
-}
-
-function drawMassHover(p) {
-  dom.massHover.innerHTML = '';
-  if (!p) { updateMassCursor(false); return; }
-  const overExisting = isNearGuess(p);
-  updateMassCursor(overExisting);
-  if (overExisting) return;
-  const c = document.createElementNS(SVG_NS, 'circle');
-  c.setAttribute('cx', p.x); c.setAttribute('cy', p.y);
-  c.setAttribute('r', 5); c.setAttribute('class', 'mg-hover');
-  dom.massHover.appendChild(c);
-}
-
-function drawMassReveal(guess, actual, dist) {
-  dom.massIdeal.innerHTML = '';
-  const g = document.createElementNS(SVG_NS, 'g');
-  g.setAttribute('class', 'mass-reveal');
-
-  // Connecting line from guess to actual
-  const ln = document.createElementNS(SVG_NS, 'line');
-  ln.setAttribute('x1', guess.x); ln.setAttribute('y1', guess.y);
-  ln.setAttribute('x2', actual.x); ln.setAttribute('y2', actual.y);
-  ln.setAttribute('class', 'mass-connector');
-  g.appendChild(ln);
-
-  // Actual centroid marker: crosshair + circle
-  const arm = 10;
-  const lh = document.createElementNS(SVG_NS, 'line');
-  lh.setAttribute('x1', actual.x - arm); lh.setAttribute('y1', actual.y);
-  lh.setAttribute('x2', actual.x + arm); lh.setAttribute('y2', actual.y);
-  lh.setAttribute('class', 'mass-centroid-arm');
-  g.appendChild(lh);
-  const lv = document.createElementNS(SVG_NS, 'line');
-  lv.setAttribute('x1', actual.x); lv.setAttribute('y1', actual.y - arm);
-  lv.setAttribute('x2', actual.x); lv.setAttribute('y2', actual.y + arm);
-  lv.setAttribute('class', 'mass-centroid-arm');
-  g.appendChild(lv);
-  const ring = document.createElementNS(SVG_NS, 'circle');
-  ring.setAttribute('cx', actual.x); ring.setAttribute('cy', actual.y);
-  ring.setAttribute('r', 6); ring.setAttribute('class', 'mass-centroid-ring');
-  g.appendChild(ring);
-
-  dom.massIdeal.appendChild(g);
-  dom.massIdeal.getBoundingClientRect();
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => g.classList.add('show'));
-  });
-}
-
-function updateMassHint() {
-  if (massVariation() === 'balance') { updateBalanceHint(); return; }
-  if (massState.confirmed) return;
-  const msg = massState.guess
-    ? 'Drag the point to adjust, or press Confirm'
-    : 'Tap anywhere to place your center of mass guess';
-  dom.scoreLine.innerHTML = `<div class="hint" id="hint">${msg}</div>`;
-}
-
-function updateBalanceHint() {
-  if (balanceState.confirmed) return;
-  const msg = balanceState.pole != null
-    ? 'Drag the pole to adjust, or press Confirm'
-    : 'Tap anywhere to place the pole';
-  dom.scoreLine.innerHTML = `<div class="hint" id="hint">${msg}</div>`;
-}
-
-function showMassVerdict(dist) {
-  let cls;
-  if (dist <= 5)       cls = 'perfect';
-  else if (dist <= 15) cls = 'great';
-  else if (dist <= 35) cls = 'good';
-  else                 cls = 'fair';
-  dom.scoreLine.innerHTML = `
-    <div class="verdict ${cls}" id="verdict">Off by ${dist.toFixed(1)}</div>
-  `;
-  const v = document.getElementById('verdict');
-  v.getBoundingClientRect();
-  requestAnimationFrame(() => {
-    requestAnimationFrame(() => v.classList.add('show'));
-  });
-}
-
-function confirmMass() {
-  if (massVariation() === 'balance') { confirmBalance(); return; }
-  if (massState.confirmed) return;
-  if (!massState.guess) return;
-  massState.confirmed = true;
-  massState.hover = null;
-  dom.massHover.innerHTML = '';
-  const actual = shapeCentroid(state.shape);
-  const dist = Math.hypot(massState.guess.x - actual.x, massState.guess.y - actual.y);
-  drawMassReveal(massState.guess, actual, dist);
-  showMassVerdict(dist);
-  recordMassDist('centroid', dist);
-  state.locked = true;
-  dom.hitPad.style.cursor = 'default';
-  updateActionButton();
-  setTimeout(() => dom.newBtn.classList.add('pulse'), 900);
 }
 
 function shapeBottomAtX(shape, x) {
@@ -219,8 +68,6 @@ function clampPoleX(x) {
   if (hi < lo) return (balanceState.xMin + balanceState.xMax) / 2;
   return Math.max(lo, Math.min(hi, x));
 }
-
-const POLE_HALF_W = 2.5;
 
 function drawBalancePole(x) {
   dom.massPole.innerHTML = '';
@@ -270,6 +117,14 @@ function updateBalanceCursor(overExisting) {
   if (balanceState.dragging) dom.hitPad.style.cursor = 'grabbing';
   else if (overExisting)     dom.hitPad.style.cursor = 'ew-resize';
   else                       dom.hitPad.style.cursor = 'crosshair';
+}
+
+function updateBalanceHint() {
+  if (balanceState.confirmed) return;
+  const msg = balanceState.pole != null
+    ? 'Drag the pole to adjust, or press Confirm'
+    : 'Tap anywhere to place the pole';
+  dom.scoreLine.innerHTML = `<div class="hint" id="hint">${msg}</div>`;
 }
 
 function showBalanceVerdict(dx, tipped) {
@@ -473,4 +328,3 @@ function runBalanceFall(pivotX, pivotY, centroid) {
   }
   balanceState.animFrame = requestAnimationFrame(step);
 }
-
