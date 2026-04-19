@@ -1,88 +1,84 @@
 const MODE_SLUGS = { cut: 'cut', inscribe: 'inscribe', balance: 'balance' };
-const SLUG_MODES = { cut: 'cut', inscribe: 'inscribe', balance: 'balance' };
+const VAR_SLUGS = {
+  cut: ['half', 'ratio', 'quad', 'tri', 'angle'],
+  inscribe: ['square', 'triangle'],
+  balance: ['pole', 'centroid'],
+};
+const DEFAULT_VAR = { cut: 'half', inscribe: 'square', balance: 'pole' };
 const HASH_RE = /^[a-z0-9]{6,64}$/i;
 
-let BASE_PATH = '';
-
 function parseLocation() {
-  const path = window.location.pathname;
-  const parts = path.split('/').filter(Boolean);
-  let mode = null, hash = null;
-  let baseParts = parts.slice();
+  const parts = window.location.pathname.split('/').filter(Boolean);
+  const sp = new URLSearchParams(window.location.search);
 
-  if (parts.length >= 1 && SLUG_MODES[parts[parts.length - 1]]) {
-    mode = SLUG_MODES[parts[parts.length - 1]];
-    baseParts = parts.slice(0, -1);
-  } else if (
-    parts.length >= 2 &&
-    SLUG_MODES[parts[parts.length - 2]] &&
-    HASH_RE.test(parts[parts.length - 1])
-  ) {
-    mode = SLUG_MODES[parts[parts.length - 2]];
-    hash = parts[parts.length - 1];
-    baseParts = parts.slice(0, -2);
-  } else if (parts.length >= 1 && /\.html?$/i.test(parts[parts.length - 1])) {
-    baseParts = parts.slice(0, -1);
+  let mode = null, variation = null;
+  if (parts.length >= 1 && MODE_SLUGS[parts[0]]) {
+    mode = parts[0];
+    if (parts.length >= 2 && VAR_SLUGS[mode].includes(parts[1])) {
+      variation = parts[1];
+    }
   }
 
-  const base = baseParts.length ? '/' + baseParts.join('/') : '';
-  return { base, mode, hash };
+  let hash = null;
+  const s = sp.get('s');
+  if (s && HASH_RE.test(s)) hash = s;
+
+  return { mode, variation, hash };
 }
 
-function buildRouteUrl(mode, hash) {
-  let p = BASE_PATH;
-  if (mode) p += '/' + MODE_SLUGS[mode];
-  if (hash) p += '/' + hash;
-  if (!p) p = '/';
-  return p + window.location.search;
+function variationPath(mode, variation) {
+  if (mode === 'cut' && variation === 'half') return '/';
+  if (mode === 'cut') return '/cut/' + variation + '/';
+  if (mode === 'inscribe' && variation === 'square') return '/inscribe/';
+  if (mode === 'inscribe') return '/inscribe/' + variation + '/';
+  if (mode === 'balance' && variation === 'pole') return '/balance/';
+  if (mode === 'balance') return '/balance/' + variation + '/';
+  return '/';
 }
 
-const MODE_META = {
-  cut: {
-    title: 'Cut — geometric.games',
-    desc: 'Slice polygons in half, to a target ratio, into quads or tris, or along a constrained angle.',
-  },
-  inscribe: {
-    title: 'Inscribe — geometric.games',
-    desc: 'Inscribe a square or equilateral triangle into a polygon. Endless geometry puzzles.',
-  },
-  balance: {
-    title: 'Balance — geometric.games',
-    desc: 'Balance a polygon on a pole or find its centroid. Physics-driven geometry puzzles.',
-  },
-};
-
-function updateMeta(mode) {
-  const m = MODE_META[mode];
-  if (!m) return;
-  document.title = m.title;
-  let desc = document.querySelector('meta[name="description"]');
-  if (desc) desc.setAttribute('content', m.desc);
-  let ogTitle = document.querySelector('meta[property="og:title"]');
-  if (ogTitle) ogTitle.setAttribute('content', m.title);
-  let ogDesc = document.querySelector('meta[property="og:description"]');
-  if (ogDesc) ogDesc.setAttribute('content', m.desc);
-  let twTitle = document.querySelector('meta[name="twitter:title"]');
-  if (twTitle) twTitle.setAttribute('content', m.title);
-  let twDesc = document.querySelector('meta[name="twitter:description"]');
-  if (twDesc) twDesc.setAttribute('content', m.desc);
-  let canonical = document.querySelector('link[rel="canonical"]');
-  if (canonical) canonical.setAttribute('href', 'https://geometric.games/' + mode);
-  let ogUrl = document.querySelector('meta[property="og:url"]');
-  if (ogUrl) ogUrl.setAttribute('content', 'https://geometric.games/' + mode);
+function buildRouteUrl(mode, variation, hash) {
+  const p = variationPath(mode, variation);
+  return hash ? p + '?s=' + hash : p;
 }
 
-function pushRoute(mode, hash) {
-  const url = buildRouteUrl(mode, hash);
-  const current = window.location.pathname + window.location.search;
-  if (url !== current) {
-    try { history.pushState({ mode, hash }, '', url); } catch (e) {}
+function setMetaAttr(selector, attr, value) {
+  const el = document.querySelector(selector);
+  if (el) el.setAttribute(attr, value);
+}
+
+function updateMeta(mode, variation) {
+  const meta = (typeof pageMetaFor === 'function') ? pageMetaFor(mode, variation) : null;
+  if (!meta) return;
+  document.title = meta.title;
+  const canonical = 'https://geometric.games' + meta.path;
+  setMetaAttr('meta[name="description"]', 'content', meta.description);
+  setMetaAttr('meta[property="og:title"]', 'content', meta.title);
+  setMetaAttr('meta[property="og:description"]', 'content', meta.description);
+  setMetaAttr('meta[name="twitter:title"]', 'content', meta.title);
+  setMetaAttr('meta[name="twitter:description"]', 'content', meta.description);
+  setMetaAttr('link[rel="canonical"]', 'href', canonical);
+  setMetaAttr('meta[property="og:url"]', 'content', canonical);
+}
+
+function canPushState() {
+  return window.location.protocol === 'http:' || window.location.protocol === 'https:';
+}
+
+function pushRoute(mode, variation, hash) {
+  if (canPushState()) {
+    const url = buildRouteUrl(mode, variation, hash);
+    const current = window.location.pathname + window.location.search;
+    if (url !== current) {
+      try { history.pushState({ mode, variation, hash }, '', url); } catch (e) {}
+    }
   }
-  updateMeta(mode);
+  updateMeta(mode, variation);
 }
 
-function replaceRoute(mode, hash) {
-  const url = buildRouteUrl(mode, hash);
-  try { history.replaceState({ mode, hash }, '', url); } catch (e) {}
-  updateMeta(mode);
+function replaceRoute(mode, variation, hash) {
+  if (canPushState()) {
+    const url = buildRouteUrl(mode, variation, hash);
+    try { history.replaceState({ mode, variation, hash }, '', url); } catch (e) {}
+  }
+  updateMeta(mode, variation);
 }

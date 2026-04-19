@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cutting polygons in half: why a perfect bisector always exists | geometric.games blog</title>
+<meta name="description" content="The Intermediate Value Theorem guarantees that every polygon has a 50/50 area bisector in every direction. A short tour of why.">
+<meta name="author" content="geometric.games">
+<meta name="theme-color" content="#111111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Cutting polygons in half: why a perfect bisector always exists">
+<meta property="og:description" content="The Intermediate Value Theorem guarantees that every polygon has a 50/50 area bisector in every direction. A short tour of why.">
+<meta property="og:url" content="https://geometric.games/blog/cutting-polygons-in-half/">
+<meta property="og:site_name" content="geometric.games">
+<meta property="og:image" content="https://geometric.games/og-image.png">
+<meta property="article:published_time" content="2026-04-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Cutting polygons in half: why a perfect bisector always exists">
+<meta name="twitter:description" content="The Intermediate Value Theorem guarantees that every polygon has a 50/50 area bisector in every direction. A short tour of why.">
+<meta name="twitter:image" content="https://geometric.games/og-image.png">
+<link rel="canonical" href="https://geometric.games/blog/cutting-polygons-in-half/">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="mask-icon" href="../../favicon.svg" color="#c084fc">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Cutting polygons in half: why a perfect bisector always exists",
+  "description": "The Intermediate Value Theorem guarantees that every polygon has a 50/50 area bisector in every direction. A short tour of why.",
+  "url": "https://geometric.games/blog/cutting-polygons-in-half/",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-04-20",
+  "inLanguage": "en",
+  "author": {
+    "@type": "Organization",
+    "name": "geometric.games"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "geometric.games",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://geometric.games/favicon.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://geometric.games/blog/cutting-polygons-in-half/"
+  }
+}
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
+<!-- End Google Tag Manager -->
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body class="blog-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9CPH9MB"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="blog-header">
+  <a class="blog-logo" href="../../">GEOMETRIC<span class="accent">.GAMES</span></a>
+  <nav class="blog-topnav"><a href="../../blog/">Blog</a></nav>
+</header>
+<article class="article">
+  <div class="article-inner">
+    <h1>Cutting polygons in half: why a perfect bisector always exists</h1>
+    <p class="article-meta"><time datetime="2026-04-20">2026-04-20</time></p>
+    <div class="article-body">
+      <h2>Slice any polygon into two equal halves</h2>
+  <p>
+    Draw a single straight line that fully crosses an irregular polygon and splits it into two pieces
+    of equal area. The shape is generated fresh every round from a seeded random polygon — sometimes
+    smooth and convex, sometimes jagged with inward notches and holes. Your cut is scored by how far
+    the smaller piece is from exactly <b>50%</b>. Drag the endpoints after placing the line to
+    fine-tune, then confirm.
+  </p>
+
+  <h2>The math: why a perfect half always exists</h2>
+  <p>
+    By the <b>Intermediate Value Theorem</b>, every bounded region has a 50/50 bisector in
+    <i>every</i> direction. Sweep a line of a fixed angle from one side of the polygon to the other:
+    one extreme has 0% of the area to its left, the other has 100%. The area-to-the-left function is
+    continuous, so it must pass through exactly 50% somewhere in between. Change the angle and you
+    get a different bisector — so every polygon has infinitely many perfect half-cuts, and the
+    puzzle is always solvable.
+  </p>
+  <p>
+    The trickier part is doing it by eye. Human intuition gets fooled by long skinny limbs, by holes
+    that shift the visual balance, and by shapes that are wider than they are tall. Learning to
+    ignore the outline and focus on where the <i>area</i> sits is the whole game.
+  </p>
+
+  <h2>Tips for getting perfect cuts</h2>
+  <ul>
+    <li>Find the longest axis of the shape and cut roughly perpendicular to it — limbs along that axis dominate the area.</li>
+    <li>Watch for holes: an empty region effectively subtracts area from one side.</li>
+    <li>Use the endpoint drag: start with a rough cut, then slide the endpoints until the two pieces look equal by eye.</li>
+    <li>If a piece has a long thin tail, it’s lighter than it looks — a compact lobe outweighs a long one of similar length.</li>
+  </ul>
+
+  <h2>Other cut variations</h2>
+  <p>
+    Once the 50/50 cut feels natural, try the variations. Each tests a different flavour of geometric
+    intuition:
+  </p>
+  <ul>
+    <li><a href="../../cut/ratio/">Target Ratio</a> — hit an exact non-half ratio like 37/63.</li>
+    <li><a href="../../cut/quad/">Quad Cut</a> — two crossing cuts, four equal quarters (Courant–Robbins).</li>
+    <li><a href="../../cut/tri/">Tri Cut</a> — two cuts, three equal pieces.</li>
+    <li><a href="../../cut/angle/">Constrained Angle</a> — the cut’s angle is fixed, slide it to the sweet spot.</li>
+  </ul>
+  <p>
+    Or switch mode entirely: <a href="../../inscribe/">inscribe a square</a> (the unsolved Toeplitz problem)
+    or <a href="../../balance/">balance the polygon on a pole</a>.
+  </p>
+    </div>
+    <div class="article-cta">
+      <a class="btn" href="../../">Play: Cut in Half →</a>
+    </div>
+    <nav class="article-nav">
+      <a href="../../blog/">← All posts</a>
+    </nav>
+  </div>
+</article>
+</body>
+</html>

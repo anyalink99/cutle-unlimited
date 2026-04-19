@@ -12,6 +12,13 @@ function balanceVariation() {
   return state.balanceVariation || 'pole';
 }
 
+function currentVariation() {
+  if (state.mode === 'cut') return state.cutVariation;
+  if (state.mode === 'inscribe') return state.inscribeVariation;
+  if (state.mode === 'balance') return state.balanceVariation;
+  return 'half';
+}
+
 function updateActionButton() {
   const btn = dom.newBtn;
   let needsConfirm = false;
@@ -33,6 +40,8 @@ function updateActionButton() {
     btn.textContent = 'New Shape';
     btn.dataset.action = 'new';
   }
+  const shareBtn = document.getElementById('share-btn');
+  if (shareBtn) shareBtn.hidden = !state.locked;
 }
 
 function generateShapeForMode() {
@@ -72,8 +81,8 @@ function newShape(hash, nav = 'push') {
   }
   dom.newBtn.classList.remove('pulse');
   updateActionButton();
-  if (nav === 'replace') replaceRoute(state.mode, state.hash);
-  else if (nav === 'push') pushRoute(state.mode, state.hash);
+  if (nav === 'replace') replaceRoute(state.mode, currentVariation(), state.hash);
+  else if (nav === 'push') pushRoute(state.mode, currentVariation(), state.hash);
 }
 
 function setMode(m) {
@@ -96,6 +105,7 @@ function setCutVariation(v) {
     cutOnNewShape();
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
+    pushRoute('cut', v, state.hash);
   }
 }
 
@@ -113,6 +123,7 @@ function setBalanceVariation(v) {
     dom.hitPad.style.cursor = 'crosshair';
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
+    pushRoute('balance', v, state.hash);
   }
 }
 
@@ -129,5 +140,6 @@ function setInscribeVariation(v) {
     renderInscribeAll();
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
+    pushRoute('inscribe', v, state.hash);
   }
 }

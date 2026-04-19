@@ -3,46 +3,43 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>geometric.games — cut a polygon in half</title>
-<meta name="description" content="Slice irregular polygons into two equal halves with a single straight line. Endless geometry puzzles in the browser, no install, free.">
+<title>Pole balance puzzle — slide the pivot under a polygon | geometric.games</title>
+<meta name="description" content="Slide a pole under an irregular polygon so it doesn’t tip. Scored by how close the pivot is to the polygon’s true centroid.">
 <meta name="author" content="geometric.games">
 <meta name="theme-color" content="#111111">
 <meta property="og:type" content="website">
-<meta property="og:title" content="geometric.games — cut a polygon in half">
-<meta property="og:description" content="Slice irregular polygons into two equal halves with a single straight line. Endless geometry puzzles in the browser, no install, free.">
-<meta property="og:url" content="https://geometric.games/">
+<meta property="og:title" content="Pole balance puzzle — slide the pivot under a polygon | geometric.games">
+<meta property="og:description" content="Slide a pole under an irregular polygon so it doesn’t tip. Scored by how close the pivot is to the polygon’s true centroid.">
+<meta property="og:url" content="https://geometric.games/balance/">
 <meta property="og:site_name" content="geometric.games">
 <meta property="og:image" content="https://geometric.games/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:image:type" content="image/png">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="geometric.games — cut a polygon in half">
-<meta name="twitter:description" content="Slice irregular polygons into two equal halves with a single straight line. Endless geometry puzzles in the browser, no install, free.">
+<meta name="twitter:title" content="Pole balance puzzle — slide the pivot under a polygon | geometric.games">
+<meta name="twitter:description" content="Slide a pole under an irregular polygon so it doesn’t tip. Scored by how close the pivot is to the polygon’s true centroid.">
 <meta name="twitter:image" content="https://geometric.games/og-image.png">
-<link rel="canonical" href="https://geometric.games/">
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<link rel="mask-icon" href="favicon.svg" color="#c084fc">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="canonical" href="https://geometric.games/balance/">
+<link rel="icon" type="image/svg+xml" href="../favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="../icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../icon-512.png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="mask-icon" href="../favicon.svg" color="#c084fc">
+<link rel="manifest" href="../manifest.webmanifest">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "geometric.games",
-  "url": "https://geometric.games/",
-  "description": "Slice irregular polygons into two equal halves with a single straight line. Endless geometry puzzles in the browser, no install, free.",
+  "@type": "Game",
+  "name": "Pole balance puzzle",
+  "url": "https://geometric.games/balance/",
+  "description": "Slide a pole under an irregular polygon so it doesn’t tip. Scored by how close the pivot is to the polygon’s true centroid.",
+  "genre": "Puzzle",
+  "applicationCategory": "Game",
+  "gamePlatform": "Web browser",
+  "operatingSystem": "Any",
   "inLanguage": "en",
-  "publisher": {
-    "@type": "Organization",
-    "name": "geometric.games",
-    "logo": {
-      "@type": "ImageObject",
-      "url": "https://geometric.games/favicon.svg"
-    }
-  }
+  "isAccessibleForFree": true
 }
 </script>
 <!-- Google Tag Manager -->
@@ -53,13 +50,13 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
 <!-- End Google Tag Manager -->
 <script>
-    window.__INITIAL_MODE = "cut";
-    window.__INITIAL_VARIATION = "half";
-    window.__CANONICAL_PATH = "/";
+    window.__INITIAL_MODE = "balance";
+    window.__INITIAL_VARIATION = "pole";
+    window.__CANONICAL_PATH = "/balance/";
   </script>
-<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="../style.css">
 </head>
-<body data-mode="cut" data-cut-variation="half" data-inscribe-variation="square" data-balance-variation="pole">
+<body data-mode="balance" data-cut-variation="half" data-inscribe-variation="square" data-balance-variation="pole">
 <!-- Google Tag Manager (noscript) -->
 <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9CPH9MB"
 height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -119,7 +116,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li>Release to place the line; drag the endpoints to fine-tune</li>
             <li>Press <b>Confirm</b> to score the cut</li>
           </ul>
-          <p class="math-note"><b>Math:</b> by the Intermediate Value Theorem, every region has a 50/50 bisector in <i>every</i> direction — perfection is always reachable. <a class="math-more" href="blog/cutting-polygons-in-half/">Read more →</a></p>
+          <p class="math-note"><b>Math:</b> by the Intermediate Value Theorem, every region has a 50/50 bisector in <i>every</i> direction — perfection is always reachable. <a class="math-more" href="../blog/cutting-polygons-in-half/">Read more →</a></p>
         </div>
         <div class="help-cut-ratio">
           <p>Cut in a <b>random target ratio</b> (5/95 … 50/50) shown up top each round.</p>
@@ -135,7 +132,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li>Draw two lines, each fully crossing the shape</li>
             <li>Drag any endpoint to adjust, then <b>Confirm</b></li>
           </ul>
-          <p class="math-note"><b>Math:</b> Courant–Robbins theorem — any planar region can be split into 4 equal pieces by <i>two perpendicular</i> lines. Proof rotates two area-bisectors by 90° and uses IVT. <a class="math-more" href="blog/courant-robbins-four-equal-pieces/">Read more →</a></p>
+          <p class="math-note"><b>Math:</b> Courant–Robbins theorem — any planar region can be split into 4 equal pieces by <i>two perpendicular</i> lines. Proof rotates two area-bisectors by 90° and uses IVT. <a class="math-more" href="../blog/courant-robbins-four-equal-pieces/">Read more →</a></p>
         </div>
         <div class="help-cut-tri">
           <p>Two cuts, but the second must stay in <b>one half</b> — three equal pieces.</p>
@@ -162,7 +159,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li>Tap / click to drop — drag points any time to adjust</li>
             <li>After four points, press <b>Confirm</b> to score</li>
           </ul>
-          <p class="math-note"><b>Math:</b> Toeplitz's Inscribed Square Problem (1911) — does every closed curve contain 4 points forming a square? Proven for polygons and smooth curves; for arbitrary Jordan curves it's still <i>open</i> after 110+ years. <a class="math-more" href="blog/inscribed-square-problem/">Read more →</a></p>
+          <p class="math-note"><b>Math:</b> Toeplitz's Inscribed Square Problem (1911) — does every closed curve contain 4 points forming a square? Proven for polygons and smooth curves; for arbitrary Jordan curves it's still <i>open</i> after 110+ years. <a class="math-more" href="../blog/inscribed-square-problem/">Read more →</a></p>
         </div>
         <div class="help-inscribe-triangle">
           <p>Place <b>three points</b> on the outline to form an equilateral triangle.</p>
@@ -171,7 +168,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li>All three sides must be equal and every angle 60°</li>
             <li>After three points, press <b>Confirm</b> to score</li>
           </ul>
-          <p class="math-note"><b>Math:</b> every Jordan curve contains inscribed equilateral triangles — proven by Nielsen &amp; Wright (1990) and others. Unlike Toeplitz's square, the triangle case is fully settled. <a class="math-more" href="blog/inscribed-equilateral-triangle/">Read more →</a></p>
+          <p class="math-note"><b>Math:</b> every Jordan curve contains inscribed equilateral triangles — proven by Nielsen &amp; Wright (1990) and others. Unlike Toeplitz's square, the triangle case is fully settled. <a class="math-more" href="../blog/inscribed-equilateral-triangle/">Read more →</a></p>
         </div>
       </div>
       <div class="help-balance">
@@ -182,7 +179,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
             <li>Tap anywhere on the board to drop your guess</li>
             <li>Drag the point to fine-tune, then press <b>Confirm</b></li>
           </ul>
-          <p class="math-note"><b>Math:</b> the centroid doesn't have to lie <i>inside</i> the shape — for an annulus it sits at the empty center. Non-convex outlines and holes are where intuition breaks. <a class="math-more" href="blog/center-of-mass-with-holes/">Read more →</a></p>
+          <p class="math-note"><b>Math:</b> the centroid doesn't have to lie <i>inside</i> the shape — for an annulus it sits at the empty center. Non-convex outlines and holes are where intuition breaks. <a class="math-more" href="../blog/center-of-mass-with-holes/">Read more →</a></p>
         </div>
         <div class="help-balance-pole">
           <p>Slide a <b>pole</b> under the shape so it <b>balances</b>.</p>
@@ -300,30 +297,30 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
-<script src="js/core/constants.js"></script>
-<script src="js/core/random.js"></script>
-<script src="js/core/seed.js"></script>
-<script src="js/core/page-meta.js"></script>
-<script src="js/core/router.js"></script>
-<script src="js/geometry/geometry.js"></script>
-<script src="js/geometry/inscribed-square.js"></script>
-<script src="js/geometry/shapes.js"></script>
-<script src="js/ui/modals.js"></script>
-<script src="js/ui/render.js"></script>
-<script src="js/modes/cut/cut.js"></script>
-<script src="js/modes/cut/input.js"></script>
-<script src="js/modes/cut/stats.js"></script>
-<script src="js/modes/inscribe/inscribe.js"></script>
-<script src="js/modes/inscribe/input.js"></script>
-<script src="js/modes/inscribe/stats.js"></script>
-<script src="js/modes/balance/centroid.js"></script>
-<script src="js/modes/balance/pole.js"></script>
-<script src="js/modes/balance/balance.js"></script>
-<script src="js/modes/balance/input.js"></script>
-<script src="js/modes/balance/stats.js"></script>
-<script src="js/stats.js"></script>
-<script src="js/share.js"></script>
-<script src="js/game.js"></script>
-<script src="js/main.js"></script>
+<script src="../js/core/constants.js"></script>
+<script src="../js/core/random.js"></script>
+<script src="../js/core/seed.js"></script>
+<script src="../js/core/page-meta.js"></script>
+<script src="../js/core/router.js"></script>
+<script src="../js/geometry/geometry.js"></script>
+<script src="../js/geometry/inscribed-square.js"></script>
+<script src="../js/geometry/shapes.js"></script>
+<script src="../js/ui/modals.js"></script>
+<script src="../js/ui/render.js"></script>
+<script src="../js/modes/cut/cut.js"></script>
+<script src="../js/modes/cut/input.js"></script>
+<script src="../js/modes/cut/stats.js"></script>
+<script src="../js/modes/inscribe/inscribe.js"></script>
+<script src="../js/modes/inscribe/input.js"></script>
+<script src="../js/modes/inscribe/stats.js"></script>
+<script src="../js/modes/balance/centroid.js"></script>
+<script src="../js/modes/balance/pole.js"></script>
+<script src="../js/modes/balance/balance.js"></script>
+<script src="../js/modes/balance/input.js"></script>
+<script src="../js/modes/balance/stats.js"></script>
+<script src="../js/stats.js"></script>
+<script src="../js/share.js"></script>
+<script src="../js/game.js"></script>
+<script src="../js/main.js"></script>
 </body>
 </html>

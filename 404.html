@@ -7,17 +7,29 @@
 <title>geometric.games</title>
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <script>
-  (function () {
-    var segmentsToKeep = 0;
-    var l = window.location;
-    var pathParts = l.pathname.split('/');
-    var base = pathParts.slice(0, 1 + segmentsToKeep).join('/');
-    var rest = pathParts.slice(1 + segmentsToKeep).join('/').replace(/&/g, '~and~');
-    var query = l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '';
-    l.replace(
-      l.protocol + '//' + l.host + base + '/?/' + rest + query + l.hash
-    );
-  })();
+// Fallback for unknown paths on GitHub Pages. Maps legacy URLs like
+// /cut/<hash> or /balance/<hash> onto their canonical modern equivalents
+// (/ or /balance/ + ?s=<hash>). Anything else drops to the homepage.
+(function () {
+  var HASH_RE = /^[a-z0-9]{6,64}$/i;
+  var MODE_CANONICAL = {
+    cut: '/',
+    inscribe: '/inscribe/',
+    balance: '/balance/',
+    // Legacy slug from the Mass -> Balance rename — keep for old bookmarks.
+    mass: '/balance/'
+  };
+  var l = window.location;
+  var parts = l.pathname.split('/').filter(Boolean);
+  var target = '/';
+  if (parts.length >= 1 && MODE_CANONICAL[parts[0]]) {
+    target = MODE_CANONICAL[parts[0]];
+    if (parts.length >= 2 && HASH_RE.test(parts[parts.length - 1])) {
+      target += '?s=' + parts[parts.length - 1];
+    }
+  }
+  l.replace(l.protocol + '//' + l.host + target + l.hash);
+})();
 </script>
 </head>
 <body></body>

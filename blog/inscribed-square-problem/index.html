@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>The Inscribed Square Problem: 110 years unsolved | geometric.games blog</title>
+<meta name="description" content="Otto Toeplitz asked in 1911 whether every simple closed curve contains four points that form a square. More than a century later, it’s still open for arbitrary curves.">
+<meta name="author" content="geometric.games">
+<meta name="theme-color" content="#111111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="The Inscribed Square Problem: 110 years unsolved">
+<meta property="og:description" content="Otto Toeplitz asked in 1911 whether every simple closed curve contains four points that form a square. More than a century later, it’s still open for arbitrary curves.">
+<meta property="og:url" content="https://geometric.games/blog/inscribed-square-problem/">
+<meta property="og:site_name" content="geometric.games">
+<meta property="og:image" content="https://geometric.games/og-image.png">
+<meta property="article:published_time" content="2026-04-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="The Inscribed Square Problem: 110 years unsolved">
+<meta name="twitter:description" content="Otto Toeplitz asked in 1911 whether every simple closed curve contains four points that form a square. More than a century later, it’s still open for arbitrary curves.">
+<meta name="twitter:image" content="https://geometric.games/og-image.png">
+<link rel="canonical" href="https://geometric.games/blog/inscribed-square-problem/">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="mask-icon" href="../../favicon.svg" color="#c084fc">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "The Inscribed Square Problem: 110 years unsolved",
+  "description": "Otto Toeplitz asked in 1911 whether every simple closed curve contains four points that form a square. More than a century later, it’s still open for arbitrary curves.",
+  "url": "https://geometric.games/blog/inscribed-square-problem/",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-04-20",
+  "inLanguage": "en",
+  "author": {
+    "@type": "Organization",
+    "name": "geometric.games"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "geometric.games",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://geometric.games/favicon.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://geometric.games/blog/inscribed-square-problem/"
+  }
+}
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
+<!-- End Google Tag Manager -->
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body class="blog-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9CPH9MB"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="blog-header">
+  <a class="blog-logo" href="../../">GEOMETRIC<span class="accent">.GAMES</span></a>
+  <nav class="blog-topnav"><a href="../../blog/">Blog</a></nav>
+</header>
+<article class="article">
+  <div class="article-inner">
+    <h1>The Inscribed Square Problem: 110 years unsolved</h1>
+    <p class="article-meta"><time datetime="2026-04-20">2026-04-20</time></p>
+    <div class="article-body">
+      <h2>Inscribe a square inside a polygon</h2>
+  <p>
+    Place <b>four points</b> on the polygon’s outline so they form a square. As you move your
+    cursor, the nearest outline point follows it — tap to drop a vertex. After four drops the
+    quadrilateral is scored: closer to a perfect square (equal sides, 90° angles) means a higher
+    score. You can drag any placed point afterwards to refine.
+  </p>
+
+  <h2>The Inscribed Square Problem (Toeplitz, 1911)</h2>
+  <p>
+    Otto Toeplitz asked a deceptively simple question in 1911: does every simple closed curve in
+    the plane contain four points that form a square? More than a century later, the answer is
+    <i>probably yes</i> — but it’s still <b>one of the oldest open problems in geometry</b>.
+  </p>
+  <p>
+    The problem is settled for nice classes of curves: polygons, convex curves, smooth curves, and
+    curves with bounded curvature all provably have an inscribed square. Recent work by Greene &amp;
+    Lobb (2020) settled the problem for smooth Jordan curves by connecting it to symplectic
+    geometry. But for <i>arbitrary</i> Jordan curves — including pathological fractal ones —
+    existence is still unproved.
+  </p>
+  <p>
+    On this page every generated shape is a polygon, so a perfect inscribed square is guaranteed to
+    exist. Your job is to find one by eye.
+  </p>
+
+  <h2>Tips for spotting an inscribed square</h2>
+  <ul>
+    <li>Start with a diameter: pick two points on roughly opposite sides of the polygon — they’re candidates for the square’s diagonal.</li>
+    <li>The two other vertices must sit on a line perpendicular to that diagonal, with the same length.</li>
+    <li>Convex regions usually have several inscribed squares; concave shapes sometimes have just one obvious one.</li>
+    <li>If three vertices already look good but the fourth is hard to place, adjust vertex two — the constraint often means the whole square has to rotate slightly.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a href="../../inscribe/triangle/">Inscribed Equilateral Triangle</a> — the solved sibling of the Toeplitz problem.</li>
+    <li><a href="../../">Cut</a> — slice polygons by area instead of placing vertices.</li>
+    <li><a href="../../balance/">Balance</a> — find where the polygon’s centroid sits.</li>
+  </ul>
+    </div>
+    <div class="article-cta">
+      <a class="btn" href="../../inscribe/">Play: Inscribed Square →</a>
+    </div>
+    <nav class="article-nav">
+      <a href="../../blog/">← All posts</a>
+    </nav>
+  </div>
+</article>
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Courant–Robbins: any region splits into four equal pieces with two perpendicular cuts | geometric.games blog</title>
+<meta name="description" content="A classic theorem from What Is Mathematics? — any planar region can be divided into four equal quarters by two perpendicular straight lines.">
+<meta name="author" content="geometric.games">
+<meta name="theme-color" content="#111111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Courant–Robbins: any region splits into four equal pieces with two perpendicular cuts">
+<meta property="og:description" content="A classic theorem from What Is Mathematics? — any planar region can be divided into four equal quarters by two perpendicular straight lines.">
+<meta property="og:url" content="https://geometric.games/blog/courant-robbins-four-equal-pieces/">
+<meta property="og:site_name" content="geometric.games">
+<meta property="og:image" content="https://geometric.games/og-image.png">
+<meta property="article:published_time" content="2026-04-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Courant–Robbins: any region splits into four equal pieces with two perpendicular cuts">
+<meta name="twitter:description" content="A classic theorem from What Is Mathematics? — any planar region can be divided into four equal quarters by two perpendicular straight lines.">
+<meta name="twitter:image" content="https://geometric.games/og-image.png">
+<link rel="canonical" href="https://geometric.games/blog/courant-robbins-four-equal-pieces/">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="mask-icon" href="../../favicon.svg" color="#c084fc">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Courant–Robbins: any region splits into four equal pieces with two perpendicular cuts",
+  "description": "A classic theorem from What Is Mathematics? — any planar region can be divided into four equal quarters by two perpendicular straight lines.",
+  "url": "https://geometric.games/blog/courant-robbins-four-equal-pieces/",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-04-20",
+  "inLanguage": "en",
+  "author": {
+    "@type": "Organization",
+    "name": "geometric.games"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "geometric.games",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://geometric.games/favicon.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://geometric.games/blog/courant-robbins-four-equal-pieces/"
+  }
+}
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
+<!-- End Google Tag Manager -->
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body class="blog-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9CPH9MB"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="blog-header">
+  <a class="blog-logo" href="../../">GEOMETRIC<span class="accent">.GAMES</span></a>
+  <nav class="blog-topnav"><a href="../../blog/">Blog</a></nav>
+</header>
+<article class="article">
+  <div class="article-inner">
+    <h1>Courant–Robbins: any region splits into four equal pieces with two perpendicular cuts</h1>
+    <p class="article-meta"><time datetime="2026-04-20">2026-04-20</time></p>
+    <div class="article-body">
+      <h2>Split a polygon into four equal pieces</h2>
+  <p>
+    Draw <b>two straight cuts</b> that each fully cross the polygon and intersect <i>inside</i> the
+    shape. Together they carve the polygon into four pieces, and you’re scored on how close those
+    pieces are to one quarter of the total area each. Drag either line’s endpoints to adjust, then
+    confirm.
+  </p>
+
+  <h2>The math: Courant &amp; Robbins’ four-piece theorem</h2>
+  <p>
+    A classical result in <i>What Is Mathematics?</i> by Courant and Robbins proves that any planar
+    region can be divided into <b>four equal pieces by two perpendicular straight lines</b>. The
+    proof is beautiful: for every angle θ, there’s an area-bisector in that direction (from the
+    Intermediate Value Theorem). Fix one bisector, then rotate a second bisector perpendicular to it
+    by 90° — by continuity, somewhere during the rotation the two bisectors cut the polygon into
+    four pieces that are all equal.
+  </p>
+  <p>
+    The puzzle doesn’t force perpendicularity — any two crossing bisectors work as long as each
+    one splits the polygon in half on its own <i>and</i> each also splits the other’s two halves
+    in half. That’s a tighter constraint than it looks, and it’s what makes this variation feel so
+    different from the simple <a href="../../">half cut</a>.
+  </p>
+
+  <h2>Tips for four equal quarters</h2>
+  <ul>
+    <li>Place your first line as a rough 50/50 bisector (same intuition as Half Cut).</li>
+    <li>Then place a second line perpendicular-ish — perpendicular isn’t required, but it’s often the easiest guess.</li>
+    <li>Slide the second line until the two pieces on each side of the first line look equal.</li>
+    <li>If a piece looks much bigger than the others, the crossing point is off-center toward that piece — shift both lines away from it.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a href="../../">Half Cut</a> — one line, two equal halves.</li>
+    <li><a href="../../cut/tri/">Tri Cut</a> — two cuts, three pieces.</li>
+    <li><a href="../../cut/ratio/">Target Ratio</a> — hit a specific non-half ratio.</li>
+    <li><a href="../../cut/angle/">Constrained Angle</a> — cut at a locked angle.</li>
+  </ul>
+    </div>
+    <div class="article-cta">
+      <a class="btn" href="../../cut/quad/">Play: Quad Cut →</a>
+    </div>
+    <nav class="article-nav">
+      <a href="../../blog/">← All posts</a>
+    </nav>
+  </div>
+</article>
+</body>
+</html>

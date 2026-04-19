@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Inscribed equilateral triangles in any curve (Nielsen–Wright) | geometric.games blog</title>
+<meta name="description" content="Unlike the still-open Toeplitz square, the equilateral-triangle version is fully solved: every Jordan curve contains infinitely many inscribed equilateral triangles.">
+<meta name="author" content="geometric.games">
+<meta name="theme-color" content="#111111">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Inscribed equilateral triangles in any curve (Nielsen–Wright)">
+<meta property="og:description" content="Unlike the still-open Toeplitz square, the equilateral-triangle version is fully solved: every Jordan curve contains infinitely many inscribed equilateral triangles.">
+<meta property="og:url" content="https://geometric.games/blog/inscribed-equilateral-triangle/">
+<meta property="og:site_name" content="geometric.games">
+<meta property="og:image" content="https://geometric.games/og-image.png">
+<meta property="article:published_time" content="2026-04-20">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Inscribed equilateral triangles in any curve (Nielsen–Wright)">
+<meta name="twitter:description" content="Unlike the still-open Toeplitz square, the equilateral-triangle version is fully solved: every Jordan curve contains infinitely many inscribed equilateral triangles.">
+<meta name="twitter:image" content="https://geometric.games/og-image.png">
+<link rel="canonical" href="https://geometric.games/blog/inscribed-equilateral-triangle/">
+<link rel="icon" type="image/svg+xml" href="../../favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="../../icon-192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="../../icon-512.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="mask-icon" href="../../favicon.svg" color="#c084fc">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Inscribed equilateral triangles in any curve (Nielsen–Wright)",
+  "description": "Unlike the still-open Toeplitz square, the equilateral-triangle version is fully solved: every Jordan curve contains infinitely many inscribed equilateral triangles.",
+  "url": "https://geometric.games/blog/inscribed-equilateral-triangle/",
+  "datePublished": "2026-04-20",
+  "dateModified": "2026-04-20",
+  "inLanguage": "en",
+  "author": {
+    "@type": "Organization",
+    "name": "geometric.games"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "geometric.games",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://geometric.games/favicon.svg"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "https://geometric.games/blog/inscribed-equilateral-triangle/"
+  }
+}
+</script>
+<!-- Google Tag Manager -->
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
+<!-- End Google Tag Manager -->
+<link rel="stylesheet" href="../../style.css">
+</head>
+<body class="blog-body">
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-N9CPH9MB"
+height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<header class="blog-header">
+  <a class="blog-logo" href="../../">GEOMETRIC<span class="accent">.GAMES</span></a>
+  <nav class="blog-topnav"><a href="../../blog/">Blog</a></nav>
+</header>
+<article class="article">
+  <div class="article-inner">
+    <h1>Inscribed equilateral triangles in any curve (Nielsen–Wright)</h1>
+    <p class="article-meta"><time datetime="2026-04-20">2026-04-20</time></p>
+    <div class="article-body">
+      <h2>Inscribe an equilateral triangle</h2>
+  <p>
+    Drop <b>three points</b> on the polygon’s outline so they form an equilateral triangle — all
+    three sides the same length, all three angles 60°. Same placement mechanics as the
+    <a href="../../inscribe/">square variation</a>: the nearest boundary point follows your cursor, tap
+    to drop, drag to refine, confirm to score.
+  </p>
+
+  <h2>The math: Nielsen–Wright and friends</h2>
+  <p>
+    Unlike the Inscribed Square Problem, the equilateral-triangle case is <b>fully solved</b>. In
+    1990, Mark Nielsen and Stephanie Wright proved that every Jordan curve contains inscribed
+    equilateral triangles — in fact, infinitely many of them. Simpler proofs exist for smooth and
+    polygonal curves using the same IVT-style continuity tricks that drive the cut-in-half puzzle.
+  </p>
+  <p>
+    The sketch: pick any point <i>A</i> on the curve. For every direction θ you can construct a
+    candidate equilateral triangle with <i>A</i> as one vertex and a second vertex lying on the
+    curve at distance <i>r(θ)</i> in direction θ. As θ rotates, the third vertex traces a continuous
+    curve that must intersect the original polygon — and at every intersection, you get an
+    inscribed equilateral triangle.
+  </p>
+
+  <h2>Tips</h2>
+  <ul>
+    <li>Start with two points a reasonable distance apart — they define one side of the triangle.</li>
+    <li>The third vertex is the apex of an equilateral triangle built on that side. There are two possible apex positions (one on each side). Pick the one that actually lands on the outline.</li>
+    <li>Long narrow polygons have smaller inscribed equilateral triangles than you’d expect.</li>
+    <li>If one vertex is locked on a sharp corner of the polygon, try a second vertex on the opposite long edge — triangles often snap nicely that way.</li>
+  </ul>
+
+  <h2>Related</h2>
+  <ul>
+    <li><a href="../../inscribe/">Inscribed Square</a> — the still-open Toeplitz problem.</li>
+    <li><a href="../../">Cut a polygon in half</a> — the IVT-driven classic.</li>
+    <li><a href="../../balance/">Balance puzzles</a> — centroid and pole physics.</li>
+  </ul>
+    </div>
+    <div class="article-cta">
+      <a class="btn" href="../../inscribe/triangle/">Play: Inscribed Triangle →</a>
+    </div>
+    <nav class="article-nav">
+      <a href="../../blog/">← All posts</a>
+    </nav>
+  </div>
+</article>
+</body>
+</html>

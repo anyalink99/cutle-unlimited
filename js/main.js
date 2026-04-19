@@ -177,10 +177,13 @@ initBalanceInput();
 loadStats();
 
 const initialRoute = parseLocation();
-BASE_PATH = initialRoute.base;
 
-let initialMode = initialRoute.mode;
-if (!initialMode) {
+// Authoritative source for mode+variation is the HTML file that was served.
+// Each generated page exposes window.__INITIAL_MODE / __INITIAL_VARIATION.
+// parseLocation() is used as a fallback (e.g. if 404 redirected us here) and
+// always to pull the ?s= hash.
+let initialMode = window.__INITIAL_MODE || initialRoute.mode;
+if (!initialMode || !MODES.includes(initialMode)) {
   try { initialMode = localStorage.getItem(MODE_KEY); } catch (e) {}
   if (!initialMode || !MODES.includes(initialMode)) initialMode = 'cut';
 }
@@ -188,45 +191,61 @@ state.mode = initialMode;
 try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
 document.body.dataset.mode = state.mode;
 
-let initialVar = 'half';
-try {
-  const v = localStorage.getItem(CUT_VARIATION_KEY);
-  if (v && CUT_VARIATIONS.includes(v)) initialVar = v;
-} catch (e) {}
-state.cutVariation = initialVar;
-document.body.dataset.cutVariation = initialVar;
+function pickInitialVariation(mode, urlVar, validList, storageKey, fallback) {
+  // URL/HTML explicit for current mode wins; localStorage for other modes.
+  if (state.mode === mode && window.__INITIAL_VARIATION && validList.includes(window.__INITIAL_VARIATION)) {
+    return window.__INITIAL_VARIATION;
+  }
+  if (state.mode === mode && urlVar && validList.includes(urlVar)) {
+    return urlVar;
+  }
+  try {
+    const v = localStorage.getItem(storageKey);
+    if (v && validList.includes(v)) return v;
+  } catch (e) {}
+  return fallback;
+}
 
-let initialInscVar = 'square';
-try {
-  const v = localStorage.getItem(INSCRIBE_VARIATION_KEY);
-  if (v && INSCRIBE_VARIATIONS.includes(v)) initialInscVar = v;
-} catch (e) {}
-state.inscribeVariation = initialInscVar;
-document.body.dataset.inscribeVariation = initialInscVar;
+state.cutVariation = pickInitialVariation('cut', initialRoute.variation, CUT_VARIATIONS, CUT_VARIATION_KEY, 'half');
+document.body.dataset.cutVariation = state.cutVariation;
 
-let initialBalanceVar = 'pole';
-try {
-  const v = localStorage.getItem(BALANCE_VARIATION_KEY);
-  if (v && BALANCE_VARIATIONS.includes(v)) initialBalanceVar = v;
-} catch (e) {}
-state.balanceVariation = initialBalanceVar;
-document.body.dataset.balanceVariation = initialBalanceVar;
+state.inscribeVariation = pickInitialVariation('inscribe', initialRoute.variation, INSCRIBE_VARIATIONS, INSCRIBE_VARIATION_KEY, 'square');
+document.body.dataset.inscribeVariation = state.inscribeVariation;
+
+state.balanceVariation = pickInitialVariation('balance', initialRoute.variation, BALANCE_VARIATIONS, BALANCE_VARIATION_KEY, 'pole');
+document.body.dataset.balanceVariation = state.balanceVariation;
 
 refreshModeCards();
 newShape(initialRoute.hash || undefined, 'replace');
 
 window.addEventListener('popstate', () => {
   const loc = parseLocation();
-  if (!loc.mode) return;
-  if (loc.mode !== state.mode) {
-    state.mode = loc.mode;
+  const targetMode = loc.mode || state.mode;
+  if (targetMode !== state.mode) {
+    state.mode = targetMode;
     document.body.dataset.mode = state.mode;
     try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
     refreshModeCards();
   }
+  if (loc.variation) {
+    if (state.mode === 'cut' && loc.variation !== state.cutVariation) {
+      state.cutVariation = loc.variation;
+      document.body.dataset.cutVariation = loc.variation;
+    } else if (state.mode === 'inscribe' && loc.variation !== state.inscribeVariation) {
+      state.inscribeVariation = loc.variation;
+      document.body.dataset.inscribeVariation = loc.variation;
+    } else if (state.mode === 'balance' && loc.variation !== state.balanceVariation) {
+      state.balanceVariation = loc.variation;
+      document.body.dataset.balanceVariation = loc.variation;
+    }
+  }
+  updateMeta(state.mode, currentVariation());
   if (loc.hash && loc.hash !== state.hash) {
     newShape(loc.hash, 'skip');
   } else if (!loc.hash) {
     newShape(undefined, 'replace');
+  } else {
+    // Same hash, mode/variation may have changed — re-render without new seed.
+    newShape(state.hash, 'skip');
   }
 });
