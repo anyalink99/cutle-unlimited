@@ -20,7 +20,9 @@ function centerShapeObject(shape) {
   };
 }
 
-function normalizeShapeArea(shape) {
+// forceClamp skips the extent-overshoot reject and just clamps into MAX_R —
+// used on a last-resort retry when the strict pass couldn't find a clean outer.
+function normalizeShapeArea(shape, forceClamp) {
   const net = shapeArea(shape);
   if (net < 1) return null;
   let scale = Math.sqrt(TARGET_AREA / net);
@@ -29,11 +31,9 @@ function normalizeShapeArea(shape) {
     const d = Math.hypot(p.x - CX, p.y - CY);
     if (d > maxD) maxD = d;
   }
-  // Mild overshoot → clamp to MAX_R and accept slightly smaller shape.
-  // Severe overshoot → reject so the caller can retry a different outer.
   const wanted = maxD * scale;
   if (wanted > MAX_R) {
-    if (wanted > MAX_R * 1.35) return null;
+    if (!forceClamp && wanted > MAX_R * 1.35) return null;
     scale = MAX_R / maxD;
   }
   const scalePts = pts => pts.map(p => ({ x: CX + (p.x - CX) * scale, y: CY + (p.y - CY) * scale }));

@@ -6,30 +6,26 @@ function _sampleGenericHoleCount() {
   return 3;
 }
 
-function _fallbackCircle() {
-  const pts = [];
-  const R = 100;
-  const N = 48;
-  for (let i = 0; i < N; i++) {
-    const a = (i / N) * TAU;
-    pts.push({ x: CX + Math.cos(a) * R, y: CY + Math.sin(a) * R });
-  }
-  return { outer: pts, holes: [] };
-}
-
 function generateShape(opts) {
   const noHoles = !!(opts && opts.noHoles);
   const noSymmetry = !!(opts && opts.noSymmetry);
-  let start = null, built = null;
-  for (let tries = 0; tries < 15 && !start; tries++) {
+  let built, start;
+  for (let tries = 0; tries < 15; tries++) {
     const candidate = generateOuter();
     if (noSymmetry && candidate.symmetric) continue;
     const normalized = normalizeShapeArea(centerShapeObject({ outer: candidate.pts, holes: [] }));
-    if (!normalized) continue;
-    built = candidate;
-    start = normalized;
+    if (normalized) { built = candidate; start = normalized; break; }
   }
-  if (!start) return _fallbackCircle();
+  if (!start) {
+    // Nothing passed the strict extent filter. Force-clamp any outer — produces
+    // a smaller shape but always valid, which beats returning a placeholder.
+    for (let tries = 0; tries < 10; tries++) {
+      const candidate = generateOuter();
+      if (noSymmetry && candidate.symmetric && tries < 5) continue;
+      const normalized = normalizeShapeArea(centerShapeObject({ outer: candidate.pts, holes: [] }), true);
+      if (normalized) { built = candidate; start = normalized; break; }
+    }
+  }
   if (noHoles) return start;
 
   // K-fold (symmetric) outers need asymmetric carving so the puzzle isn't
