@@ -89,15 +89,15 @@ function updateActionButton() {
 
 function generateShapeForMode() {
   if (state.mode === 'inscribe') {
-    for (let i = 0; i < 40; i++) {
-      const s = generateShape();
-      if (!s.holes || s.holes.length === 0) return s;
-    }
-    const s = generateShape();
-    return { outer: s.outer, holes: [] };
+    return generateShape({ noHoles: true, noSymmetry: true });
   }
   if (state.mode === 'balance') {
     return generateBalanceShape();
+  }
+  if (Math.random() < 0.15) {
+    const raw = generateBalanceShape();
+    const centered = centerShapeObject(raw);
+    return normalizeShapeArea(centered) || centered;
   }
   return generateShape();
 }

@@ -112,19 +112,83 @@ function mergeCutHolesIntoOuter(outer, clippedHoles, nx, ny, c) {
     }
     const spliced = spliceHoleIntoOuter(current, hole, chordStart, onLine, t);
     if (spliced) current = spliced;
-    else remaining.push(hole);
   }
   return { outer: current, holes: remaining };
 }
 
+function splitHalfPlanePolygon(pts, nx, ny, c) {
+  const EPS = 0.1;
+  const n = pts.length;
+  if (n < 3) return [pts];
+
+  const onLineFlags = pts.map(p => Math.abs(nx * p.x + ny * p.y + c) < EPS);
+  let onLineCount = 0;
+  for (const b of onLineFlags) if (b) onLineCount++;
+  if (onLineCount <= 2) return [pts];
+  if (onLineCount % 2 !== 0) return [pts];
+
+  const ux = -ny, uy = nx;
+  const onLineIdx = [];
+  for (let i = 0; i < n; i++) if (onLineFlags[i]) onLineIdx.push(i);
+  onLineIdx.sort((a, b) => (pts[a].x * ux + pts[a].y * uy) - (pts[b].x * ux + pts[b].y * uy));
+
+  const pairs = [];
+  for (let i = 0; i < onLineIdx.length; i += 2) {
+    pairs.push([onLineIdx[i], onLineIdx[i + 1]]);
+  }
+
+  const subPolygons = [];
+  for (const [a, b] of pairs) {
+    let forwardHasOther = false;
+    {
+      let i = (a + 1) % n;
+      while (i !== b) {
+        if (onLineFlags[i]) { forwardHasOther = true; break; }
+        i = (i + 1) % n;
+      }
+    }
+    const sub = [];
+    if (!forwardHasOther) {
+      let i = a;
+      while (true) {
+        sub.push(pts[i]);
+        if (i === b) break;
+        i = (i + 1) % n;
+      }
+    } else {
+      let i = a;
+      while (true) {
+        sub.push(pts[i]);
+        if (i === b) break;
+        i = (i - 1 + n) % n;
+      }
+    }
+    if (sub.length >= 3) subPolygons.push(sub);
+  }
+  return subPolygons.length ? subPolygons : [pts];
+}
+
 function clipShapeHalfPlane(shape, nx, ny, c) {
-  const outer = clipHalfPlane(shape.outer, nx, ny, c);
-  const clippedHoles = [];
+  const clippedOuter = clipHalfPlane(shape.outer, nx, ny, c);
+  const outerPieces = splitHalfPlanePolygon(clippedOuter, nx, ny, c);
+  if (!outerPieces.length) return [{ outer: [], holes: [] }];
+
+  const allClippedHoles = [];
   for (const h of shape.holes) {
     const hc = clipHalfPlane(h, nx, ny, c);
-    if (hc.length >= 3 && polygonArea(hc) > 1) clippedHoles.push(hc);
+    if (hc.length >= 3 && polygonArea(hc) > 1) allClippedHoles.push(hc);
   }
-  return mergeCutHolesIntoOuter(outer, clippedHoles, nx, ny, c);
+
+  const results = [];
+  for (const outer of outerPieces) {
+    const myHoles = [];
+    for (const h of allClippedHoles) {
+      const ctr = polygonCentroid(h);
+      if (pointInPolygon(ctr, outer)) myHoles.push(h);
+    }
+    results.push(mergeCutHolesIntoOuter(outer, myHoles, nx, ny, c));
+  }
+  return results;
 }
 
 function halfPlaneFromCut(cut) {
@@ -182,33 +246,79 @@ function chordSameSideOfLine(cut, otherCut, outer) {
 }
 
 function applyCutsToShape(shape, cuts) {
-  let pieces = [shape];
+  let pieces = [{ shapes: [shape] }];
   for (const cut of cuts) {
     const { nx, ny, c } = halfPlaneFromCut(cut);
     const next = [];
-    for (const p of pieces) {
-      const pos = clipShapeHalfPlane(p, nx, ny, c);
-      const neg = clipShapeHalfPlane(p, -nx, -ny, -c);
-      if (shapeArea(pos) > 1) next.push(pos);
-      if (shapeArea(neg) > 1) next.push(neg);
+    for (const piece of pieces) {
+      const posShapes = [];
+      const negShapes = [];
+      for (const s of piece.shapes) {
+        for (const sub of clipShapeHalfPlane(s, nx, ny, c)) {
+          if (shapeArea(sub) > 1) posShapes.push(sub);
+        }
+        for (const sub of clipShapeHalfPlane(s, -nx, -ny, -c)) {
+          if (shapeArea(sub) > 1) negShapes.push(sub);
+        }
+      }
+      if (posShapes.length) next.push({ shapes: posShapes });
+      if (negShapes.length) next.push({ shapes: negShapes });
     }
     pieces = next;
   }
   return pieces;
 }
 
-function makePiece(shape) {
-  return makeShapeGroup(shape, 'piece');
+function pieceArea(piece) {
+  let total = 0;
+  for (const s of piece.shapes) total += shapeArea(s);
+  return total;
+}
+
+function pieceCentroid(piece) {
+  let totalArea = 0, cx = 0, cy = 0;
+  for (const s of piece.shapes) {
+    const a = shapeArea(s);
+    if (a < 1e-6) continue;
+    const c = shapeCentroid(s);
+    totalArea += a;
+    cx += c.x * a;
+    cy += c.y * a;
+  }
+  return totalArea > 1e-6 ? { x: cx / totalArea, y: cy / totalArea } : { x: CX, y: CY };
+}
+
+function makePiece(piece) {
+  const g = document.createElementNS(SVG_NS, 'g');
+  g.setAttribute('class', 'piece');
+  for (const s of piece.shapes) {
+    const fill = document.createElementNS(SVG_NS, 'path');
+    fill.setAttribute('class', 'shape-fill');
+    fill.setAttribute('d', shapeToPath(s));
+    g.appendChild(fill);
+
+    const outline = document.createElementNS(SVG_NS, 'path');
+    outline.setAttribute('class', 'shape-outline');
+    let d = pointsToPath(s.outer);
+    if (s.holes && s.holes.length) {
+      for (const h of s.holes) if (h.length) d += ' ' + pointsToPath(h);
+    }
+    outline.setAttribute('d', d);
+    g.appendChild(outline);
+  }
+  return g;
 }
 
 function pieceTouchesCutLine(piece, cut) {
   const { nx, ny, c } = halfPlaneFromCut(cut);
   const EPS = 0.5;
-  const outer = piece.outer;
-  for (let i = 0, n = outer.length; i < n; i++) {
-    const a = outer[i], b = outer[(i + 1) % n];
-    if (Math.abs(nx * a.x + ny * a.y + c) < EPS &&
-        Math.abs(nx * b.x + ny * b.y + c) < EPS) return true;
+  for (const s of piece.shapes) {
+    const outer = s.outer;
+    for (let i = 0, n = outer.length; i < n; i++) {
+      const a = outer[i], b = outer[(i + 1) % n];
+      if (Math.abs(nx * a.x + ny * a.y + c) < EPS &&
+          Math.abs(nx * b.x + ny * b.y + c) < EPS) return true;
+    }
   }
   return false;
 }
@@ -428,7 +538,7 @@ function showCutVerdict(mainText, subText) {
 function evaluateCut() {
   const v = cutVariation();
   const pieces = applyCutsToShape(state.shape, cutState.cuts);
-  const areas = pieces.map(shapeArea);
+  const areas = pieces.map(pieceArea);
   const total = areas.reduce((s, x) => s + x, 0);
   if (total < 1) return null;
   const pcts = areas.map(a => (a / total) * 100);
@@ -540,11 +650,11 @@ function finalizeCut(opts) {
   const offset = 22;
   const middleIdx = v === 'tri' ? findTriMiddleIndex(res.pieces, cutState.cuts) : -1;
   const animCenter = middleIdx >= 0
-    ? polygonCentroid(res.pieces[middleIdx].outer)
+    ? pieceCentroid(res.pieces[middleIdx])
     : { x: CX, y: CY };
   const pieceOffsets = res.pieces.map((p, i) => {
     if (i === middleIdx) return { tx: 0, ty: 0, nx: 0, ny: 0 };
-    const cen = polygonCentroid(p.outer);
+    const cen = pieceCentroid(p);
     const dx = cen.x - animCenter.x, dy = cen.y - animCenter.y;
     const dl = Math.hypot(dx, dy) || 1;
     return { tx: (dx / dl) * offset, ty: (dy / dl) * offset, nx: dx / dl, ny: dy / dl };
@@ -562,7 +672,7 @@ function finalizeCut(opts) {
 
   setTimeout(() => {
     res.pieces.forEach((p, i) => {
-      const cen = polygonCentroid(p.outer);
+      const cen = pieceCentroid(p);
       const { nx, ny } = pieceOffsets[i];
       const labelOffset = i === middleIdx ? 0 : offset;
       addCutLabel(cen, nx, ny, +1, labelOffset, res.pcts[i]);

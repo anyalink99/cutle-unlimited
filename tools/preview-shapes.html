@@ -129,14 +129,7 @@
   const PER_MODE = 10;
 
   function genForMode(mode) {
-    if (mode === 'inscribe') {
-      for (let i = 0; i < 40; i++) {
-        const s = generateShape();
-        if (!s.holes || s.holes.length === 0) return s;
-      }
-      const s = generateShape();
-      return { outer: s.outer, holes: [] };
-    }
+    if (mode === 'inscribe') return generateShape({ noHoles: true, noSymmetry: true });
     if (mode === 'balance') return generateBalanceShape();
     return generateShape();
   }
