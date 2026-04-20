@@ -24,10 +24,7 @@ function cutRequiredCount() {
 
 registerModeAPI('cut', {
   pickShape() {
-    if (Math.random() < 0.15) {
-      const finalized = finalizeWithHoles(generateBalanceShape());
-      if (finalized) return finalized;
-    }
+    if (Math.random() < 0.15) return generateBalanceShape();
     return generateShape();
   },
 });

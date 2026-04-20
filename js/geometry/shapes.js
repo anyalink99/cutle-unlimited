@@ -1,71 +1,54 @@
+function _sampleGenericHoleCount() {
+  const r = Math.random();
+  if (r < 0.55) return 0;
+  if (r < 0.80) return 1;
+  if (r < 0.93) return 2;
+  return 3;
+}
+
+function _fallbackCircle() {
+  const pts = [];
+  const R = 100;
+  const N = 48;
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * TAU;
+    pts.push({ x: CX + Math.cos(a) * R, y: CY + Math.sin(a) * R });
+  }
+  return { outer: pts, holes: [] };
+}
+
 function generateShape(opts) {
   const noHoles = !!(opts && opts.noHoles);
   const noSymmetry = !!(opts && opts.noSymmetry);
-  for (let attempt = 0; attempt < 30; attempt++) {
-    let built = generateOuter();
-    if (noSymmetry) {
-      let guard = 0;
-      while (built.symmetric && guard < 20) { built = generateOuter(); guard++; }
-      if (built.symmetric) continue;
-    }
-    let shape = { outer: built.pts, holes: [] };
-    shape = centerShapeObject(shape);
-    const normalized = normalizeShapeArea(shape);
+  let start = null, built = null;
+  for (let tries = 0; tries < 15 && !start; tries++) {
+    const candidate = generateOuter();
+    if (noSymmetry && candidate.symmetric) continue;
+    const normalized = normalizeShapeArea(centerShapeObject({ outer: candidate.pts, holes: [] }));
     if (!normalized) continue;
-
-    if (noHoles) return normalized;
-
-    if (built.symmetric) {
-      const breaking = tryMakeSymmetricBreakingHoles(normalized.outer);
-      if (breaking) {
-        const holes = breaking.holes.slice();
-        if (Math.random() < 0.4) {
-          const extra = 1 + Math.floor(Math.random() * 3);
-          for (let i = 0; i < extra; i++) {
-            const small = tryMakeSmallHoleAvoiding(breaking.outer, holes);
-            if (!small) break;
-            holes.push(small);
-          }
-        }
-        const withHoles = { outer: breaking.outer, holes };
-        const renormalized = normalizeShapeArea(withHoles);
-        if (renormalized) return renormalized;
-      }
-      const cavity = tryMakeCavity(normalized.outer);
-      if (cavity) {
-        const withHole = { outer: normalized.outer, holes: [cavity] };
-        const renormalized = normalizeShapeArea(withHole);
-        if (renormalized) return renormalized;
-      }
-      continue;
-    }
-
-    let cavityChance = 0.15;
-    const needsExtra = built.starMode && !built.hasBiteBump;
-    if (needsExtra) cavityChance = 0.6;
-
-    const clusterRoll = Math.random();
-    if (!needsExtra && clusterRoll < 0.08) {
-      const cluster = tryMakeClusterHoles(normalized.outer);
-      if (cluster) {
-        const withHoles = { outer: normalized.outer, holes: cluster };
-        const renormalized = normalizeShapeArea(withHoles);
-        if (renormalized) return renormalized;
-      }
-    }
-
-    if (Math.random() < cavityChance) {
-      const cavity = tryMakeCavity(normalized.outer);
-      if (cavity) {
-        const withHole = { outer: normalized.outer, holes: [cavity] };
-        const renormalized = normalizeShapeArea(withHole);
-        if (renormalized) return renormalized;
-      }
-      if (needsExtra) continue;
-    } else if (needsExtra) {
-      continue;
-    }
-
-    return normalized;
+    built = candidate;
+    start = normalized;
   }
+  if (!start) return _fallbackCircle();
+  if (noHoles) return start;
+
+  // K-fold (symmetric) outers need asymmetric carving so the puzzle isn't
+  // trivially solvable by the shape's symmetry axis. Use balance-style bites
+  // at 10-30% area.
+  if (built.symmetric) {
+    const outerArea = polygonArea(start.outer);
+    const targetRatio = 0.10 + Math.random() * 0.20;
+    const count = 1 + Math.floor(Math.random() * 3);
+    const result = integrateBitesAndHoles(start.outer, count, outerArea * targetRatio);
+    if (result.outer !== start.outer || result.holes.length) {
+      return { outer: result.outer, holes: result.holes };
+    }
+  }
+
+  const count = _sampleGenericHoleCount();
+  if (count === 0) return start;
+  const holes = makeHolesSimple(start.outer, count, { minDist: 10, maxR: 30 });
+  if (!holes.length) return start;
+  const withHoles = { outer: start.outer, holes };
+  return normalizeShapeArea(withHoles) || start;
 }

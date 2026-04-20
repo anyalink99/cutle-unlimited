@@ -21,11 +21,8 @@ function inscribeVariation() {
 registerModeAPI('inscribe', {
   pickShape() {
     if (Math.random() < 0.25) {
-      const balance = generateInscribeBalanceShape();
-      if (balance) {
-        const finalized = finalizeWithHoles(balance);
-        if (finalized) return finalized;
-      }
+      const bal = generateInscribeBalanceShape();
+      if (bal) return bal;
     }
     return generateShape({ noHoles: true, noSymmetry: true });
   },

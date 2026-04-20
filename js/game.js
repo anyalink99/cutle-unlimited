@@ -44,11 +44,6 @@ function updateActionButton() {
   if (shareBtn) shareBtn.hidden = !state.locked;
 }
 
-function finalizeWithHoles(shape) {
-  const centered = centerShapeObject(shape);
-  return normalizeShapeArea(centered);
-}
-
 // Single-shot: on failure drop straight to the plain generator; no retries.
 function generateShapeForMode() {
   const api = MODE_REGISTRY[state.mode] && MODE_REGISTRY[state.mode].api;
@@ -60,55 +55,61 @@ function resetAllModes() {
   for (const m of MODE_LIST) modeRunner[m].reset();
 }
 
-let precomputed = null;
-let precomputeId = null;
+// Shape precompute runs in a Web Worker and fills a per-mode queue, so "New Shape"
+// reads a ready result instead of blocking the main thread. Queues are keyed by mode
+// (not variation) because pickShape logic is variation-agnostic — switching variation
+// within a mode reuses prebuilt shapes.
+const SHAPE_QUEUE_TARGET = 3;
+const shapeQueue = {};
+const shapePendingByMode = {};
+const shapePendingReq = {};
+let shapeReqIdCounter = 0;
 
-function cancelPrecompute() {
-  if (precomputeId != null && typeof cancelIdleCallback === 'function') {
-    cancelIdleCallback(precomputeId);
-  }
-  precomputeId = null;
+function shapeQueueFor(mode) {
+  return shapeQueue[mode] || (shapeQueue[mode] = []);
 }
 
-function schedulePrecompute() {
-  cancelPrecompute();
-  precomputed = null;
+function requestShapeFill() {
   if (state.daily) return;
-  if (typeof requestIdleCallback !== 'function') return;
+  const w = ensureWorker('shape');
+  if (!w) return;
   const mode = state.mode;
-  const variation = currentVariation();
-  precomputeId = requestIdleCallback(() => {
-    precomputeId = null;
-    if (state.mode !== mode || currentVariation() !== variation || state.daily) return;
-    const hash = generateHash();
-    let shape;
-    try { shape = withSeed(seedFromString(hash), generateShapeForMode); }
-    catch (e) { return; }
-    if (state.mode !== mode || currentVariation() !== variation || state.daily) return;
-    precomputed = { mode, variation, hash, shape };
-  }, { timeout: 1500 });
+  const q = shapeQueueFor(mode);
+  const pending = shapePendingByMode[mode] || 0;
+  const slots = SHAPE_QUEUE_TARGET - q.length - pending;
+  if (slots <= 0) return;
+  shapePendingByMode[mode] = pending + slots;
+  for (let i = 0; i < slots; i++) {
+    const reqId = ++shapeReqIdCounter;
+    shapePendingReq[reqId] = mode;
+    w.postMessage({ type: 'gen', reqId, hash: generateHash(), mode });
+  }
 }
 
-function takePrecomputed() {
-  if (!precomputed) return null;
-  if (precomputed.mode !== state.mode || precomputed.variation !== currentVariation()) {
-    precomputed = null;
-    return null;
-  }
-  const p = precomputed;
-  precomputed = null;
-  return p;
+function takeFromShapeQueue() {
+  const q = shapeQueue[state.mode];
+  return q && q.length ? q.shift() : null;
 }
+
+setWorkerHandler('shape', (e) => {
+  const d = e.data;
+  if (!d || d.type !== 'gen') return;
+  const mode = shapePendingReq[d.reqId];
+  if (!mode) return;
+  delete shapePendingReq[d.reqId];
+  shapePendingByMode[mode] = Math.max(0, (shapePendingByMode[mode] || 1) - 1);
+  if (!d.error && d.shape) {
+    shapeQueueFor(mode).push({ hash: d.hash, shape: d.shape });
+  }
+  requestShapeFill();
+});
 
 function newShape(hash, nav = 'push') {
-  cancelPrecompute();
   let h = hash;
   let cachedShape = null;
   if (!h && !state.daily) {
-    const p = takePrecomputed();
+    const p = takeFromShapeQueue();
     if (p) { h = p.hash; cachedShape = p.shape; }
-  } else {
-    precomputed = null;
   }
   if (!h) {
     h = state.daily
@@ -135,7 +136,7 @@ function newShape(hash, nav = 'push') {
   else if (nav === 'push') pushRoute(state.mode, currentVariation(), urlHash, state.daily);
 
   trackWithContext('game_start', { hash: state.hash || null });
-  schedulePrecompute();
+  requestShapeFill();
 }
 
 function replayDailyLock(lock) {

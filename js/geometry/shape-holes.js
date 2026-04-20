@@ -1,11 +1,3 @@
-function cavityFitsInside(pts, outer, margin) {
-  for (const p of pts) {
-    if (!pointInPolygon(p, outer)) return false;
-    if (distPointToPolygon(p, outer) < margin) return false;
-  }
-  return true;
-}
-
 function makeCircleCavity(cx, cy, r) {
   const N = Math.max(32, Math.min(72, Math.round(r * 1.4)));
   const angOff = rand(0, TAU);
@@ -44,231 +36,317 @@ function makeLensCavity(cx, cy, len, ang, bulge) {
   return pts;
 }
 
-function tryMakeCavity(outer) {
+function pickInteriorPoints(outer, targetCount, minInteriorDist) {
   const { minX, maxX, minY, maxY } = getBounds(outer);
-  for (let tries = 0; tries < 50; tries++) {
-    const cx = rand(minX, maxX);
-    const cy = rand(minY, maxY);
-    if (!pointInPolygon({ x: cx, y: cy }, outer)) continue;
-    const interiorDist = distPointToPolygon({ x: cx, y: cy }, outer);
-    if (interiorDist < 20) continue;
-    const margin = 9;
-    const maxR = Math.min(interiorDist - margin, 30);
-    if (maxR < 9) continue;
-    const typeRoll = Math.random();
-    let type;
-    if (typeRoll < 0.5) type = 'circle';
-    else if (typeRoll < 0.8) type = 'lens';
-    else type = 'slit';
-    let pts;
-    if (type === 'circle') {
-      const r = rand(9, maxR);
-      pts = makeCircleCavity(cx, cy, r);
-    } else if (type === 'lens') {
-      const ang = rand(0, TAU);
-      const len = rand(22, Math.min(64, (interiorDist - margin) * 2 * 0.85));
-      const bulge = len * rand(0.22, 0.42);
-      if (bulge > maxR) continue;
-      pts = makeLensCavity(cx, cy, len, ang, bulge);
-    } else {
-      const ang = rand(0, TAU);
-      const maxLen = (interiorDist - margin) * 2 * 0.9;
-      if (maxLen < 40) continue;
-      const len = rand(40, Math.min(130, maxLen));
-      const bulge = Math.min(maxR * 0.7, len * rand(0.06, 0.14));
-      if (bulge < 3) continue;
-      pts = makeLensCavity(cx, cy, len, ang, bulge);
+  const w = maxX - minX, h = maxY - minY;
+  if (w < 40 || h < 40) return [];
+  const cells = Math.max(4, Math.min(7, Math.ceil(Math.sqrt(targetCount * 3))));
+  const cellW = w / cells, cellH = h / cells;
+  const candidates = [];
+  for (let i = 0; i < cells; i++) {
+    for (let j = 0; j < cells; j++) {
+      const cx = minX + (i + 0.5) * cellW + rand(-0.35, 0.35) * cellW;
+      const cy = minY + (j + 0.5) * cellH + rand(-0.35, 0.35) * cellH;
+      const pt = { x: cx, y: cy };
+      if (!pointInPolygon(pt, outer)) continue;
+      const d = distPointToPolygon(pt, outer);
+      if (d < minInteriorDist) continue;
+      candidates.push({ pt, d });
     }
-    if (cavityFitsInside(pts, outer, margin)) return pts;
   }
-  return null;
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = candidates[i]; candidates[i] = candidates[j]; candidates[j] = t;
+  }
+  const picked = [];
+  for (const c of candidates) {
+    if (picked.length >= targetCount) break;
+    let ok = true;
+    for (const p of picked) {
+      const need = (c.d + p.d) * 0.85;
+      if (Math.hypot(c.pt.x - p.pt.x, c.pt.y - p.pt.y) < need) { ok = false; break; }
+    }
+    if (ok) picked.push(c);
+  }
+  return picked;
 }
 
-function tryMakeSmallHoleAvoiding(outer, existing) {
-  const { minX, maxX, minY, maxY } = getBounds(outer);
-  const margin = 7;
-  for (let tries = 0; tries < 80; tries++) {
-    const cx = rand(minX, maxX);
-    const cy = rand(minY, maxY);
-    const center = { x: cx, y: cy };
-    if (!pointInPolygon(center, outer)) continue;
-    let blocked = false;
-    for (const h of existing) {
-      if (pointInPolygon(center, h)) { blocked = true; break; }
+function shapeHoleAt(cx, cy, interiorDist, maxR) {
+  const baseR = Math.max(6, Math.min(maxR, interiorDist - 5));
+  const roll = Math.random();
+  if (roll < 0.55) {
+    return makeCircleCavity(cx, cy, baseR * rand(0.6, 1.0));
+  }
+  const len = Math.min(baseR * 2.4, (interiorDist - 5) * 1.4);
+  if (len < 20) return makeCircleCavity(cx, cy, baseR * rand(0.6, 0.9));
+  const ang = rand(0, TAU);
+  const thin = roll >= 0.85;
+  const bulge = thin
+    ? Math.min(baseR * 0.5, len * rand(0.06, 0.14))
+    : Math.min(baseR * 0.9, len * rand(0.22, 0.40));
+  if (bulge < 3) return makeCircleCavity(cx, cy, baseR * rand(0.6, 0.8));
+  return makeLensCavity(cx, cy, len, ang, bulge);
+}
+
+function makeHolesSimple(outer, desired, opts) {
+  if (desired <= 0) return [];
+  const minDist = (opts && opts.minDist) || 10;
+  const maxR = (opts && opts.maxR) || 28;
+  const points = pickInteriorPoints(outer, desired, minDist);
+  const out = [];
+  for (const p of points) out.push(shapeHoleAt(p.pt.x, p.pt.y, p.d, maxR));
+  return out;
+}
+
+// Binary-search the circle radius that makes clip(outer ∩ circle) ≈ targetArea.
+// Center is placed just past the outer's farthest point in direction `angle`,
+// so the circle straddles the boundary. Converges in ~10 iterations for any
+// achievable target (~5%..95% of outer area).
+function carveBiteInDirection(outer, angle, targetArea) {
+  const centroid = polygonCentroid(outer);
+  const dx = Math.cos(angle), dy = Math.sin(angle);
+
+  let tExit = 0;
+  for (const p of outer) {
+    const t = (p.x - centroid.x) * dx + (p.y - centroid.y) * dy;
+    if (t > tExit) tExit = t;
+  }
+
+  const baseR = Math.sqrt(targetArea / Math.PI);
+  const offset = tExit + baseR * 0.25;
+  const cx = centroid.x + dx * offset;
+  const cy = centroid.y + dy * offset;
+
+  let rLo = 4;
+  let rHi = Math.max(400, baseR * 2.5, tExit * 2.5);
+  let best = null, bestAbsDiff = Infinity;
+
+  for (let iter = 0; iter < 12; iter++) {
+    const r = (rLo + rHi) / 2;
+    const raw = makeCircleCavity(cx, cy, r);
+    const clipped = intersectPolygonWithConvex(outer, raw);
+    const area = (clipped && clipped.length >= 3) ? polygonArea(clipped) : 0;
+    const absDiff = Math.abs(area - targetArea);
+    if (absDiff < bestAbsDiff) {
+      bestAbsDiff = absDiff;
+      best = { clipped, area };
     }
-    if (blocked) continue;
-    let minDist = distPointToPolygon(center, outer);
-    for (const h of existing) {
-      minDist = Math.min(minDist, distPointToPolygon(center, h));
-    }
-    if (minDist < 12) continue;
-    const maxR = Math.min(minDist - margin, 14);
-    if (maxR < 6) continue;
-    const r = rand(6, maxR);
-    const pts = makeCircleCavity(cx, cy, r);
-    if (!cavityFitsInside(pts, outer, margin)) continue;
+    if (area < targetArea) rLo = r;
+    else rHi = r;
+  }
+  return best;
+}
+
+function placeInteriorHole(outer, existing, targetArea) {
+  const points = pickInteriorPoints(outer, 6, 8);
+  const r = Math.sqrt(targetArea / Math.PI);
+  for (const p of points) {
+    const useR = Math.min(r, p.d - 5);
+    if (useR < 6) continue;
+    const hole = makeCircleCavity(p.pt.x, p.pt.y, useR);
     let overlaps = false;
     for (const h of existing) {
-      for (const p of pts) {
-        if (pointInPolygon(p, h)) { overlaps = true; break; }
-      }
-      if (overlaps) break;
+      if (polygonsOverlap(hole, h)) { overlaps = true; break; }
     }
     if (overlaps) continue;
-    return pts;
+    return hole;
   }
   return null;
 }
 
-function tryMakeClusterHoles(outer) {
-  const count = 3 + Math.floor(Math.random() * 4);
-  const holes = [];
-  for (let i = 0; i < count; i++) {
-    const hole = tryMakeSmallHoleAvoiding(outer, holes);
-    if (!hole) break;
-    holes.push(hole);
+// Single-run merge for a bite chunk: tries both walk directions and picks the
+// one whose area matches (outer_area - bite_area). The generic
+// mergeBoundaryHoleIntoOuter uses a length-based heuristic that fails for
+// bites >50% of outer (the "uneaten" side becomes the shorter arc).
+function mergeBiteIntoOuter(outer, biteClipped, biteArea) {
+  const eps = 1.5;
+  const H = biteClipped.length;
+  if (H < 3) return null;
+
+  const locs = biteClipped.map(p => locateOnPolygonBoundary(p, outer, eps));
+  const onB = locs.map(l => l !== null);
+  if (!onB.some(b => b) || onB.every(b => b)) return null;
+
+  // Find the first (boundary → interior) transition; read one contiguous run.
+  let runStart = -1, runEnd = -1;
+  for (let i = 0; i < H; i++) {
+    if (onB[i] && !onB[(i + 1) % H]) {
+      runStart = (i + 1) % H;
+      let k = runStart;
+      while (!onB[(k + 1) % H]) {
+        k = (k + 1) % H;
+        if (k === runStart) break;
+      }
+      runEnd = k;
+      break;
+    }
   }
-  return holes.length >= 3 ? holes : null;
+  if (runStart < 0) return null;
+
+  // Reject multi-run shapes — bite should produce exactly one run of interior vertices.
+  let after = (runEnd + 1) % H;
+  while (after !== runStart) {
+    if (!onB[after]) return null;
+    after = (after + 1) % H;
+  }
+
+  const boundaryBefore = biteClipped[(runStart - 1 + H) % H];
+  const boundaryAfter = biteClipped[(runEnd + 1) % H];
+  const interiorCurve = [boundaryBefore];
+  let k = runStart;
+  while (true) {
+    interiorCurve.push(biteClipped[k]);
+    if (k === runEnd) break;
+    k = (k + 1) % H;
+  }
+  interiorCurve.push(boundaryAfter);
+
+  const locStart = locateOnPolygonBoundary(boundaryBefore, outer, eps * 2);
+  const locEnd = locateOnPolygonBoundary(boundaryAfter, outer, eps * 2);
+  if (!locStart || !locEnd) return null;
+
+  const trySplice = (walkDir) => {
+    const outerPath = walkPolygonBetween(outer, locStart, locEnd, walkDir);
+    if (!outerPath.length) return null;
+    const merged = [locStart.point];
+    for (const p of outerPath) merged.push(p);
+    merged.push(locEnd.point);
+    for (let i = interiorCurve.length - 2; i >= 1; i--) merged.push(interiorCurve[i]);
+    const dedup = _dedupRing(merged);
+    return dedup.length >= 3 ? dedup : null;
+  };
+
+  const s1 = trySplice(1);
+  const s2 = trySplice(-1);
+  const s1Ok = s1 && isSimplePolygon(s1);
+  const s2Ok = s2 && isSimplePolygon(s2);
+  if (!s1Ok && !s2Ok) return null;
+  if (!s1Ok) return s2;
+  if (!s2Ok) return s1;
+
+  const expected = polygonArea(outer) - biteArea;
+  const d1 = Math.abs(polygonArea(s1) - expected);
+  const d2 = Math.abs(polygonArea(s2) - expected);
+  return d1 < d2 ? s1 : s2;
 }
 
-function tryMakeSymmetricBreakingHoles(outer) {
-  const count = 1 + Math.floor(Math.random() * 3);
-  const targetRatio = 0.10 + Math.random() * 0.20;
+function integrateBitesAndHoles(outer, count, targetArea, opts) {
   const outerArea = polygonArea(outer);
-  const targetHoleArea = outerArea * targetRatio;
-  const tol = outerArea * 0.05;
-  const lo = Math.max(outerArea * 0.08, targetHoleArea - tol);
-  const hi = Math.min(outerArea * 0.32, targetHoleArea + tol);
-  return tryPlaceHolesInOuter(outer, count, targetHoleArea, lo, hi, 15);
+  const biteBiasBase = (opts && opts.biteBias != null) ? opts.biteBias : 0.75;
+  const ratio = targetArea / outerArea;
+  const biteBias = Math.min(1.0, biteBiasBase + ratio * 0.3);
+
+  // Heavier angular jitter — perfect n-fold spacing reads as a shuriken.
+  const baseAngle = rand(0, TAU);
+  const jitterFrac = count >= 3 ? 0.55 : 0.25;
+  const slots = [];
+  for (let i = 0; i < count; i++) {
+    const frac = (i + rand(-jitterFrac, jitterFrac)) / count;
+    slots.push(baseAngle + frac * TAU);
+  }
+
+  // Classify each slot upfront so bites can run first: if a hole were placed before
+  // a nearby bite, the bite's merge could strip the outer region around the hole,
+  // leaving an "orphan" polygon that evenodd-fill renders as a ghost outside the shape.
+  const biteSlots = [];
+  const holeSlots = [];
+  for (const s of slots) {
+    if (Math.random() < biteBias) biteSlots.push(s);
+    else holeSlots.push(s);
+  }
+  for (let i = biteSlots.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    const t = biteSlots[i]; biteSlots[i] = biteSlots[j]; biteSlots[j] = t;
+  }
+
+  const perSlot = targetArea / count;
+  let currentOuter = outer;
+  let achieved = 0;
+
+  // Phase 1: bites carve into the running outer.
+  for (const angle of biteSlots) {
+    const bite = carveBiteInDirection(currentOuter, angle, perSlot);
+    if (!bite || !bite.clipped || bite.clipped.length < 3) continue;
+    if (bite.area < perSlot * 0.25) continue;
+    const merged = mergeBiteIntoOuter(currentOuter, bite.clipped, bite.area);
+    if (merged && merged !== currentOuter) {
+      currentOuter = merged;
+      achieved += bite.area;
+    }
+  }
+
+  // Phase 2: interior holes land in the final outer — guaranteed inside it.
+  const interiorHoles = [];
+  for (let i = 0; i < holeSlots.length; i++) {
+    const hole = placeInteriorHole(currentOuter, interiorHoles, perSlot);
+    if (hole) {
+      interiorHoles.push(hole);
+      achieved += polygonArea(hole);
+    }
+  }
+
+  return { outer: currentOuter, holes: interiorHoles, achieved };
 }
 
 function sampleBalanceHoleCount() {
-  const roll = Math.random() * 100;
-  if (roll < 20)   return 1;
-  if (roll < 40)   return 2;
-  if (roll < 60)   return 3;
-  if (roll < 70)   return 4;
-  if (roll < 77.5) return 5;
-  if (roll < 85)   return 6;
-  if (roll < 90)   return 7;
-  if (roll < 94)   return 8;
-  if (roll < 97)   return 9;
-  if (roll < 98.5) return 10;
-  if (roll < 99.5) return 11;
-  return 12;
-}
-
-function placeBalanceHole(outer, existing, targetArea, minX, maxX, minY, maxY) {
-  for (let tries = 0; tries < 120; tries++) {
-    const cx = rand(minX, maxX);
-    const cy = rand(minY, maxY);
-    const slack = rand(1.15, 1.9);
-    const unclippedArea = targetArea * slack;
-    const r = Math.sqrt(unclippedArea / Math.PI);
-    if (r < 8 || r > 220) continue;
-
-    let pts;
-    if (Math.random() < 0.7) {
-      pts = makeCircleCavity(cx, cy, r);
-    } else {
-      const len = r * 1.8;
-      const ang = rand(0, TAU);
-      const bulge = len * rand(0.22, 0.4);
-      pts = makeLensCavity(cx, cy, len, ang, bulge);
-    }
-
-    let hasOutside = false, hasInside = false;
-    for (const p of pts) {
-      if (pointInPolygon(p, outer)) hasInside = true;
-      else hasOutside = true;
-      if (hasOutside && hasInside) break;
-    }
-    if (!hasOutside || !hasInside) continue;
-
-    const clipped = intersectPolygonWithConvex(outer, pts);
-    if (!clipped || clipped.length < 3) continue;
-    const area = polygonArea(clipped);
-    if (area < 80) continue;
-
-    let overlaps = false;
-    for (const h of existing) {
-      if (polygonsOverlap(clipped, h)) { overlaps = true; break; }
-    }
-    if (overlaps) continue;
-
-    return clipped;
-  }
-  return null;
-}
-
-function tryBalanceShapeWithCount(targetHoleCount) {
-  const targetRatio = 0.30 + Math.random() * 0.60;
-
-  for (let outerAttempt = 0; outerAttempt < 12; outerAttempt++) {
-    const built = generateOuter();
-    const normalized = normalizeShapeArea(centerShapeObject({ outer: built.pts, holes: [] }));
-    if (!normalized) continue;
-
-    const outer = normalized.outer;
-    const outerArea = polygonArea(outer);
-    const targetHoleArea = outerArea * targetRatio;
-    const tol = outerArea * 0.10;
-    const lo = Math.max(outerArea * 0.28, targetHoleArea - tol);
-    const hi = Math.min(outerArea * 0.92, targetHoleArea + tol);
-
-    const result = tryPlaceHolesInOuter(outer, targetHoleCount, targetHoleArea, lo, hi, 15);
-    if (result) return result;
-  }
-  return null;
+  const r = Math.random() * 100;
+  if (r < 25) return 1;
+  if (r < 50) return 2;
+  if (r < 67) return 3;
+  if (r < 80) return 4;
+  if (r < 89) return 5;
+  if (r < 95) return 6;
+  if (r < 98) return 7;
+  return 8;
 }
 
 function generateBalanceShape() {
-  let count = sampleBalanceHoleCount();
-  for (let round = 0; round < 4; round++) {
-    const result = tryBalanceShapeWithCount(count);
-    if (result) return result;
-    if (count <= 1) break;
-    count = Math.max(1, Math.floor(count * 0.6));
+  let start = null;
+  for (let tries = 0; tries < 10 && !start; tries++) {
+    const built = generateOuter();
+    start = normalizeShapeArea(centerShapeObject({ outer: built.pts, holes: [] }));
   }
-  return generateShape();
-}
+  if (!start) return generateShape();
 
-function placeIndentAndMerge(outer, targetArea) {
-  const b = getBounds(outer);
-  const padX = (b.maxX - b.minX) * 0.3;
-  const padY = (b.maxY - b.minY) * 0.3;
-  const minX = b.minX - padX, maxX = b.maxX + padX;
-  const minY = b.minY - padY, maxY = b.maxY + padY;
-  for (let tries = 0; tries < 10; tries++) {
-    const placed = placeBalanceHole(outer, [], targetArea, minX, maxX, minY, maxY);
-    if (!placed) continue;
-    const { merged } = mergeBoundaryHoleIntoOuter(outer, placed, 1.2);
-    if (merged) return merged;
+  const outerArea = polygonArea(start.outer);
+  const targetRatio = 0.30 + Math.random() * 0.45;
+  const targetArea = outerArea * targetRatio;
+  const count = sampleBalanceHoleCount();
+  const tol = outerArea * 0.06;
+
+  let best = null, bestDiff = Infinity;
+  for (let tries = 0; tries < 3; tries++) {
+    const result = integrateBitesAndHoles(start.outer, count, targetArea);
+    const diff = Math.abs(result.achieved - targetArea);
+    if (diff < bestDiff) { bestDiff = diff; best = result; }
+    if (diff < tol) break;
   }
-  return null;
+  if (!best || (best.outer === start.outer && best.holes.length === 0)) return start;
+  return { outer: best.outer, holes: best.holes };
 }
 
 function generateInscribeBalanceShape() {
-  for (let attempt = 0; attempt < 6; attempt++) {
+  let start = null;
+  for (let tries = 0; tries < 10 && !start; tries++) {
     const built = generateOuter();
     if (built.symmetric) continue;
-    const start = normalizeShapeArea(centerShapeObject({ outer: built.pts, holes: [] }));
-    if (!start) continue;
-
-    let current = start.outer;
-    const count = 1 + Math.floor(Math.random() * 2);
-    const ratio = 0.10 + Math.random() * 0.15;
-    const perHole = polygonArea(current) * ratio / count;
-
-    let ok = true;
-    for (let i = 0; i < count; i++) {
-      const next = placeIndentAndMerge(current, perHole);
-      if (!next) { ok = false; break; }
-      current = next;
-    }
-    if (!ok) continue;
-    if (!isSimplePolygon(current)) continue;
-    return { outer: current, holes: [] };
+    start = normalizeShapeArea(centerShapeObject({ outer: built.pts, holes: [] }));
   }
-  return null;
+  if (!start) return null;
+
+  const outerArea = polygonArea(start.outer);
+  const targetRatio = 0.10 + Math.random() * 0.15;
+  const targetArea = outerArea * targetRatio;
+  const count = 1 + Math.floor(Math.random() * 2);
+
+  let best = null, bestDiff = Infinity;
+  for (let tries = 0; tries < 3; tries++) {
+    const result = integrateBitesAndHoles(start.outer, count, targetArea, { biteBias: 1.0 });
+    if (result.outer === start.outer) continue;
+    if (result.holes.length) continue;
+    const diff = Math.abs(result.achieved - targetArea);
+    if (diff < bestDiff) { bestDiff = diff; best = result; }
+  }
+  if (!best) return null;
+  return { outer: best.outer, holes: [] };
 }
