@@ -20,11 +20,7 @@ function seedFromString(str) {
 
 function generateHash() {
   const bytes = new Uint8Array(12);
-  if (typeof crypto !== 'undefined' && crypto.getRandomValues) {
-    crypto.getRandomValues(bytes);
-  } else {
-    for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
-  }
+  crypto.getRandomValues(bytes);
   let s = '';
   for (const b of bytes) s += b.toString(16).padStart(2, '0');
   return s;
@@ -36,9 +32,7 @@ function withSeed(seed, fn) {
   try { return fn(); } finally { Math.random = orig; }
 }
 
-// ---- Daily seed helpers ----
-
-// Reference day for Daily #N counter. 2026-04-20 (UTC) = Daily #1.
+// 2026-04-20 (UTC) = Daily #1.
 const DAILY_EPOCH_MS = Date.UTC(2026, 3, 20);
 
 function todayUtc(now) {
@@ -53,8 +47,6 @@ function dailyIndex(now) {
   return Math.floor((ms - DAILY_EPOCH_MS) / 86400000) + 1;
 }
 
-// Returns a 16-hex-char string that matches HASH_RE. Deterministic per
-// (date, mode, variation).
 function dailyHashFor(mode, variation, dateStr) {
   const key = (dateStr || todayUtc()) + ':' + mode + ':' + variation;
   const a = seedFromString(key).toString(16).padStart(8, '0');

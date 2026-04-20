@@ -1,11 +1,6 @@
-// Share-to-clipboard: renders the current #board SVG + score + URL footer into
-// a 1080x1080 PNG and writes it to the clipboard as a ClipboardItem.
-
 const SHARE_CANVAS_SIZE = 1080;
 
-// CSS properties that actually affect the visible rendering of the SVG board.
-// We copy each element's computed value onto the clone as an inline style so
-// the serialized SVG is self-contained (no external stylesheet dependency).
+// Inlined onto each cloned node so the serialized SVG has no external CSS dependency.
 const SHARE_SVG_STYLE_PROPS = [
   'display',
   'visibility',
@@ -40,9 +35,7 @@ function shareScoreText() {
 }
 
 function inlineSvgStyles(originalRoot, cloneRoot) {
-  // Walk original + clone in parallel. querySelectorAll('*') gives a flat,
-  // depth-first list in the same order for both trees since the clone is a
-  // structural copy.
+  // Relies on querySelectorAll returning identical order for original and structural clone.
   const origList = [originalRoot, ...originalRoot.querySelectorAll('*')];
   const cloneList = [cloneRoot, ...cloneRoot.querySelectorAll('*')];
   const toRemove = [];
@@ -74,15 +67,13 @@ function buildBoardSvgBlob() {
   if (!board) throw new Error('no board');
   const clone = board.cloneNode(true);
 
-  // Drop transient UI elements that only matter during interaction.
   const preview = clone.querySelector('#cut-preview');
   if (preview) preview.remove();
   clone.querySelectorAll('.sp-hover, .centroid-hover, .pole-hover').forEach(el => el.remove());
 
   inlineSvgStyles(board, clone);
 
-  // Ensure the SVG has xmlns (cloneNode on elements in an HTML doc doesn't
-  // always set it) and explicit dimensions so Image() can decode it.
+  // cloneNode on HTML-doc SVG elements doesn't always set xmlns; Image() needs explicit dims.
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
   clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
   const vb = (clone.getAttribute('viewBox') || '0 0 520 560').split(/\s+/).map(Number);
@@ -115,8 +106,7 @@ async function buildSharePng() {
   try {
     img = await loadImage(svgUrl);
   } finally {
-    // Safari needs the URL alive until decode completes, but by the time
-    // loadImage resolves, decode is done. Revoke on microtask-later to be safe.
+    // Safari needs the URL alive through decode; revoke after a microtask.
     setTimeout(() => URL.revokeObjectURL(svgUrl), 0);
   }
 
@@ -126,12 +116,10 @@ async function buildSharePng() {
   canvas.height = size;
   const ctx = canvas.getContext('2d');
 
-  // Background — match the game's inner background.
   const bg = '#2d2631';
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, size, size);
 
-  // Header — GEOMETRIC.GAMES brand, centered.
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
 
@@ -149,12 +137,10 @@ async function buildSharePng() {
   ctx.fillStyle = '#c084fc';
   ctx.fillText(brandRight, rightX, brandY);
 
-  // Subtitle — MODE · VARIATION
   ctx.font = '700 24px ui-monospace, SFMono-Regular, Menlo, Monaco, monospace';
   ctx.fillStyle = '#9ca3af';
   ctx.fillText(shareLabel(), size / 2, brandY + 54);
 
-  // Board image — preserve aspect ratio, center in the middle band.
   const boardTop = 200;
   const boardBottom = 820;
   const boardAvailH = boardBottom - boardTop;
@@ -166,7 +152,6 @@ async function buildSharePng() {
   const boardY = boardTop + (boardAvailH - boardH) / 2;
   ctx.drawImage(img, boardX, boardY, boardW, boardH);
 
-  // Score verdict + stats
   const { verdict, stats } = shareScoreText();
   if (verdict) {
     ctx.font = '900 44px ui-sans-serif, system-ui, sans-serif';
@@ -179,7 +164,6 @@ async function buildSharePng() {
     ctx.fillText(stats, size / 2, 946);
   }
 
-  // URL footer
   ctx.font = '600 22px ui-monospace, SFMono-Regular, Menlo, Monaco, monospace';
   ctx.fillStyle = '#9ca3af';
   const urlLine = 'geometric.games' + shareCanonicalPath();
@@ -223,7 +207,6 @@ async function copyShareToClipboard() {
     showToast('Copied image to clipboard');
   } catch (clipboardErr) {
     console.warn('clipboard failed, falling back:', clipboardErr);
-    // Fallback: open the PNG in a new tab. Works on file:// and older browsers.
     try {
       const url = URL.createObjectURL(png);
       const w = window.open(url, '_blank');

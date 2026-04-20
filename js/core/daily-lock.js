@@ -1,8 +1,5 @@
-// Daily lock: once the user Confirms their answer on today's daily for a
-// given mode+variation, we freeze the result. Re-entering that daily later
-// the same UTC day replays the locked board (shape + user placements +
-// verdict) instead of giving them a fresh attempt. A bounded per-variation
-// history of past daily outcomes feeds the "Daily wins" stats row.
+// Freezes today's daily per (mode, variation) after Confirm; same UTC day
+// replays the locked board. History feeds the "Daily wins" stats row.
 
 const DAILY_LOCK_PREFIX = 'geometric.games.daily-lock.';
 const DAILY_HISTORY_PREFIX = 'geometric.games.daily-history.';
@@ -30,9 +27,6 @@ function saveDailyLockRaw(mode, variation, lock) {
   } catch (e) {}
 }
 
-// Active lock for *today's* daily, or null if the stored lock is stale or
-// absent. Callers use this to decide whether newShape() should enter replay
-// mode and whether the main action button should show the countdown.
 function getTodayLock(mode, variation) {
   const lock = loadDailyLock(mode, variation);
   if (!lock) return null;
@@ -60,9 +54,6 @@ function recordDailyResult(mode, variation, snapshot, won) {
   const dateStr = todayUtc();
   saveDailyLockRaw(mode, variation, { day, dateStr, snapshot, won: !!won });
   const hist = loadDailyHistory(mode, variation);
-  // Defensive: if somehow a record for today already exists, replace it
-  // rather than creating a duplicate. Shouldn't normally happen because
-  // the lock prevents re-confirming, but avoids history drift if it ever does.
   if (hist.length && hist[hist.length - 1].day === day) {
     hist[hist.length - 1] = { day, dateStr, won: !!won };
   } else {

@@ -159,31 +159,19 @@ function inscribeReset() {
   dom.inscribeIdeal.innerHTML = '';
 }
 
-let inscribeWorker = null;
-
-function ensureInscribeWorker() {
-  if (inscribeWorker) return inscribeWorker;
-  try {
-    inscribeWorker = new Worker('js/workers/inscribe-worker.js');
-    inscribeWorker.onmessage = (e) => {
-      if (e.data.gen !== inscribeState.generation) return;
-      inscribeState.idealCorners = e.data.corners;
-      if (inscribeState.confirmed && e.data.corners && !inscribeState.idealDrawn) {
-        drawIdealInscribe(e.data.corners);
-        inscribeState.idealDrawn = true;
-      }
-    };
-    inscribeWorker.onerror = () => { inscribeWorker = null; };
-  } catch (e) {
-    inscribeWorker = null;
+setWorkerHandler('inscribe', (e) => {
+  if (e.data.gen !== inscribeState.generation) return;
+  inscribeState.idealCorners = e.data.corners;
+  if (inscribeState.confirmed && e.data.corners && !inscribeState.idealDrawn) {
+    drawIdealInscribe(e.data.corners);
+    inscribeState.idealDrawn = true;
   }
-  return inscribeWorker;
-}
+});
 
 function precomputeIdeal(outer) {
   inscribeState.idealCorners = null;
   const gen = ++inscribeState.generation;
-  const w = ensureInscribeWorker();
+  const w = ensureWorker('inscribe');
   if (w) w.postMessage({ outer, gen, N: inscribeN() });
 }
 
@@ -420,7 +408,7 @@ function showInscribeVerdict(res, N) {
   });
 }
 
-function findInscribedFallback(outer, N) {
+function computeInscribedSync(outer, N) {
   if (N === 4) return findInscribedSquare(outer, {
     N: 18, coarseIters: 22, topK: 40, refineIters: 260,
   });
@@ -450,7 +438,7 @@ function confirmInscribe(opts) {
   inscribeState.hover = null;
   dom.inscribeHover.innerHTML = '';
   const res = evaluateNgon(inscribeState.points, N);
-  const inscribed = inscribeState.idealCorners || findInscribedFallback(state.shape.outer, N);
+  const inscribed = inscribeState.idealCorners || computeInscribedSync(state.shape.outer, N);
   if (inscribed) {
     inscribeState.idealCorners = inscribed;
     drawIdealInscribe(inscribed);

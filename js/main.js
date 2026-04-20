@@ -16,27 +16,16 @@ const statsEls = {
   blDailyWins: document.getElementById('bl-daily-wins'),
 };
 
-// ---- Main action button (Confirm / New Shape / Daily countdown) ----
 document.getElementById('new-btn').addEventListener('click', () => {
   const action = dom.newBtn.dataset.action;
-  if (action === 'confirm') {
-    if (state.mode === 'inscribe') confirmInscribe();
-    else if (state.mode === 'balance') confirmBalance();
-    else if (state.mode === 'cut') finalizeCut();
-  } else if (action === 'locked') {
-    // Daily already played today — button shows a countdown and does nothing.
-  } else {
-    newShape();
-  }
+  if (action === 'confirm') modeRunner[state.mode].confirm();
+  else if (action !== 'locked') newShape();
 });
 
-// Refresh the countdown label while a daily lock is active. Cheap — just
-// rewrites button text — and only fires when something would actually change.
 setInterval(() => {
   if (isCurrentDailyLocked()) updateActionButton();
 }, 30000);
 
-// ---- Help + Stats modals ----
 document.getElementById('help-btn').addEventListener('click', () => openModal('help-modal'));
 document.getElementById('close-help').addEventListener('click', () => closeModal('help-modal'));
 document.getElementById('close-stats').addEventListener('click', () => closeModal('stats-modal'));
@@ -69,14 +58,9 @@ document.getElementById('reset-stats').addEventListener('click', () => {
 });
 document.getElementById('stats-btn').addEventListener('click', openStatsModal);
 
-// ---- Unified Puzzle modal (mode + variation + endless/daily) ----
-//
-// Flow: opening the modal initializes the tab to the current mode and marks
-// the current variation with a dot. Clicking a mode tab only switches which
-// variation list is visible; game state doesn't change until the user picks a
-// variation card (which commits mode + variation + current daily state in one
-// shot and closes the modal). The Endless/Daily pills are live — toggling
-// regenerates immediately without closing.
+// Opening the modal only previews — state changes only when the user picks a
+// variation card (which commits mode + variation together). The Endless/Daily
+// pills are live and regenerate immediately.
 let puzzleModalTab = null;
 
 function refreshPuzzleModal() {
@@ -88,8 +72,6 @@ function refreshPuzzleModal() {
   document.querySelectorAll('#puzzle-modal .var-group').forEach(g => {
     g.classList.toggle('active', g.dataset.mode === puzzleModalTab);
   });
-  // Active dot only on the card that matches the variation currently in play
-  // within the mode currently in play.
   document.querySelectorAll('#puzzle-modal .var-card').forEach(c => {
     const groupMode = c.closest('.var-group').dataset.mode;
     const isCurrentMode = groupMode === state.mode;
@@ -110,18 +92,12 @@ function openPuzzleModal() {
   puzzleModalTab = state.mode;
   refreshPuzzleModal();
   openModal('puzzle-modal');
-  // Suppress scrollbar for the first couple of frames only — the initial
-  // layout pass can briefly compute an overflow before flex settles, which
-  // flashes a scrollbar on tall viewports where one isn't needed at all.
-  // Two rAFs is ~32ms (imperceptible) and guarantees the first paint has
-  // committed. If scroll is actually needed, CSS overflow-y: auto shows
-  // it right after — no awkward delay.
+  // Hide scrollbar for the first two frames so flex settling can't flash one.
   const container = document.querySelector('#puzzle-modal .var-groups');
   if (container) {
     container.style.overflow = 'hidden';
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        // Don't stomp on tab-switch animation's own overflow handling.
         if (!container._heightAnim) container.style.overflow = '';
       });
     });
@@ -131,9 +107,6 @@ function openPuzzleModal() {
 document.getElementById('gamemode-btn').addEventListener('click', openPuzzleModal);
 document.getElementById('close-puzzle').addEventListener('click', () => closeModal('puzzle-modal'));
 
-// Switch the visible variation group with a smooth height animation. Uses
-// Web Animations API so there's no inline style residue and no interference
-// with CSS transitions on child opacity/backgrounds.
 function switchPuzzleTab(newMode) {
   if (puzzleModalTab === newMode) return;
   const container = document.querySelector('#puzzle-modal .var-groups');
@@ -144,7 +117,6 @@ function switchPuzzleTab(newMode) {
     return;
   }
 
-  // Cancel any prior in-flight animation so we don't stack.
   if (container._heightAnim) {
     container._heightAnim.cancel();
     container._heightAnim = null;
@@ -157,8 +129,7 @@ function switchPuzzleTab(newMode) {
   const endH = container.offsetHeight;
   if (startH === endH) return;
 
-  // Clip overflow during the animation so transient content > container
-  // mismatch doesn't show a scrollbar while the height is mid-morph.
+  // Clip overflow during the height morph so transient content doesn't flash a scrollbar.
   container.style.overflow = 'hidden';
   const anim = container.animate(
     [{ height: startH + 'px' }, { height: endH + 'px' }],
@@ -206,10 +177,6 @@ loadStats();
 
 const initialRoute = parseLocation();
 
-// Authoritative source for mode+variation is the HTML file that was served.
-// Each generated page exposes window.__INITIAL_MODE / __INITIAL_VARIATION.
-// parseLocation() is used as a fallback (e.g. if 404 redirected us here) and
-// always to pull the ?s= hash and ?daily=1 flag.
 let initialMode = window.__INITIAL_MODE || initialRoute.mode;
 if (!isValidMode(initialMode)) {
   try { initialMode = localStorage.getItem(MODE_KEY); } catch (e) {}
@@ -264,7 +231,6 @@ window.addEventListener('popstate', () => {
   state.daily = !!loc.daily;
   updateMeta(state.mode, currentVariation());
   if (dailyChanged || (loc.hash && loc.hash !== state.hash)) {
-    // Seed source changed or explicit different hash — regenerate.
     newShape(loc.daily ? undefined : loc.hash, 'skip');
   } else if (!loc.hash && !loc.daily) {
     newShape(undefined, 'replace');

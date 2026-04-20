@@ -117,15 +117,6 @@ const GAME_PAGES = [
   },
 ];
 
-// Keep legacy variable name for external references (if any).
-const PAGES = GAME_PAGES;
-
-// ---------------------------------------------------------------------------
-// Blog posts. Each article lives at /blog/<slug>/. Content is plain HTML —
-// the article template wraps it in article chrome (title, date, back link,
-// play-the-puzzle CTA). Authored in reverse chronological order (newest first).
-// ---------------------------------------------------------------------------
-
 const BLOG_POSTS = [
   {
     slug: 'inscribed-square-problem',
@@ -430,6 +421,7 @@ function renderPage(p) {
     window.__INITIAL_MODE = ${JSON.stringify(p.mode)};
     window.__INITIAL_VARIATION = ${JSON.stringify(p.variation)};
     window.__CANONICAL_PATH = ${JSON.stringify(p.canonicalPath)};
+    window.__ASSET_BASE = ${JSON.stringify(rel)};
   </script>`.trim();
 
   const html = `<!DOCTYPE html>
@@ -536,11 +528,15 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/core/modes.js"></script>
 <script src="${rel}js/core/router.js"></script>
 <script src="${rel}js/core/daily-lock.js"></script>
+<script src="${rel}js/core/mode-stats.js"></script>
+<script src="${rel}js/core/workers.js"></script>
 <script src="${rel}js/geometry/geometry.js"></script>
 <script src="${rel}js/geometry/inscribed-square.js"></script>
 <script src="${rel}js/geometry/shapes.js"></script>
 <script src="${rel}js/ui/modals.js"></script>
 <script src="${rel}js/ui/render.js"></script>
+<script src="${rel}js/modes/cut/geometry.js"></script>
+<script src="${rel}js/modes/cut/render.js"></script>
 <script src="${rel}js/modes/cut/cut.js"></script>
 <script src="${rel}js/modes/cut/input.js"></script>
 <script src="${rel}js/modes/cut/stats.js"></script>
@@ -553,6 +549,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/modes/balance/input.js"></script>
 <script src="${rel}js/modes/balance/stats.js"></script>
 <script src="${rel}js/stats.js"></script>
+<script src="${rel}js/mode-runner.js"></script>
 <script src="${rel}js/share.js"></script>
 <script src="${rel}js/game.js"></script>
 <script src="${rel}js/main.js"></script>
@@ -1038,7 +1035,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 // ---------------------------------------------------------------------------
 
 function buildPages() {
-  for (const p of PAGES) {
+  for (const p of GAME_PAGES) {
     writeFile(p.outPath, renderPage(p));
   }
 }
@@ -1051,7 +1048,7 @@ function buildBlog() {
 }
 
 function sitemapUrls() {
-  const gameUrls = PAGES.filter(p => !p.isAlias).map(p => ({
+  const gameUrls = GAME_PAGES.filter(p => !p.isAlias).map(p => ({
     loc: SITE + p.canonicalPath,
     priority: p.canonicalPath === '/' ? '1.0' : '0.9',
   }));
@@ -1081,7 +1078,7 @@ function buildPageMetaJs() {
   // Client-side lookup: given a mode+variation, return title/description/canonical
   // so pushState navigations can update <title> and meta tags on the fly.
   const map = {};
-  for (const p of PAGES) {
+  for (const p of GAME_PAGES) {
     const key = `${p.mode}:${p.variation}`;
     if (map[key]) continue; // first entry wins (index.html beats cut/half)
     map[key] = {

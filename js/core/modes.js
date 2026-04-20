@@ -1,9 +1,3 @@
-// Single-source registry for the three game modes and their variations.
-// Anything that needs per-mode metadata (variation list, default, storage
-// key, body-dataset attr, human label, share-image label) reads it here.
-// Adding a new mode or variation only requires touching this file plus the
-// mode-specific stats/input/render code.
-
 const MODE_LIST = ['cut', 'inscribe', 'balance'];
 
 const MODE_REGISTRY = {
