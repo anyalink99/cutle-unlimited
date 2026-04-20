@@ -15,6 +15,7 @@ const statsEls = {
 
 const MODES = ['cut', 'inscribe', 'balance'];
 
+// ---- Main action button (Confirm / New Shape) ----
 document.getElementById('new-btn').addEventListener('click', () => {
   const action = dom.newBtn.dataset.action;
   if (action === 'confirm') {
@@ -25,76 +26,12 @@ document.getElementById('new-btn').addEventListener('click', () => {
     newShape();
   }
 });
-document.getElementById('gamemode-btn').addEventListener('click', () => openModal('gamemode-modal'));
+
+// ---- Help + Stats modals ----
 document.getElementById('help-btn').addEventListener('click', () => openModal('help-modal'));
 document.getElementById('close-help').addEventListener('click', () => closeModal('help-modal'));
-document.getElementById('close-gamemode').addEventListener('click', () => closeModal('gamemode-modal'));
 document.getElementById('close-stats').addEventListener('click', () => closeModal('stats-modal'));
-document.getElementById('close-variations').addEventListener('click', () => closeModal('variations-modal'));
 
-const variationsBtn = document.getElementById('variations-btn');
-const cutVarPicker = document.getElementById('cut-var-picker');
-const inscribeVarPicker = document.getElementById('inscribe-var-picker');
-const variationsTitle = document.getElementById('variations-title');
-const variationsDesc = document.getElementById('variations-desc');
-
-function refreshVariationsBtn() {
-  variationsBtn.style.display = (state.mode === 'cut' || state.mode === 'inscribe' || state.mode === 'balance') ? '' : 'none';
-}
-variationsBtn.addEventListener('click', () => {
-  refreshVarCards();
-  closeModal('gamemode-modal');
-  openModal('variations-modal');
-});
-document.querySelectorAll('.var-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const v = card.dataset.var;
-    closeModal('variations-modal');
-    setCutVariation(v);
-  });
-});
-document.querySelectorAll('.inscribe-var-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const v = card.dataset.inscvar;
-    closeModal('variations-modal');
-    setInscribeVariation(v);
-  });
-});
-document.querySelectorAll('.balance-var-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const v = card.dataset.balancevar;
-    closeModal('variations-modal');
-    setBalanceVariation(v);
-  });
-});
-const balanceVarPicker = document.getElementById('balance-var-picker');
-function refreshVarCards() {
-  const isCut = state.mode === 'cut';
-  const isInscribe = state.mode === 'inscribe';
-  const isBalance = state.mode === 'balance';
-  cutVarPicker.style.display = isCut ? '' : 'none';
-  inscribeVarPicker.style.display = isInscribe ? '' : 'none';
-  balanceVarPicker.style.display = isBalance ? '' : 'none';
-  if (isCut) {
-    variationsTitle.textContent = 'CUT VARIATIONS';
-    variationsDesc.textContent = 'Same cut mechanics, new goals.';
-  } else if (isInscribe) {
-    variationsTitle.textContent = 'INSCRIBE VARIATIONS';
-    variationsDesc.textContent = 'Same placement mechanics, different inscribed shape.';
-  } else if (isBalance) {
-    variationsTitle.textContent = 'BALANCE VARIATIONS';
-    variationsDesc.textContent = 'Same shape, different way to find the balance.';
-  }
-  document.querySelectorAll('.var-card').forEach(c => {
-    c.classList.toggle('active', c.dataset.var === state.cutVariation);
-  });
-  document.querySelectorAll('.inscribe-var-card').forEach(c => {
-    c.classList.toggle('active', c.dataset.inscvar === state.inscribeVariation);
-  });
-  document.querySelectorAll('.balance-var-card').forEach(c => {
-    c.classList.toggle('active', c.dataset.balancevar === state.balanceVariation);
-  });
-}
 const statsCutSection = document.getElementById('stats-cut-section');
 const statsInscribeSection = document.getElementById('stats-inscribe-section');
 const statsBalanceSection = document.getElementById('stats-balance-section');
@@ -151,21 +88,115 @@ document.getElementById('reset-stats').addEventListener('click', () => {
 });
 document.getElementById('stats-btn').addEventListener('click', openStatsModal);
 
-document.querySelectorAll('.mode-card').forEach(card => {
-  card.addEventListener('click', () => {
-    const m = card.dataset.mode;
-    closeModal('gamemode-modal');
-    setMode(m);
+// ---- Unified Puzzle modal (mode + variation + endless/daily) ----
+//
+// Flow: opening the modal initializes the tab to the current mode and marks
+// the current variation with a dot. Clicking a mode tab only switches which
+// variation list is visible; game state doesn't change until the user picks a
+// variation card (which commits mode + variation + current daily state in one
+// shot and closes the modal). The Endless/Daily pills are live — toggling
+// regenerates immediately without closing.
+let puzzleModalTab = null;
+
+function refreshPuzzleModal() {
+  document.querySelectorAll('#puzzle-modal .mode-tab').forEach(t => {
+    const on = t.dataset.mode === puzzleModalTab;
+    t.classList.toggle('active', on);
+    t.setAttribute('aria-selected', String(on));
+  });
+  document.querySelectorAll('#puzzle-modal .var-group').forEach(g => {
+    g.classList.toggle('active', g.dataset.mode === puzzleModalTab);
+  });
+  // Active dot only on the card that matches the variation currently in play
+  // within the mode currently in play.
+  document.querySelectorAll('#puzzle-modal .var-card').forEach(c => {
+    const groupMode = c.closest('.var-group').dataset.mode;
+    const isCurrentMode = groupMode === state.mode;
+    const currentVar = currentVariation();
+    c.classList.toggle('active', isCurrentMode && c.dataset.var === currentVar);
+  });
+  document.querySelectorAll('#puzzle-modal .seed-pill').forEach(p => {
+    const isDaily = p.dataset.seed === 'daily';
+    const on = isDaily === !!state.daily;
+    p.classList.toggle('active', on);
+    p.setAttribute('aria-selected', String(on));
+  });
+  const sub = document.getElementById('daily-sub');
+  if (sub) sub.textContent = '#' + dailyIndex() + ' · everyone plays the same';
+}
+
+function openPuzzleModal() {
+  puzzleModalTab = state.mode;
+  refreshPuzzleModal();
+  openModal('puzzle-modal');
+}
+
+document.getElementById('gamemode-btn').addEventListener('click', openPuzzleModal);
+document.getElementById('close-puzzle').addEventListener('click', () => closeModal('puzzle-modal'));
+
+// Switch the visible variation group with a smooth height animation. Uses
+// Web Animations API so there's no inline style residue and no interference
+// with CSS transitions on child opacity/backgrounds.
+function switchPuzzleTab(newMode) {
+  if (puzzleModalTab === newMode) return;
+  const container = document.querySelector('#puzzle-modal .var-groups');
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!container || reduceMotion || typeof container.animate !== 'function') {
+    puzzleModalTab = newMode;
+    refreshPuzzleModal();
+    return;
+  }
+
+  // Cancel any prior in-flight animation so we don't stack.
+  if (container._heightAnim) {
+    container._heightAnim.cancel();
+    container._heightAnim = null;
+    container.style.overflow = '';
+  }
+
+  const startH = container.offsetHeight;
+  puzzleModalTab = newMode;
+  refreshPuzzleModal();
+  const endH = container.offsetHeight;
+  if (startH === endH) return;
+
+  // Clip overflow during the animation so transient content/container
+  // mismatch doesn't flash a scrollbar.
+  container.style.overflow = 'hidden';
+  const anim = container.animate(
+    [{ height: startH + 'px' }, { height: endH + 'px' }],
+    { duration: 280, easing: 'cubic-bezier(0.4, 0, 0.2, 1)' }
+  );
+  container._heightAnim = anim;
+  anim.finished.finally(() => {
+    if (container._heightAnim === anim) {
+      container.style.overflow = '';
+      container._heightAnim = null;
+    }
+  });
+}
+
+document.querySelectorAll('#puzzle-modal .mode-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    switchPuzzleTab(tab.dataset.mode);
   });
 });
 
-function refreshModeCards() {
-  document.querySelectorAll('.mode-card').forEach(c => {
-    c.classList.toggle('active', c.dataset.mode === state.mode);
+document.querySelectorAll('#puzzle-modal .var-card').forEach(card => {
+  card.addEventListener('click', () => {
+    const v = card.dataset.var;
+    const groupMode = card.closest('.var-group').dataset.mode;
+    closeModal('puzzle-modal');
+    applyPuzzleChoice(groupMode, v);
   });
-  refreshVariationsBtn();
-}
-document.getElementById('gamemode-btn').addEventListener('click', refreshModeCards);
+});
+
+document.querySelectorAll('#puzzle-modal .seed-pill').forEach(pill => {
+  pill.addEventListener('click', () => {
+    setDailyMode(pill.dataset.seed === 'daily');
+    refreshPuzzleModal();
+  });
+});
 
 bindModalDismissers();
 document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
@@ -181,7 +212,7 @@ const initialRoute = parseLocation();
 // Authoritative source for mode+variation is the HTML file that was served.
 // Each generated page exposes window.__INITIAL_MODE / __INITIAL_VARIATION.
 // parseLocation() is used as a fallback (e.g. if 404 redirected us here) and
-// always to pull the ?s= hash.
+// always to pull the ?s= hash and ?daily=1 flag.
 let initialMode = window.__INITIAL_MODE || initialRoute.mode;
 if (!initialMode || !MODES.includes(initialMode)) {
   try { initialMode = localStorage.getItem(MODE_KEY); } catch (e) {}
@@ -192,7 +223,6 @@ try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
 document.body.dataset.mode = state.mode;
 
 function pickInitialVariation(mode, urlVar, validList, storageKey, fallback) {
-  // URL/HTML explicit for current mode wins; localStorage for other modes.
   if (state.mode === mode && window.__INITIAL_VARIATION && validList.includes(window.__INITIAL_VARIATION)) {
     return window.__INITIAL_VARIATION;
   }
@@ -215,7 +245,8 @@ document.body.dataset.inscribeVariation = state.inscribeVariation;
 state.balanceVariation = pickInitialVariation('balance', initialRoute.variation, BALANCE_VARIATIONS, BALANCE_VARIATION_KEY, 'pole');
 document.body.dataset.balanceVariation = state.balanceVariation;
 
-refreshModeCards();
+state.daily = !!initialRoute.daily;
+
 newShape(initialRoute.hash || undefined, 'replace');
 
 window.addEventListener('popstate', () => {
@@ -225,7 +256,6 @@ window.addEventListener('popstate', () => {
     state.mode = targetMode;
     document.body.dataset.mode = state.mode;
     try { localStorage.setItem(MODE_KEY, state.mode); } catch (e) {}
-    refreshModeCards();
   }
   if (loc.variation) {
     if (state.mode === 'cut' && loc.variation !== state.cutVariation) {
@@ -239,13 +269,15 @@ window.addEventListener('popstate', () => {
       document.body.dataset.balanceVariation = loc.variation;
     }
   }
+  const dailyChanged = !!loc.daily !== !!state.daily;
+  state.daily = !!loc.daily;
   updateMeta(state.mode, currentVariation());
-  if (loc.hash && loc.hash !== state.hash) {
-    newShape(loc.hash, 'skip');
-  } else if (!loc.hash) {
+  if (dailyChanged || (loc.hash && loc.hash !== state.hash)) {
+    // Seed source changed or explicit different hash — regenerate.
+    newShape(loc.daily ? undefined : loc.hash, 'skip');
+  } else if (!loc.hash && !loc.daily) {
     newShape(undefined, 'replace');
   } else {
-    // Same hash, mode/variation may have changed — re-render without new seed.
     newShape(state.hash, 'skip');
   }
 });

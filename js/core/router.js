@@ -19,11 +19,15 @@ function parseLocation() {
     }
   }
 
-  let hash = null;
-  const s = sp.get('s');
-  if (s && HASH_RE.test(s)) hash = s;
+  const daily = sp.get('daily') === '1';
 
-  return { mode, variation, hash };
+  let hash = null;
+  if (!daily) {
+    const s = sp.get('s');
+    if (s && HASH_RE.test(s)) hash = s;
+  }
+
+  return { mode, variation, hash, daily };
 }
 
 function variationPath(mode, variation) {
@@ -36,9 +40,11 @@ function variationPath(mode, variation) {
   return '/';
 }
 
-function buildRouteUrl(mode, variation, hash) {
+function buildRouteUrl(mode, variation, hash, daily) {
   const p = variationPath(mode, variation);
-  return hash ? p + '?s=' + hash : p;
+  if (daily) return p + '?daily=1';
+  if (hash) return p + '?s=' + hash;
+  return p;
 }
 
 function setMetaAttr(selector, attr, value) {
@@ -64,21 +70,21 @@ function canPushState() {
   return window.location.protocol === 'http:' || window.location.protocol === 'https:';
 }
 
-function pushRoute(mode, variation, hash) {
+function pushRoute(mode, variation, hash, daily) {
   if (canPushState()) {
-    const url = buildRouteUrl(mode, variation, hash);
+    const url = buildRouteUrl(mode, variation, hash, daily);
     const current = window.location.pathname + window.location.search;
     if (url !== current) {
-      try { history.pushState({ mode, variation, hash }, '', url); } catch (e) {}
+      try { history.pushState({ mode, variation, hash, daily: !!daily }, '', url); } catch (e) {}
     }
   }
   updateMeta(mode, variation);
 }
 
-function replaceRoute(mode, variation, hash) {
+function replaceRoute(mode, variation, hash, daily) {
   if (canPushState()) {
-    const url = buildRouteUrl(mode, variation, hash);
-    try { history.replaceState({ mode, variation, hash }, '', url); } catch (e) {}
+    const url = buildRouteUrl(mode, variation, hash, daily);
+    try { history.replaceState({ mode, variation, hash, daily: !!daily }, '', url); } catch (e) {}
   }
   updateMeta(mode, variation);
 }

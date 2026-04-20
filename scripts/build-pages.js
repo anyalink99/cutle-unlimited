@@ -514,7 +514,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="actions">
-    <button class="btn secondary" id="gamemode-btn">Change Gamemode</button>
+    <button class="btn secondary" id="gamemode-btn">Change Puzzle</button>
     <button class="btn" id="new-btn" data-action="new">New Shape</button>
     <button id="share-btn" class="share-float" title="Copy result as image" aria-label="Share result" hidden>
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v12"/><path d="M7 9l5-5 5 5"/><path d="M5 14v4a3 3 0 0 0 3 3h8a3 3 0 0 0 3-3v-4"/></svg>
@@ -523,8 +523,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   ${HELP_MODAL}
   ${STATS_MODAL}
-  ${GAMEMODE_MODAL}
-  ${VARIATIONS_MODAL}
+  ${PUZZLE_MODAL}
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
@@ -690,78 +689,73 @@ const STATS_MODAL = `<div class="modal-back" id="stats-modal">
     </div>
   </div>`;
 
-const GAMEMODE_MODAL = `<div class="modal-back" id="gamemode-modal">
-    <div class="modal">
-      <h2>CHANGE GAMEMODE</h2>
-      <p>Pick how you want to play.</p>
-      <div class="mode-picker">
-        <button class="mode-card" data-mode="cut">
-          <div class="mode-title">Cut</div>
-          <div class="mode-desc">Slice the shape.</div>
-        </button>
-        <button class="mode-card" data-mode="inscribe">
-          <div class="mode-title">Inscribe</div>
-          <div class="mode-desc">Spot the vertices.</div>
-        </button>
-        <button class="mode-card" data-mode="balance">
-          <div class="mode-title">Balance</div>
-          <div class="mode-desc">Pin the pivot.</div>
-        </button>
-      </div>
-      <div class="close-row">
-        <button class="btn secondary" id="variations-btn">Variations</button>
-        <button class="btn" id="close-gamemode">Close</button>
-      </div>
-    </div>
-  </div>`;
+const PUZZLE_MODAL = `<div class="modal-back" id="puzzle-modal">
+    <div class="modal modal-wide">
+      <h2>CHANGE PUZZLE</h2>
 
-const VARIATIONS_MODAL = `<div class="modal-back" id="variations-modal">
-    <div class="modal">
-      <h2 id="variations-title">VARIATIONS</h2>
-      <p id="variations-desc">Same mechanics, new goals.</p>
-      <div class="mode-picker" id="cut-var-picker">
-        <button class="var-card" data-var="half">
-          <div class="mode-title">Half</div>
-          <div class="mode-desc">Classic 50/50 split by area — one straight line.</div>
+      <div class="seed-toggle" role="tablist" aria-label="Seed source">
+        <button class="seed-pill" data-seed="endless" role="tab" aria-selected="true">
+          <span class="seed-pill-label">Endless</span>
+          <span class="seed-pill-sub">random shapes</span>
         </button>
-        <button class="var-card" data-var="ratio">
-          <div class="mode-title">Target Ratio</div>
-          <div class="mode-desc">Cut in a random ratio between 5/95 and 50/50 — the target changes each shape.</div>
-        </button>
-        <button class="var-card" data-var="quad">
-          <div class="mode-title">Quad Cut</div>
-          <div class="mode-desc">Two cuts, four equal pieces. The lines must intersect inside the shape.</div>
-        </button>
-        <button class="var-card" data-var="tri">
-          <div class="mode-title">Tri Cut</div>
-          <div class="mode-desc">Two cuts, three equal pieces. The second cut must leave one piece whole.</div>
-        </button>
-        <button class="var-card" data-var="angle">
-          <div class="mode-title">Constrained Angle</div>
-          <div class="mode-desc">Line is pre-placed at a fixed angle. Drag it to find the 50/50 sweet spot.</div>
+        <button class="seed-pill" data-seed="daily" role="tab" aria-selected="false">
+          <span class="seed-pill-label">Daily</span>
+          <span class="seed-pill-sub" id="daily-sub">everyone plays the same</span>
         </button>
       </div>
-      <div class="mode-picker" id="inscribe-var-picker">
-        <button class="inscribe-var-card" data-inscvar="square">
-          <div class="mode-title">Square</div>
-          <div class="mode-desc">Four points forming a regular square — the classic inscribed-square challenge.</div>
-        </button>
-        <button class="inscribe-var-card" data-inscvar="triangle">
-          <div class="mode-title">Equilateral Triangle</div>
-          <div class="mode-desc">Three points with equal sides and 60° angles.</div>
-        </button>
+
+      <div class="mode-tabs" role="tablist" aria-label="Puzzle mode">
+        <button class="mode-tab" data-mode="cut" role="tab">Cut</button>
+        <button class="mode-tab" data-mode="inscribe" role="tab">Inscribe</button>
+        <button class="mode-tab" data-mode="balance" role="tab">Balance</button>
       </div>
-      <div class="mode-picker" id="balance-var-picker">
-        <button class="balance-var-card" data-balancevar="pole">
-          <div class="mode-title">Pole Balance</div>
-          <div class="mode-desc">Slide a pole under the shape so it doesn't tip.</div>
-        </button>
-        <button class="balance-var-card" data-balancevar="centroid">
-          <div class="mode-title">Centroid</div>
-          <div class="mode-desc">Tap the board where you think the center of mass is.</div>
-        </button>
+
+      <div class="var-groups">
+        <div class="var-group" data-mode="cut">
+          <button class="var-card" data-var="half">
+            <div class="mode-title">Half</div>
+            <div class="mode-desc">Classic 50/50 split by area — one straight line.</div>
+          </button>
+          <button class="var-card" data-var="ratio">
+            <div class="mode-title">Target Ratio</div>
+            <div class="mode-desc">Cut in a random ratio between 5/95 and 50/50 — the target changes each shape.</div>
+          </button>
+          <button class="var-card" data-var="quad">
+            <div class="mode-title">Quad Cut</div>
+            <div class="mode-desc">Two cuts, four equal pieces. The lines must intersect inside the shape.</div>
+          </button>
+          <button class="var-card" data-var="tri">
+            <div class="mode-title">Tri Cut</div>
+            <div class="mode-desc">Two cuts, three equal pieces. The second cut must leave one piece whole.</div>
+          </button>
+          <button class="var-card" data-var="angle">
+            <div class="mode-title">Constrained Angle</div>
+            <div class="mode-desc">Line is pre-placed at a fixed angle. Drag it to find the 50/50 sweet spot.</div>
+          </button>
+        </div>
+        <div class="var-group" data-mode="inscribe">
+          <button class="var-card" data-var="square">
+            <div class="mode-title">Square</div>
+            <div class="mode-desc">Four points forming a regular square — the classic inscribed-square challenge.</div>
+          </button>
+          <button class="var-card" data-var="triangle">
+            <div class="mode-title">Equilateral Triangle</div>
+            <div class="mode-desc">Three points with equal sides and 60° angles.</div>
+          </button>
+        </div>
+        <div class="var-group" data-mode="balance">
+          <button class="var-card" data-var="pole">
+            <div class="mode-title">Pole Balance</div>
+            <div class="mode-desc">Slide a pole under the shape so it doesn't tip.</div>
+          </button>
+          <button class="var-card" data-var="centroid">
+            <div class="mode-title">Centroid</div>
+            <div class="mode-desc">Tap the board where you think the center of mass is.</div>
+          </button>
+        </div>
       </div>
-      <div class="close-row"><button class="btn" id="close-variations">Close</button></div>
+
+      <div class="close-row"><button class="btn" id="close-puzzle">Close</button></div>
     </div>
   </div>`;
 

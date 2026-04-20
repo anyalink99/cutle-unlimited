@@ -35,3 +35,29 @@ function withSeed(seed, fn) {
   Math.random = mulberry32(seed);
   try { return fn(); } finally { Math.random = orig; }
 }
+
+// ---- Daily seed helpers ----
+
+// Reference day for Daily #N counter. 2026-04-20 (UTC) = Daily #1.
+const DAILY_EPOCH_MS = Date.UTC(2026, 3, 20);
+
+function todayUtc(now) {
+  const d = now ? new Date(now) : new Date();
+  return d.getUTCFullYear() + '-'
+    + String(d.getUTCMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getUTCDate()).padStart(2, '0');
+}
+
+function dailyIndex(now) {
+  const ms = now || Date.now();
+  return Math.floor((ms - DAILY_EPOCH_MS) / 86400000) + 1;
+}
+
+// Returns a 16-hex-char string that matches HASH_RE. Deterministic per
+// (date, mode, variation).
+function dailyHashFor(mode, variation, dateStr) {
+  const key = (dateStr || todayUtc()) + ':' + mode + ':' + variation;
+  const a = seedFromString(key).toString(16).padStart(8, '0');
+  const b = seedFromString(key + ':b').toString(16).padStart(8, '0');
+  return a + b;
+}

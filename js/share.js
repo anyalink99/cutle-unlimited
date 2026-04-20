@@ -34,7 +34,9 @@ const SHARE_SVG_STYLE_PROPS = [
 
 function shareLabel() {
   const v = currentVariation();
-  return `${MODE_LABELS_SHARE[state.mode] || ''} · ${VAR_LABELS_SHARE[v] || v.toUpperCase()}`;
+  const base = `${MODE_LABELS_SHARE[state.mode] || ''} · ${VAR_LABELS_SHARE[v] || v.toUpperCase()}`;
+  if (state.daily) return `DAILY #${dailyIndex()}  ·  ${base}`;
+  return base;
 }
 
 function shareCanonicalPath() {

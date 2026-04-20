@@ -6,6 +6,7 @@ const state = {
   shape: { outer: [], holes: [] },
   locked: false,
   hash: null,
+  daily: false,
 };
 
 function balanceVariation() {
@@ -60,7 +61,12 @@ function generateShapeForMode() {
 }
 
 function newShape(hash, nav = 'push') {
-  const h = hash || generateHash();
+  let h = hash;
+  if (!h) {
+    h = state.daily
+      ? dailyHashFor(state.mode, currentVariation())
+      : generateHash();
+  }
   state.hash = h;
   state.shape = withSeed(seedFromString(h), generateShapeForMode);
   state.locked = false;
@@ -81,8 +87,10 @@ function newShape(hash, nav = 'push') {
   }
   dom.newBtn.classList.remove('pulse');
   updateActionButton();
-  if (nav === 'replace') replaceRoute(state.mode, currentVariation(), state.hash);
-  else if (nav === 'push') pushRoute(state.mode, currentVariation(), state.hash);
+  // In daily mode the URL is ?daily=1 (no seed hash — it's derived from the date).
+  const urlHash = state.daily ? null : state.hash;
+  if (nav === 'replace') replaceRoute(state.mode, currentVariation(), urlHash, state.daily);
+  else if (nav === 'push') pushRoute(state.mode, currentVariation(), urlHash, state.daily);
 }
 
 function setMode(m) {
@@ -95,6 +103,7 @@ function setMode(m) {
 
 function setCutVariation(v) {
   if (!CUT_VARIATIONS.includes(v)) return;
+  if (state.cutVariation === v && state.mode === 'cut') return;
   state.cutVariation = v;
   document.body.dataset.cutVariation = v;
   try { localStorage.setItem(CUT_VARIATION_KEY, v); } catch (e) {}
@@ -105,12 +114,13 @@ function setCutVariation(v) {
     cutOnNewShape();
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
-    pushRoute('cut', v, state.hash);
+    pushRoute('cut', v, state.daily ? null : state.hash, state.daily);
   }
 }
 
 function setBalanceVariation(v) {
   if (!BALANCE_VARIATIONS.includes(v)) return;
+  if (state.balanceVariation === v && state.mode === 'balance') return;
   state.balanceVariation = v;
   document.body.dataset.balanceVariation = v;
   try { localStorage.setItem(BALANCE_VARIATION_KEY, v); } catch (e) {}
@@ -123,12 +133,13 @@ function setBalanceVariation(v) {
     dom.hitPad.style.cursor = 'crosshair';
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
-    pushRoute('balance', v, state.hash);
+    pushRoute('balance', v, state.daily ? null : state.hash, state.daily);
   }
 }
 
 function setInscribeVariation(v) {
   if (!INSCRIBE_VARIATIONS.includes(v)) return;
+  if (state.inscribeVariation === v && state.mode === 'inscribe') return;
   state.inscribeVariation = v;
   document.body.dataset.inscribeVariation = v;
   try { localStorage.setItem(INSCRIBE_VARIATION_KEY, v); } catch (e) {}
@@ -140,6 +151,51 @@ function setInscribeVariation(v) {
     renderInscribeAll();
     dom.newBtn.classList.remove('pulse');
     updateActionButton();
-    pushRoute('inscribe', v, state.hash);
+    pushRoute('inscribe', v, state.daily ? null : state.hash, state.daily);
   }
+}
+
+// Toggle between endless (random each shape) and daily (one shared seed per
+// mode+variation per UTC day). URL is the source of truth: ?daily=1 on, absent
+// off. Regenerates the current shape to match the new seed source.
+function setDailyMode(daily) {
+  daily = !!daily;
+  if (state.daily === daily) return;
+  state.daily = daily;
+  newShape();
+}
+
+// Apply a combined mode+variation selection from the unified puzzle modal.
+// Prefers a single shape regeneration and URL update.
+function applyPuzzleChoice(mode, variation) {
+  const varsByMode = {
+    cut: CUT_VARIATIONS,
+    inscribe: INSCRIBE_VARIATIONS,
+    balance: BALANCE_VARIATIONS,
+  };
+  if (!varsByMode[mode] || !varsByMode[mode].includes(variation)) return;
+
+  if (state.mode === mode) {
+    if (mode === 'cut') setCutVariation(variation);
+    else if (mode === 'inscribe') setInscribeVariation(variation);
+    else if (mode === 'balance') setBalanceVariation(variation);
+    return;
+  }
+
+  // Cross-mode: update the target mode's variation in state + storage first,
+  // then switch mode so the new shape is generated with the right variation.
+  if (mode === 'cut') {
+    state.cutVariation = variation;
+    document.body.dataset.cutVariation = variation;
+    try { localStorage.setItem(CUT_VARIATION_KEY, variation); } catch (e) {}
+  } else if (mode === 'inscribe') {
+    state.inscribeVariation = variation;
+    document.body.dataset.inscribeVariation = variation;
+    try { localStorage.setItem(INSCRIBE_VARIATION_KEY, variation); } catch (e) {}
+  } else if (mode === 'balance') {
+    state.balanceVariation = variation;
+    document.body.dataset.balanceVariation = variation;
+    try { localStorage.setItem(BALANCE_VARIATION_KEY, variation); } catch (e) {}
+  }
+  setMode(mode);
 }
