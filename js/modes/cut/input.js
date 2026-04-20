@@ -16,6 +16,14 @@ function initCutInput() {
     cutPreview.classList.remove('valid');
   }
 
+  function clampToHitPad(p) {
+    const m = POINT_GRAB_R;
+    return {
+      x: Math.max(-60 + m, Math.min(460 - m, p.x)),
+      y: Math.max(-80 + m, Math.min(480 - m, p.y)),
+    };
+  }
+
   function beginCutLineDrag(e, p, idx, constrainPerp) {
     cutState.dragCutIdx = idx;
     cutState.dragLineMode = true;
@@ -103,8 +111,9 @@ function initCutInput() {
     }
 
     if (cutState.dragCutIdx >= 0) {
+      const cp = clampToHitPad(p);
       const cut = cutState.cuts[cutState.dragCutIdx];
-      if (cutState.dragEndIdx === 0) cut.a = p; else cut.b = p;
+      if (cutState.dragEndIdx === 0) cut.a = cp; else cut.b = cp;
       renderCutSegments();
       renderCutHandles();
       return;

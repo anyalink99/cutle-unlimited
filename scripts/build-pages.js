@@ -491,7 +491,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 
   <div class="stage">
     <svg id="board" viewBox="-60 -80 520 560" preserveAspectRatio="xMidYMid meet">
-      <rect class="hit-pad" id="hit-pad" x="0" y="-80" width="400" height="560"/>
+      <rect class="hit-pad" id="hit-pad" x="-60" y="-80" width="520" height="560"/>
       <g id="pole-layer"></g>
       <g id="shape-layer"></g>
       <g id="cut-layer"></g>
