@@ -25,3 +25,9 @@ function renderBalanceStats(els, variation) {
     dailyWins: els.blDailyWins,
   }, variation, d => d.toFixed(1));
 }
+
+registerModeAPI('balance', {
+  loadStats: loadBalanceStats,
+  resetStats: resetBalanceStats,
+  renderStats: renderBalanceStats,
+});

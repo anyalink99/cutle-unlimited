@@ -18,6 +18,32 @@ function inscribeVariation() {
   return state.inscribeVariation || 'square';
 }
 
+registerModeAPI('inscribe', {
+  pickShape() {
+    if (Math.random() < 0.25) {
+      const balance = generateInscribeBalanceShape();
+      if (balance) {
+        const finalized = finalizeWithHoles(balance);
+        if (finalized) return finalized;
+      }
+    }
+    return generateShape({ noHoles: true, noSymmetry: true });
+  },
+  nudge(dx, dy) {
+    if (inscribeState.confirmed) return;
+    if (!inscribeState.points.length) return;
+    const idx = inscribeState.dragIdx >= 0 ? inscribeState.dragIdx : inscribeState.points.length - 1;
+    const p = inscribeState.points[idx];
+    if (!p) return;
+    const proj = projectToOutline({ x: p.x + dx, y: p.y + dy }, state.shape.outer);
+    if (!proj) return;
+    inscribeState.points[idx] = proj;
+    renderInscribeLines();
+    renderInscribePoints();
+    updateActionButton();
+  },
+});
+
 function inscribeN() {
   return inscribeVariation() === 'triangle' ? 3 : 4;
 }
@@ -140,24 +166,31 @@ function translateInscribeLine(delta) {
   inscribeState.points[iB] = { x: mx + ux * bestB, y: my + uy * bestB };
 }
 
-function inscribeReset() {
-  inscribeState.points = [];
-  inscribeState.hover = null;
-  inscribeState.hoverRaw = null;
-  inscribeState.dragIdx = -1;
-  inscribeState.dragLineIdxs = null;
-  inscribeState.dragInitialPoints = null;
-  inscribeState.dragOrigin = null;
-  inscribeState.confirmed = false;
-  inscribeState.activePointerId = null;
-  inscribeState.idealCorners = null;
-  inscribeState.idealDrawn = false;
-  inscribeState.generation++;
-  dom.inscribeLines.innerHTML = '';
-  dom.inscribePoints.innerHTML = '';
-  dom.inscribeHover.innerHTML = '';
-  dom.inscribeIdeal.innerHTML = '';
-}
+const inscribeReset = makeModeReset({
+  state: inscribeState,
+  defaults: {
+    points: [],
+    hover: null,
+    hoverRaw: null,
+    dragIdx: -1,
+    dragLineIdxs: null,
+    dragInitialPoints: null,
+    dragOrigin: null,
+    confirmed: false,
+    activePointerId: null,
+    idealCorners: null,
+    idealDrawn: false,
+  },
+  layers: [
+    () => dom.inscribeLines,
+    () => dom.inscribePoints,
+    () => dom.inscribeHover,
+    () => dom.inscribeIdeal,
+  ],
+  after() {
+    inscribeState.generation++;
+  },
+});
 
 setWorkerHandler('inscribe', (e) => {
   if (e.data.gen !== inscribeState.generation) return;

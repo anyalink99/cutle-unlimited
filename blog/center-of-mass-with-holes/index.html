@@ -60,6 +60,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
 <!-- End Google Tag Manager -->
 <link rel="stylesheet" href="../../style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false});"></script>
 </head>
 <body class="blog-body">
 <!-- Google Tag Manager (noscript) -->
@@ -86,9 +89,16 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <h2>The math: the centroid formula</h2>
   <p>
     For a uniformly dense planar region, the <b>centroid</b> is the area-weighted average of all
-    points inside the shape. For polygons it has a closed-form formula as a sum over the vertices —
-    and since the curved shapes here are sampled into dense polylines before the math runs, the
-    same formula works in practice. But the qualitative facts are more useful while playing:
+    points inside the shape:
+  </p>
+  <p>$$\bar{x} = \frac{1}{A}\iint_R x\,dA, \qquad \bar{y} = \frac{1}{A}\iint_R y\,dA$$</p>
+  <p>
+    For a closed polygon with vertices $(x_i, y_i)$ and signed area $A$ there's a tidy closed form:
+  </p>
+  <p>$$\bar{x} = \frac{1}{6A}\sum_{i=0}^{n-1} (x_i + x_{i+1})(x_i y_{i+1} - x_{i+1} y_i)$$</p>
+  <p>
+    The curved shapes here are sampled into dense polylines before this math runs, so the same
+    formula works in practice. But the qualitative facts are more useful while playing:
   </p>
   <ul>
     <li>The centroid is invariant under translation and rotation.</li>

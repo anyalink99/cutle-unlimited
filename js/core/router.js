@@ -1,10 +1,3 @@
-const MODE_SLUGS = { cut: 'cut', inscribe: 'inscribe', balance: 'balance' };
-const VAR_SLUGS = {
-  cut: ['half', 'ratio', 'quad', 'tri', 'angle'],
-  inscribe: ['square', 'triangle'],
-  balance: ['pole', 'centroid'],
-};
-const DEFAULT_VAR = { cut: 'half', inscribe: 'square', balance: 'pole' };
 const HASH_RE = /^[a-z0-9]{6,64}$/i;
 
 function parseLocation() {
@@ -12,9 +5,9 @@ function parseLocation() {
   const sp = new URLSearchParams(window.location.search);
 
   let mode = null, variation = null;
-  if (parts.length >= 1 && MODE_SLUGS[parts[0]]) {
+  if (parts.length >= 1 && isValidMode(parts[0])) {
     mode = parts[0];
-    if (parts.length >= 2 && VAR_SLUGS[mode].includes(parts[1])) {
+    if (parts.length >= 2 && isValidVariation(mode, parts[1])) {
       variation = parts[1];
     }
   }
@@ -31,13 +24,10 @@ function parseLocation() {
 }
 
 function variationPath(mode, variation) {
-  if (mode === 'cut' && variation === 'half') return '/';
-  if (mode === 'cut') return '/cut/' + variation + '/';
-  if (mode === 'inscribe' && variation === 'square') return '/inscribe/';
-  if (mode === 'inscribe') return '/inscribe/' + variation + '/';
-  if (mode === 'balance' && variation === 'pole') return '/balance/';
-  if (mode === 'balance') return '/balance/' + variation + '/';
-  return '/';
+  const cfg = modeConfig(mode);
+  if (!cfg) return '/';
+  if (variation === cfg.defaultVariation) return cfg.rootPath;
+  return cfg.subBase + '/' + variation + '/';
 }
 
 function buildRouteUrl(mode, variation, hash, daily) {

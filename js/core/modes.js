@@ -7,8 +7,11 @@ const MODE_REGISTRY = {
     storageKey: CUT_VARIATION_KEY,
     variations: CUT_VARIATIONS,
     defaultVariation: 'half',
+    rootPath: '/',
+    subBase: '/cut',
     label: 'Cut',
     shareLabel: 'CUT',
+    statsSectionId: 'stats-cut-section',
     variationLabels: {
       half: 'Half',
       ratio: 'Target Ratio',
@@ -23,6 +26,7 @@ const MODE_REGISTRY = {
       tri: 'TRI',
       angle: 'CONSTRAINED ANGLE',
     },
+    api: {},
   },
   inscribe: {
     stateKey: 'inscribeVariation',
@@ -30,8 +34,11 @@ const MODE_REGISTRY = {
     storageKey: INSCRIBE_VARIATION_KEY,
     variations: INSCRIBE_VARIATIONS,
     defaultVariation: 'square',
+    rootPath: '/inscribe/',
+    subBase: '/inscribe',
     label: 'Inscribe',
     shareLabel: 'INSCRIBE',
+    statsSectionId: 'stats-inscribe-section',
     variationLabels: {
       square: 'Square',
       triangle: 'Equilateral Triangle',
@@ -40,6 +47,7 @@ const MODE_REGISTRY = {
       square: 'SQUARE',
       triangle: 'TRIANGLE',
     },
+    api: {},
   },
   balance: {
     stateKey: 'balanceVariation',
@@ -47,8 +55,11 @@ const MODE_REGISTRY = {
     storageKey: BALANCE_VARIATION_KEY,
     variations: BALANCE_VARIATIONS,
     defaultVariation: 'pole',
+    rootPath: '/balance/',
+    subBase: '/balance',
     label: 'Balance',
     shareLabel: 'BALANCE',
+    statsSectionId: 'stats-balance-section',
     variationLabels: {
       pole: 'Pole Balance',
       centroid: 'Centroid',
@@ -57,8 +68,15 @@ const MODE_REGISTRY = {
       pole: 'POLE',
       centroid: 'CENTROID',
     },
+    api: {},
   },
 };
+
+function registerModeAPI(mode, api) {
+  const cfg = MODE_REGISTRY[mode];
+  if (!cfg) return;
+  cfg.api = Object.assign(cfg.api || {}, api);
+}
 
 function modeConfig(mode) {
   return MODE_REGISTRY[mode] || null;

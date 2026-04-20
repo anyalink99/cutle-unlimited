@@ -22,23 +22,36 @@ function cutRequiredCount() {
   return (v === 'quad' || v === 'tri') ? 2 : 1;
 }
 
-function cutReset() {
-  cutState.cuts = [];
-  cutState.drawing = null;
-  cutState.activePointerId = null;
-  cutState.dragCutIdx = -1;
-  cutState.dragEndIdx = -1;
-  cutState.dragLineMode = false;
-  cutState.dragLineConstrained = false;
-  cutState.dragOrigin = null;
-  cutState.dragInitialCuts = null;
-  cutState.confirmed = false;
-  dom.cutPreview.style.display = 'none';
-  dom.cutPreview.classList.remove('valid');
-  dom.cutLines.innerHTML = '';
-  dom.cutPoints.innerHTML = '';
-  dom.cutLayer.innerHTML = '';
-}
+registerModeAPI('cut', {
+  pickShape() {
+    if (Math.random() < 0.15) {
+      const finalized = finalizeWithHoles(generateBalanceShape());
+      if (finalized) return finalized;
+    }
+    return generateShape();
+  },
+});
+
+const cutReset = makeModeReset({
+  state: cutState,
+  defaults: {
+    cuts: [],
+    drawing: null,
+    activePointerId: null,
+    dragCutIdx: -1,
+    dragEndIdx: -1,
+    dragLineMode: false,
+    dragLineConstrained: false,
+    dragOrigin: null,
+    dragInitialCuts: null,
+    confirmed: false,
+  },
+  layers: [() => dom.cutLines, () => dom.cutPoints, () => dom.cutLayer],
+  after() {
+    dom.cutPreview.style.display = 'none';
+    dom.cutPreview.classList.remove('valid');
+  },
+});
 
 function evaluateCut() {
   const v = cutVariation();

@@ -24,3 +24,9 @@ function renderCutStats(els, variation) {
     dailyWins:  els.dailyWins,
   }, variation, d => d.toFixed(2) + '%');
 }
+
+registerModeAPI('cut', {
+  loadStats: loadCutStats,
+  resetStats: resetCutStats,
+  renderStats: renderCutStats,
+});

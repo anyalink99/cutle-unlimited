@@ -1,17 +1,13 @@
 function loadStats() {
-  loadCutStats();
-  loadInscribeStats();
-  loadBalanceStats();
+  for (const m of MODE_LIST) MODE_REGISTRY[m].api.loadStats();
 }
 
 function resetStats(mode, variation) {
-  if (mode === 'cut')           resetCutStats(variation);
-  else if (mode === 'inscribe') resetInscribeStats(variation);
-  else if (mode === 'balance')  resetBalanceStats(variation);
+  const api = MODE_REGISTRY[mode] && MODE_REGISTRY[mode].api;
+  if (api && api.resetStats) api.resetStats(variation);
 }
 
 function renderStatsInto(els, mode, variation) {
-  if (mode === 'cut')           renderCutStats(els, variation);
-  else if (mode === 'inscribe') renderInscribeStats(els, variation);
-  else if (mode === 'balance')  renderBalanceStats(els, variation);
+  const api = MODE_REGISTRY[mode] && MODE_REGISTRY[mode].api;
+  if (api && api.renderStats) api.renderStats(els, variation);
 }

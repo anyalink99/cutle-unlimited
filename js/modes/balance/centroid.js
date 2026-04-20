@@ -7,17 +7,22 @@ const centroidState = {
   activePointerId: null,
 };
 
-function centroidReset() {
-  centroidState.guess = null;
-  centroidState.hover = null;
-  centroidState.confirmed = false;
-  centroidState.pointerType = null;
-  centroidState.dragging = false;
-  centroidState.activePointerId = null;
-  dom.centroidPoint.innerHTML = '';
-  dom.balanceHover.innerHTML = '';
-  dom.centroidIdeal.innerHTML = '';
-}
+const centroidReset = makeModeReset({
+  state: centroidState,
+  defaults: {
+    guess: null,
+    hover: null,
+    confirmed: false,
+    pointerType: null,
+    dragging: false,
+    activePointerId: null,
+  },
+  layers: [
+    () => dom.centroidPoint,
+    () => dom.balanceHover,
+    () => dom.centroidIdeal,
+  ],
+});
 
 function isNearGuess(p, grabR) {
   if (!centroidState.guess) return false;

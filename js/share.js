@@ -25,6 +25,67 @@ function shareCanonicalPath() {
   return variationPath(state.mode, currentVariation());
 }
 
+// Replay-able URL for the current puzzle: seed hash for Endless, ?daily=1 for Daily.
+function sharePuzzleUrl() {
+  const base = 'https://geometric.games' + shareCanonicalPath();
+  if (state.daily) return base + '?daily=1';
+  if (state.hash) return base + '?s=' + state.hash;
+  return base;
+}
+
+function shareDisplayUrl() {
+  return sharePuzzleUrl().replace(/^https:\/\//, '');
+}
+
+// Returns { modules: number[row][col] as bool, size: number } or null if qr lib missing.
+function buildQrMatrix(text) {
+  if (typeof qrcode !== 'function') return null;
+  try {
+    const qr = qrcode(0, 'M');
+    qr.addData(text);
+    qr.make();
+    const size = qr.getModuleCount();
+    const modules = [];
+    for (let r = 0; r < size; r++) {
+      const row = [];
+      for (let c = 0; c < size; c++) row.push(qr.isDark(r, c));
+      modules.push(row);
+    }
+    return { modules, size };
+  } catch (e) {
+    return null;
+  }
+}
+
+const QR_BG = '#f3e8ff';
+const QR_FG = '#2d2631';
+
+function drawQrOnCanvas(ctx, matrix, x, y, pxSize) {
+  if (!matrix) return;
+  const { modules, size } = matrix;
+  const quietModules = 2;
+  const totalModules = size + quietModules * 2;
+  const modulePx = pxSize / totalModules;
+  const radius = Math.min(18, pxSize * 0.06);
+  ctx.fillStyle = QR_BG;
+  if (typeof ctx.roundRect === 'function') {
+    ctx.beginPath();
+    ctx.roundRect(x, y, pxSize, pxSize, radius);
+    ctx.fill();
+  } else {
+    ctx.fillRect(x, y, pxSize, pxSize);
+  }
+  ctx.fillStyle = QR_FG;
+  for (let r = 0; r < size; r++) {
+    for (let c = 0; c < size; c++) {
+      if (!modules[r][c]) continue;
+      const px = x + (c + quietModules) * modulePx;
+      const py = y + (r + quietModules) * modulePx;
+      ctx.fillRect(Math.floor(px), Math.floor(py), Math.ceil(modulePx) + 1, Math.ceil(modulePx) + 1);
+    }
+  }
+}
+
 function shareScoreText() {
   const verdict = document.querySelector('#score-line .verdict');
   const stats = document.querySelector('#score-line .score-stats');
@@ -164,10 +225,24 @@ async function buildSharePng() {
     ctx.fillText(stats, size / 2, 946);
   }
 
-  ctx.font = '600 22px ui-monospace, SFMono-Regular, Menlo, Monaco, monospace';
+  const qrMatrix = buildQrMatrix(sharePuzzleUrl());
+  const qrSize = qrMatrix ? 180 : 0;
+  const qrPad = 30;
+  const qrX = size - qrSize - qrPad;
+  const qrY = size - qrSize - qrPad;
+  if (qrMatrix) drawQrOnCanvas(ctx, qrMatrix, qrX, qrY, qrSize);
+
+  ctx.textAlign = qrMatrix ? 'left' : 'center';
+  ctx.font = '700 26px ui-sans-serif, system-ui, sans-serif';
+  ctx.fillStyle = '#e5e7eb';
+  const ctaX = qrMatrix ? qrPad : size / 2;
+  ctx.fillText('Play this puzzle →', ctaX, size - 90);
+
+  ctx.font = '600 20px ui-monospace, SFMono-Regular, Menlo, Monaco, monospace';
   ctx.fillStyle = '#9ca3af';
-  const urlLine = 'geometric.games' + shareCanonicalPath();
-  ctx.fillText(urlLine, size / 2, size - 54);
+  const urlLine = shareDisplayUrl();
+  ctx.fillText(urlLine, ctaX, size - 54);
+  ctx.textAlign = 'center';
 
   return await new Promise((resolve, reject) => {
     canvas.toBlob(b => {

@@ -369,9 +369,16 @@ function postCentroidHoles() {
   <h2>The math: the centroid formula</h2>
   <p>
     For a uniformly dense planar region, the <b>centroid</b> is the area-weighted average of all
-    points inside the shape. For polygons it has a closed-form formula as a sum over the vertices —
-    and since the curved shapes here are sampled into dense polylines before the math runs, the
-    same formula works in practice. But the qualitative facts are more useful while playing:
+    points inside the shape:
+  </p>
+  <p>$$\\bar{x} = \\frac{1}{A}\\iint_R x\\,dA, \\qquad \\bar{y} = \\frac{1}{A}\\iint_R y\\,dA$$</p>
+  <p>
+    For a closed polygon with vertices $(x_i, y_i)$ and signed area $A$ there's a tidy closed form:
+  </p>
+  <p>$$\\bar{x} = \\frac{1}{6A}\\sum_{i=0}^{n-1} (x_i + x_{i+1})(x_i y_{i+1} - x_{i+1} y_i)$$</p>
+  <p>
+    The curved shapes here are sampled into dense polylines before this math runs, so the same
+    formula works in practice. But the qualitative facts are more useful while playing:
   </p>
   <ul>
     <li>The centroid is invariant under translation and rotation.</li>
@@ -484,7 +491,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="stage">
-    <svg id="board" viewBox="-60 -80 520 560" preserveAspectRatio="xMidYMid meet">
+    <svg id="board" viewBox="-60 -80 520 560" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-labelledby="board-title board-desc">
+      <title id="board-title">Puzzle board</title>
+      <desc id="board-desc">An irregular shape on a grid. Drag or tap to place your answer. The hint below the board describes what to solve.</desc>
       <rect class="hit-pad" id="hit-pad" x="-60" y="-80" width="520" height="560"/>
       <g id="pole-layer"></g>
       <g id="shape-layer"></g>
@@ -504,7 +514,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="score-line" id="score-line">
-    <div class="hint" id="hint">Drag a line that fully crosses the shape</div>
+    <div class="hint" id="hint" role="status" aria-live="polite">Drag a line that fully crosses the shape</div>
   </div>
 
   <div class="actions">
@@ -530,11 +540,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/core/daily-lock.js"></script>
 <script src="${rel}js/core/mode-stats.js"></script>
 <script src="${rel}js/core/workers.js"></script>
+<script src="${rel}js/core/reset.js"></script>
 <script src="${rel}js/geometry/geometry.js"></script>
 <script src="${rel}js/geometry/inscribed-square.js"></script>
+<script src="${rel}js/geometry/shape-utils.js"></script>
+<script src="${rel}js/geometry/shape-edges.js"></script>
+<script src="${rel}js/geometry/shape-outer.js"></script>
+<script src="${rel}js/geometry/shape-holes.js"></script>
 <script src="${rel}js/geometry/shapes.js"></script>
 <script src="${rel}js/ui/modals.js"></script>
 <script src="${rel}js/ui/render.js"></script>
+<script src="${rel}js/ui/keyboard.js"></script>
 <script src="${rel}js/modes/cut/geometry.js"></script>
 <script src="${rel}js/modes/cut/render.js"></script>
 <script src="${rel}js/modes/cut/cut.js"></script>
@@ -550,6 +566,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/modes/balance/stats.js"></script>
 <script src="${rel}js/stats.js"></script>
 <script src="${rel}js/mode-runner.js"></script>
+<script src="${rel}js/vendor/qrcode.min.js"></script>
 <script src="${rel}js/share.js"></script>
 <script src="${rel}js/game.js"></script>
 <script src="${rel}js/main.js"></script>
@@ -914,6 +931,9 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
 })(window,document,'script','dataLayer','GTM-N9CPH9MB');</script>
 <!-- End Google Tag Manager -->
 <link rel="stylesheet" href="${rel}style.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" crossorigin="anonymous">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js" crossorigin="anonymous"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js" crossorigin="anonymous" onload="renderMathInElement(document.body, {delimiters: [{left: '$$', right: '$$', display: true}, {left: '$', right: '$', display: false}], throwOnError: false});"></script>
 </head>
 <body class="blog-body">
 <!-- Google Tag Manager (noscript) -->

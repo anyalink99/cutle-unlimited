@@ -75,7 +75,10 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="stage">
-    <svg id="board" viewBox="-60 -80 520 560" preserveAspectRatio="xMidYMid meet">
+    <svg id="board" viewBox="-60 -80 520 560" preserveAspectRatio="xMidYMid meet"
+         role="img" aria-labelledby="board-title board-desc">
+      <title id="board-title">Puzzle board</title>
+      <desc id="board-desc">An irregular shape on a grid. Drag or tap to place your answer. The hint below the board describes what to solve.</desc>
       <rect class="hit-pad" id="hit-pad" x="-60" y="-80" width="520" height="560"/>
       <g id="pole-layer"></g>
       <g id="shape-layer"></g>
@@ -95,7 +98,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   </div>
 
   <div class="score-line" id="score-line">
-    <div class="hint" id="hint">Drag a line that fully crosses the shape</div>
+    <div class="hint" id="hint" role="status" aria-live="polite">Drag a line that fully crosses the shape</div>
   </div>
 
   <div class="actions">
@@ -306,11 +309,17 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="../../js/core/daily-lock.js"></script>
 <script src="../../js/core/mode-stats.js"></script>
 <script src="../../js/core/workers.js"></script>
+<script src="../../js/core/reset.js"></script>
 <script src="../../js/geometry/geometry.js"></script>
 <script src="../../js/geometry/inscribed-square.js"></script>
+<script src="../../js/geometry/shape-utils.js"></script>
+<script src="../../js/geometry/shape-edges.js"></script>
+<script src="../../js/geometry/shape-outer.js"></script>
+<script src="../../js/geometry/shape-holes.js"></script>
 <script src="../../js/geometry/shapes.js"></script>
 <script src="../../js/ui/modals.js"></script>
 <script src="../../js/ui/render.js"></script>
+<script src="../../js/ui/keyboard.js"></script>
 <script src="../../js/modes/cut/geometry.js"></script>
 <script src="../../js/modes/cut/render.js"></script>
 <script src="../../js/modes/cut/cut.js"></script>
@@ -326,6 +335,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="../../js/modes/balance/stats.js"></script>
 <script src="../../js/stats.js"></script>
 <script src="../../js/mode-runner.js"></script>
+<script src="../../js/vendor/qrcode.min.js"></script>
 <script src="../../js/share.js"></script>
 <script src="../../js/game.js"></script>
 <script src="../../js/main.js"></script>

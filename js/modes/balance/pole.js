@@ -11,20 +11,25 @@ const poleState = {
 
 const POLE_HALF_W = 2.5;
 
-function poleReset() {
-  poleState.pole = null;
-  poleState.confirmed = false;
-  poleState.dragging = false;
-  poleState.activePointerId = null;
-  poleState.pivotY = FLOOR_Y;
-  if (poleState.animFrame) {
-    cancelAnimationFrame(poleState.animFrame);
-    poleState.animFrame = 0;
-  }
-  dom.poleLayer.innerHTML = '';
-  const g = dom.shapeLayer.firstElementChild;
-  if (g) g.removeAttribute('transform');
-}
+const poleReset = makeModeReset({
+  state: poleState,
+  defaults: () => ({
+    pole: null,
+    confirmed: false,
+    dragging: false,
+    activePointerId: null,
+    pivotY: FLOOR_Y,
+  }),
+  layers: [() => dom.poleLayer],
+  after() {
+    if (poleState.animFrame) {
+      cancelAnimationFrame(poleState.animFrame);
+      poleState.animFrame = 0;
+    }
+    const g = dom.shapeLayer.firstElementChild;
+    if (g) g.removeAttribute('transform');
+  },
+});
 
 function shapeBottomAtX(shape, x) {
   const outer = shape.outer;

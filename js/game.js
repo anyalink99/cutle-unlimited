@@ -51,23 +51,8 @@ function finalizeWithHoles(shape) {
 
 // Single-shot: on failure drop straight to the plain generator; no retries.
 function generateShapeForMode() {
-  if (state.mode === 'inscribe') {
-    if (Math.random() < 0.25) {
-      const balance = generateInscribeBalanceShape();
-      if (balance) {
-        const finalized = finalizeWithHoles(balance);
-        if (finalized) return finalized;
-      }
-    }
-    return generateShape({ noHoles: true, noSymmetry: true });
-  }
-  if (state.mode === 'balance') {
-    return generateBalanceShape();
-  }
-  if (Math.random() < 0.15) {
-    const finalized = finalizeWithHoles(generateBalanceShape());
-    if (finalized) return finalized;
-  }
+  const api = MODE_REGISTRY[state.mode] && MODE_REGISTRY[state.mode].api;
+  if (api && api.pickShape) return api.pickShape();
   return generateShape();
 }
 

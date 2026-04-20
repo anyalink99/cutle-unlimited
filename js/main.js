@@ -30,9 +30,6 @@ document.getElementById('help-btn').addEventListener('click', () => openModal('h
 document.getElementById('close-help').addEventListener('click', () => closeModal('help-modal'));
 document.getElementById('close-stats').addEventListener('click', () => closeModal('stats-modal'));
 
-const statsCutSection = document.getElementById('stats-cut-section');
-const statsInscribeSection = document.getElementById('stats-inscribe-section');
-const statsBalanceSection = document.getElementById('stats-balance-section');
 const statsSubtitle = document.getElementById('stats-subtitle');
 
 function updateStatsSubtitle() {
@@ -42,9 +39,10 @@ function updateStatsSubtitle() {
 }
 
 function openStatsModal() {
-  statsCutSection.style.display = state.mode === 'cut' ? '' : 'none';
-  statsInscribeSection.style.display = state.mode === 'inscribe' ? '' : 'none';
-  statsBalanceSection.style.display = state.mode === 'balance' ? '' : 'none';
+  for (const m of MODE_LIST) {
+    const sec = document.getElementById(MODE_REGISTRY[m].statsSectionId);
+    if (sec) sec.style.display = state.mode === m ? '' : 'none';
+  }
   updateStatsSubtitle();
   renderStatsInto(statsEls, state.mode, currentVariation());
   openModal('stats-modal');
@@ -168,6 +166,14 @@ document.querySelectorAll('#puzzle-modal .seed-pill').forEach(pill => {
 
 bindModalDismissers();
 document.addEventListener('gesturestart', e => e.preventDefault(), { passive: false });
+
+// Android long-press fires contextmenu with a haptic pulse even when pointerdown
+// is preventDefault'd. Killing it on the board keeps point-drag silent on mobile.
+const stageEl = document.querySelector('.stage');
+if (stageEl) {
+  stageEl.addEventListener('contextmenu', e => e.preventDefault());
+  stageEl.addEventListener('selectstart', e => e.preventDefault());
+}
 
 initCutInput();
 initInscribeInput();

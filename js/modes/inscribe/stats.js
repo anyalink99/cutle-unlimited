@@ -24,3 +24,9 @@ function renderInscribeStats(els, variation) {
     dailyWins: els.inDailyWins,
   }, variation, s => s.toFixed(1) + '%');
 }
+
+registerModeAPI('inscribe', {
+  loadStats: loadInscribeStats,
+  resetStats: resetInscribeStats,
+  renderStats: renderInscribeStats,
+});
