@@ -43,6 +43,15 @@ const MODE_HOOKS = {
   },
 };
 
+function isCurrentDailyLocked() {
+  return !!(state.daily && getTodayLock(state.mode, currentVariation()));
+}
+
+function maybePulseNewBtn(delayMs) {
+  if (isCurrentDailyLocked()) return;
+  setTimeout(() => dom.newBtn.classList.add('pulse'), delayMs);
+}
+
 function updateActionButton() {
   const btn = dom.newBtn;
   let needsConfirm = false;
@@ -60,9 +69,19 @@ function updateActionButton() {
   if (needsConfirm) {
     btn.textContent = 'Confirm';
     btn.dataset.action = 'confirm';
+    btn.disabled = false;
+  } else if (isCurrentDailyLocked()) {
+    // Today's daily for this mode+variation is already answered. Replace
+    // "New Shape" with a countdown to the next UTC day so the user can't
+    // regenerate and re-guess.
+    btn.textContent = nextDailyCountdownLabel();
+    btn.dataset.action = 'locked';
+    btn.disabled = true;
+    btn.classList.remove('pulse');
   } else {
     btn.textContent = 'New Shape';
     btn.dataset.action = 'new';
+    btn.disabled = false;
   }
   const shareBtn = document.getElementById('share-btn');
   if (shareBtn) shareBtn.hidden = !state.locked;
@@ -106,10 +125,37 @@ function newShape(hash, nav = 'push') {
   MODE_HOOKS[state.mode].init();
   dom.newBtn.classList.remove('pulse');
   updateActionButton();
+
+  // If this is a daily that's already been confirmed today, restore the
+  // user's original placements and replay the confirm flow so the board
+  // shows their locked result instead of a fresh attempt.
+  if (state.daily) {
+    const lock = getTodayLock(state.mode, currentVariation());
+    if (lock && lock.snapshot) replayDailyLock(lock);
+  }
+
   // In daily mode the URL is ?daily=1 (no seed hash — it's derived from the date).
   const urlHash = state.daily ? null : state.hash;
   if (nav === 'replace') replaceRoute(state.mode, currentVariation(), urlHash, state.daily);
   else if (nav === 'push') pushRoute(state.mode, currentVariation(), urlHash, state.daily);
+}
+
+function replayDailyLock(lock) {
+  if (state.mode === 'cut') {
+    cutRestoreSnapshot(lock.snapshot);
+    finalizeCut({ replay: true });
+  } else if (state.mode === 'inscribe') {
+    inscribeRestoreSnapshot(lock.snapshot);
+    confirmInscribe({ replay: true });
+  } else if (state.mode === 'balance') {
+    if (balanceVariation() === 'pole') {
+      poleRestoreSnapshot(lock.snapshot);
+      confirmPole({ replay: true });
+    } else {
+      centroidRestoreSnapshot(lock.snapshot);
+      confirmCentroid({ replay: true });
+    }
+  }
 }
 
 function setMode(m) {
@@ -138,6 +184,13 @@ function setVariation(mode, variation) {
   if (state[cfg.stateKey] === variation && state.mode === mode) return;
   commitVariationChoice(mode, variation);
   if (state.mode !== mode) return;
+  // In daily mode the seed depends on (mode, variation) — changing variation
+  // means a different shape, and any existing daily lock belongs to the new
+  // variation. Regenerate so newShape() picks up the right seed + replay.
+  if (state.daily) {
+    newShape();
+    return;
+  }
   state.locked = false;
   MODE_HOOKS[mode].reset();
   renderShape(state.shape);

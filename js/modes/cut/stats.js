@@ -60,4 +60,5 @@ function renderCutStats(els, variation) {
   els.best.textContent = b.bestDiff === Infinity ? '—' : b.bestDiff.toFixed(2) + '%';
   els.avg.textContent = b.attempts ? (b.sumDiff / b.attempts).toFixed(2) + '%' : '—';
   els.perfect.textContent = b.perfect;
+  if (els.dailyWins) els.dailyWins.textContent = dailyWinsFor('cut', variation);
 }

@@ -140,7 +140,19 @@ function showPoleVerdict(dx, tipped) {
   });
 }
 
-function confirmPole() {
+function poleSnapshot() {
+  return { pole: poleState.pole };
+}
+
+function poleRestoreSnapshot(snap) {
+  if (!snap || typeof snap.pole !== 'number') return;
+  poleState.pole = snap.pole;
+  poleState.pivotY = shapeBottomAtX(state.shape, snap.pole) ?? FLOOR_Y;
+  drawPole(snap.pole);
+}
+
+function confirmPole(opts) {
+  const replay = !!(opts && opts.replay);
   if (poleState.confirmed) return;
   if (poleState.pole == null) return;
   poleState.confirmed = true;
@@ -151,7 +163,12 @@ function confirmPole() {
   const dx = actual.x - pivotX;
   const absDx = Math.abs(dx);
   const tipped = absDx > BALANCE_PERFECT_THRESHOLD;
-  recordBalanceDist('pole', absDx);
+  if (!replay) {
+    recordBalanceDist('pole', absDx);
+    if (state.daily) {
+      recordDailyResult('balance', 'pole', poleSnapshot(), !tipped);
+    }
+  }
   showPoleVerdict(dx, tipped);
   state.locked = true;
   dom.hitPad.style.cursor = 'default';
@@ -181,7 +198,7 @@ function runPoleSway(pivotX, pivotY, centroid) {
     if (Math.abs(theta) < 0.0015 && Math.abs(omega) < 0.02) {
       shapeG.removeAttribute('transform');
       poleState.animFrame = 0;
-      setTimeout(() => dom.newBtn.classList.add('pulse'), 400);
+      maybePulseNewBtn(400);
       return;
     }
     poleState.animFrame = requestAnimationFrame(step);
@@ -353,7 +370,7 @@ function runPoleFall(pivotX, pivotY, centroid) {
   function stopAnim() {
     applyTransform();
     poleState.animFrame = 0;
-    setTimeout(() => dom.newBtn.classList.add('pulse'), 400);
+    maybePulseNewBtn(400);
   }
 
   function step(now) {

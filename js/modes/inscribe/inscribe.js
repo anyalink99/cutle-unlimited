@@ -428,7 +428,20 @@ function findInscribedFallback(outer, N) {
   });
 }
 
-function confirmInscribe() {
+function inscribeSnapshot() {
+  return {
+    points: inscribeState.points.map(p => ({ x: p.x, y: p.y })),
+  };
+}
+
+function inscribeRestoreSnapshot(snap) {
+  if (!snap || !Array.isArray(snap.points)) return;
+  inscribeState.points = snap.points.map(p => ({ x: p.x, y: p.y }));
+  renderInscribeAll();
+}
+
+function confirmInscribe(opts) {
+  const replay = !!(opts && opts.replay);
   if (inscribeState.confirmed) return;
   const N = inscribeN();
   if (inscribeState.points.length !== N) return;
@@ -443,8 +456,16 @@ function confirmInscribe() {
     inscribeState.idealDrawn = true;
   }
   showInscribeVerdict(res, N);
-  recordInscribeScore(inscribeVariation(), res.score);
+  const v = inscribeVariation();
+  if (!replay) {
+    recordInscribeScore(v, res.score);
+    if (state.daily) {
+      recordDailyResult('inscribe', v, inscribeSnapshot(), res.score > 96);
+    }
+  }
   state.locked = true;
   updateActionButton();
-  setTimeout(() => dom.newBtn.classList.add('pulse'), 900);
+  if (!(state.daily && getTodayLock('inscribe', v))) {
+    setTimeout(() => dom.newBtn.classList.add('pulse'), 900);
+  }
 }

@@ -533,6 +533,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/core/page-meta.js"></script>
 <script src="${rel}js/core/modes.js"></script>
 <script src="${rel}js/core/router.js"></script>
+<script src="${rel}js/core/daily-lock.js"></script>
 <script src="${rel}js/geometry/geometry.js"></script>
 <script src="${rel}js/geometry/inscribed-square.js"></script>
 <script src="${rel}js/geometry/shapes.js"></script>
@@ -670,18 +671,21 @@ const STATS_MODAL = `<div class="modal-back" id="stats-modal">
         <p>Best cut: <b id="s-best">—</b></p>
         <p>Average off by: <b id="s-avg">—</b></p>
         <p>Perfect cuts (&lt;0.5%): <b id="s-perfect">0</b></p>
+        <p>Daily wins: <b id="s-daily-wins">0</b></p>
       </div>
       <div id="stats-inscribe-section">
         <p>Rounds played: <b id="in-attempts">0</b></p>
         <p>Best score: <b id="in-best">—</b></p>
         <p>Average score: <b id="in-avg">—</b></p>
         <p>Perfect (&gt;96%): <b id="in-perfect">0</b></p>
+        <p>Daily wins: <b id="in-daily-wins">0</b></p>
       </div>
       <div id="stats-balance-section">
         <p>Shapes played: <b id="bl-attempts">0</b></p>
         <p>Best off by: <b id="bl-best">—</b></p>
         <p>Average off by: <b id="bl-avg">—</b></p>
         <p>Perfect (&le;5): <b id="bl-perfect">0</b></p>
+        <p>Daily wins: <b id="bl-daily-wins">0</b></p>
       </div>
       <div class="close-row">
         <button class="btn secondary" id="reset-stats">Reset</button>

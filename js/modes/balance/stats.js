@@ -61,4 +61,5 @@ function renderBalanceStats(els, variation) {
   els.blBest.textContent = b.bestDist === Infinity ? '—' : b.bestDist.toFixed(1);
   els.blAvg.textContent = b.attempts ? (b.sumDist / b.attempts).toFixed(1) : '—';
   els.blPerfect.textContent = b.perfect;
+  if (els.blDailyWins) els.blDailyWins.textContent = dailyWinsFor('balance', variation);
 }

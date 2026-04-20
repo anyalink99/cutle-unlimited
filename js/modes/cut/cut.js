@@ -471,38 +471,58 @@ function evaluateCut() {
   return null;
 }
 
-function finalizeCut() {
+function cutSnapshot() {
+  return {
+    cuts: cutState.cuts.map(c => ({
+      a: { x: c.a.x, y: c.a.y },
+      b: { x: c.b.x, y: c.b.y },
+    })),
+  };
+}
+
+function cutRestoreSnapshot(snap) {
+  if (!snap || !Array.isArray(snap.cuts)) return;
+  cutState.cuts = snap.cuts.map(c => ({
+    a: { x: c.a.x, y: c.a.y },
+    b: { x: c.b.x, y: c.b.y },
+  }));
+}
+
+function finalizeCut(opts) {
+  const replay = !!(opts && opts.replay);
   if (cutState.confirmed) return;
   const v = cutVariation();
-  if (cutState.cuts.length !== cutRequiredCount()) {
-    flashCutHint('Place all lines first');
-    return;
-  }
-  for (const cut of cutState.cuts) {
-    if (!lineFullyCrossesShape(cut.a, cut.b, state.shape.outer)) {
-      flashCutHint('Each line must fully cross the shape');
+  if (!replay) {
+    if (cutState.cuts.length !== cutRequiredCount()) {
+      flashCutHint('Place all lines first');
       return;
     }
-  }
-  if (v === 'quad') {
-    if (!linesIntersectInsideShape(cutState.cuts[0], cutState.cuts[1], state.shape.outer)) {
-      flashCutHint('Lines must intersect inside the shape');
-      return;
+    for (const cut of cutState.cuts) {
+      if (!lineFullyCrossesShape(cut.a, cut.b, state.shape.outer)) {
+        flashCutHint('Each line must fully cross the shape');
+        return;
+      }
     }
-  }
-  if (v === 'tri') {
-    if (linesIntersectInsideShape(cutState.cuts[0], cutState.cuts[1], state.shape.outer)) {
-      flashCutHint('Second cut must not cross the first inside the shape');
-      return;
+    if (v === 'quad') {
+      if (!linesIntersectInsideShape(cutState.cuts[0], cutState.cuts[1], state.shape.outer)) {
+        flashCutHint('Lines must intersect inside the shape');
+        return;
+      }
     }
-    if (!chordSameSideOfLine(cutState.cuts[1], cutState.cuts[0], state.shape.outer)) {
-      flashCutHint('Second cut must stay in one half');
-      return;
+    if (v === 'tri') {
+      if (linesIntersectInsideShape(cutState.cuts[0], cutState.cuts[1], state.shape.outer)) {
+        flashCutHint('Second cut must not cross the first inside the shape');
+        return;
+      }
+      if (!chordSameSideOfLine(cutState.cuts[1], cutState.cuts[0], state.shape.outer)) {
+        flashCutHint('Second cut must stay in one half');
+        return;
+      }
     }
   }
   const res = evaluateCut();
-  if (!res) { flashCutHint('Could not score the cut'); return; }
-  if (res.invalid) { flashCutHint(res.msg); return; }
+  if (!res) { if (!replay) flashCutHint('Could not score the cut'); return; }
+  if (res.invalid) { if (!replay) flashCutHint(res.msg); return; }
 
   cutState.confirmed = true;
   state.locked = true;
@@ -550,9 +570,16 @@ function finalizeCut() {
   }, 60);
 
   showCutVerdict(res.text, res.sub);
-  recordCutDiff(v, res.off);
+  if (!replay) {
+    recordCutDiff(v, res.off);
+    if (state.daily) {
+      recordDailyResult('cut', v, cutSnapshot(), res.off < 0.5);
+    }
+  }
   updateActionButton();
-  setTimeout(() => dom.newBtn.classList.add('pulse'), 1000);
+  if (!(state.daily && getTodayLock('cut', v))) {
+    setTimeout(() => dom.newBtn.classList.add('pulse'), 1000);
+  }
 }
 
 function setupAngleChord(offsetRatio) {

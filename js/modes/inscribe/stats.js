@@ -60,4 +60,5 @@ function renderInscribeStats(els, variation) {
   els.inBest.textContent = b.bestScore === -Infinity ? '—' : b.bestScore.toFixed(1) + '%';
   els.inAvg.textContent = b.attempts ? (b.sumScore / b.attempts).toFixed(1) + '%' : '—';
   els.inPerfect.textContent = b.perfect;
+  if (els.inDailyWins) els.inDailyWins.textContent = dailyWinsFor('inscribe', variation);
 }

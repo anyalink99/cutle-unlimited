@@ -3,27 +3,38 @@ const statsEls = {
   best: document.getElementById('s-best'),
   avg: document.getElementById('s-avg'),
   perfect: document.getElementById('s-perfect'),
+  dailyWins: document.getElementById('s-daily-wins'),
   inAttempts: document.getElementById('in-attempts'),
   inBest: document.getElementById('in-best'),
   inAvg: document.getElementById('in-avg'),
   inPerfect: document.getElementById('in-perfect'),
+  inDailyWins: document.getElementById('in-daily-wins'),
   blAttempts: document.getElementById('bl-attempts'),
   blBest: document.getElementById('bl-best'),
   blAvg: document.getElementById('bl-avg'),
   blPerfect: document.getElementById('bl-perfect'),
+  blDailyWins: document.getElementById('bl-daily-wins'),
 };
 
-// ---- Main action button (Confirm / New Shape) ----
+// ---- Main action button (Confirm / New Shape / Daily countdown) ----
 document.getElementById('new-btn').addEventListener('click', () => {
   const action = dom.newBtn.dataset.action;
   if (action === 'confirm') {
     if (state.mode === 'inscribe') confirmInscribe();
     else if (state.mode === 'balance') confirmBalance();
     else if (state.mode === 'cut') finalizeCut();
+  } else if (action === 'locked') {
+    // Daily already played today — button shows a countdown and does nothing.
   } else {
     newShape();
   }
 });
+
+// Refresh the countdown label while a daily lock is active. Cheap — just
+// rewrites button text — and only fires when something would actually change.
+setInterval(() => {
+  if (isCurrentDailyLocked()) updateActionButton();
+}, 30000);
 
 // ---- Help + Stats modals ----
 document.getElementById('help-btn').addEventListener('click', () => openModal('help-modal'));

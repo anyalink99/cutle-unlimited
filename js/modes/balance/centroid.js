@@ -125,7 +125,18 @@ function showCentroidVerdict(dist) {
   });
 }
 
-function confirmCentroid() {
+function centroidSnapshot() {
+  return { guess: { x: centroidState.guess.x, y: centroidState.guess.y } };
+}
+
+function centroidRestoreSnapshot(snap) {
+  if (!snap || !snap.guess) return;
+  centroidState.guess = { x: snap.guess.x, y: snap.guess.y };
+  drawCentroidGuess(centroidState.guess);
+}
+
+function confirmCentroid(opts) {
+  const replay = !!(opts && opts.replay);
   if (centroidState.confirmed) return;
   if (!centroidState.guess) return;
   centroidState.confirmed = true;
@@ -135,9 +146,14 @@ function confirmCentroid() {
   const dist = Math.hypot(centroidState.guess.x - actual.x, centroidState.guess.y - actual.y);
   drawCentroidReveal(centroidState.guess, actual, dist);
   showCentroidVerdict(dist);
-  recordBalanceDist('centroid', dist);
+  if (!replay) {
+    recordBalanceDist('centroid', dist);
+    if (state.daily) {
+      recordDailyResult('balance', 'centroid', centroidSnapshot(), dist <= 5);
+    }
+  }
   state.locked = true;
   dom.hitPad.style.cursor = 'default';
   updateActionButton();
-  setTimeout(() => dom.newBtn.classList.add('pulse'), 900);
+  maybePulseNewBtn(900);
 }

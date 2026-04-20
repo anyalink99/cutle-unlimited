@@ -12,7 +12,7 @@ function updateBalanceHint() {
   else updateCentroidHint();
 }
 
-function confirmBalance() {
-  if (balanceVariation() === 'pole') confirmPole();
-  else confirmCentroid();
+function confirmBalance(opts) {
+  if (balanceVariation() === 'pole') confirmPole(opts);
+  else confirmCentroid(opts);
 }

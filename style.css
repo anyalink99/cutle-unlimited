@@ -250,6 +250,14 @@ h1.title, .title {
 .btn.secondary { background-color: #4b5563; box-shadow: 0 4px 0 #374151; }
 .btn.secondary:active { box-shadow: 0 2px 0 #374151; }
 .btn.pulse { animation: btnPulse 1.4s ease-in-out infinite; }
+.btn:disabled {
+  background-color: #4b5563;
+  box-shadow: 0 4px 0 #374151;
+  cursor: default;
+  opacity: 0.7;
+}
+.btn:disabled:hover { filter: none; }
+.btn:disabled:active { transform: none; box-shadow: 0 4px 0 #374151; }
 @keyframes btnPulse {
   0%,100% { box-shadow: 0 4px 0 var(--accent-deep), 0 0 0 0 rgba(192,132,252,0.5); }
   50%     { box-shadow: 0 4px 0 var(--accent-deep), 0 0 0 10px rgba(192,132,252,0); }
