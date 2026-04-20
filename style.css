@@ -564,8 +564,8 @@ body[data-mode="balance"][data-balance-variation="pole"]     .help-balance-pole 
   animation: varGroupIn 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 @keyframes varGroupIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   .var-group.active { animation: none; }

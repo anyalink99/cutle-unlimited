@@ -129,17 +129,21 @@ function openPuzzleModal() {
   puzzleModalTab = state.mode;
   refreshPuzzleModal();
   openModal('puzzle-modal');
-  // Suppress scrollbar during the modal's fadeScaleIn animation — the
-  // initial layout pass can briefly compute an overflow before flex settles,
-  // causing a one-frame scrollbar flash. After the animation is done, CSS
-  // overflow-y: auto kicks back in (shows scrollbar only if truly needed).
+  // Suppress scrollbar for the first couple of frames only — the initial
+  // layout pass can briefly compute an overflow before flex settles, which
+  // flashes a scrollbar on tall viewports where one isn't needed at all.
+  // Two rAFs is ~32ms (imperceptible) and guarantees the first paint has
+  // committed. If scroll is actually needed, CSS overflow-y: auto shows
+  // it right after — no awkward delay.
   const container = document.querySelector('#puzzle-modal .var-groups');
   if (container) {
     container.style.overflow = 'hidden';
-    setTimeout(() => {
-      // Leave tab-switch animation's own overflow handling alone.
-      if (!container._heightAnim) container.style.overflow = '';
-    }, 300);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // Don't stomp on tab-switch animation's own overflow handling.
+        if (!container._heightAnim) container.style.overflow = '';
+      });
+    });
   }
 }
 
