@@ -391,11 +391,12 @@ function drawIdealInscribe(corners) {
 }
 
 function showInscribeVerdict(res, N) {
+  const perfectThreshold = N === 3 ? 98 : 95;
   let cls;
-  if (res.score > 96)       cls = 'perfect';
-  else if (res.score >= 90) cls = 'great';
-  else if (res.score >= 75) cls = 'good';
-  else                      cls = 'fair';
+  if (res.score >= perfectThreshold) cls = 'perfect';
+  else if (res.score >= 90)          cls = 'great';
+  else if (res.score >= 75)          cls = 'good';
+  else                               cls = 'fair';
   const label = shapeLabel(N);
   dom.scoreLine.innerHTML = `
     <div class="verdict ${cls}" id="verdict">${label}: ${res.score.toFixed(1)}%</div>

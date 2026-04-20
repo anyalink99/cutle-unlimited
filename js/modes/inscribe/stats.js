@@ -50,7 +50,8 @@ function recordInscribeScore(variation, score) {
   b.attempts++;
   b.sumScore += score;
   if (score > b.bestScore) b.bestScore = score;
-  if (score > 96) b.perfect++;
+  const perfectThreshold = variation === 'triangle' ? 98 : 95;
+  if (score >= perfectThreshold) b.perfect++;
   saveInscribeStats(variation);
 }
 
