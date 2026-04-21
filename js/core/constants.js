@@ -32,3 +32,7 @@ const BALANCE_VARIATIONS = ['pole', 'centroid', 'perch'];
 const CUT_HANDLE_PAD = 22;
 
 const BALANCE_PERFECT_THRESHOLD = 5;
+
+function isCoarsePointer() {
+  return !!(window.matchMedia && window.matchMedia('(pointer: coarse)').matches);
+}

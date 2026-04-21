@@ -13,6 +13,8 @@ const PERCH_VIEW_PAD = 2;
 const TIP_TOUCH_EPS = 0.6;
 const HANDLE_R = 11;
 const HANDLE_GAP = 22;
+function perchHandleR() { return isCoarsePointer() ? HANDLE_R * 2 : HANDLE_R; }
+function perchHandleIconR() { return isCoarsePointer() ? 10.4 : 5.2; }
 const PERCH_WALL_L = -120, PERCH_WALL_R = 520;
 
 const perchState = {
@@ -170,7 +172,7 @@ function perchShapeBoundingRadius() {
 function perchComputeHandlePos() {
   const wc = perchWorldPivot();
   const R = perchShapeBoundingRadius() + HANDLE_GAP;
-  const pad = 18;
+  const pad = perchHandleR() + 7;
   const dirs = [[0, -1], [1, 0], [-1, 0], [0, 1]];
   for (const [dx, dy] of dirs) {
     const hx = wc.x + dx * R, hy = wc.y + dy * R;
@@ -225,7 +227,7 @@ function buildHandle() {
   layer.innerHTML = '';
   const g = document.createElementNS(SVG_NS, 'g');
   const circ = document.createElementNS(SVG_NS, 'circle');
-  circ.setAttribute('r', HANDLE_R);
+  circ.setAttribute('r', perchHandleR());
   circ.setAttribute('class', 'rot-handle');
   circ.addEventListener('pointerdown', onHandlePointerDown);
   g.appendChild(circ);
@@ -248,10 +250,12 @@ function updateHandlePos() {
   const icon = g.lastElementChild;
   circ.setAttribute('cx', hx);
   circ.setAttribute('cy', hy);
-  const r = 5.2;
+  circ.setAttribute('r', perchHandleR());
+  const r = perchHandleIconR();
+  const tick = r / 5.2 * 2.5;
   icon.setAttribute('d',
     `M ${hx - r} ${hy} A ${r} ${r} 0 1 1 ${hx + r} ${hy}` +
-    `M ${hx + r - 2.5} ${hy - 2.5} L ${hx + r} ${hy} L ${hx + r + 2.5} ${hy - 2.5}`
+    `M ${hx + r - tick} ${hy - tick} L ${hx + r} ${hy} L ${hx + r + tick} ${hy - tick}`
   );
 }
 

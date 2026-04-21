@@ -216,15 +216,16 @@ function drawInscribeLine(a, b, cls = 'inscribe-line') {
 }
 
 function drawInscribePoint(p, idx) {
+  const coarse = isCoarsePointer();
   const g = document.createElementNS(SVG_NS, 'g');
   g.setAttribute('class', 'inscribe-point');
   const halo = document.createElementNS(SVG_NS, 'circle');
   halo.setAttribute('cx', p.x); halo.setAttribute('cy', p.y);
-  halo.setAttribute('r', 11);
+  halo.setAttribute('r', coarse ? 22 : 11);
   halo.setAttribute('class', 'sp-halo');
   const dot = document.createElementNS(SVG_NS, 'circle');
   dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
-  dot.setAttribute('r', 5.5);
+  dot.setAttribute('r', coarse ? 11 : 5.5);
   dot.setAttribute('class', 'sp-dot');
   g.appendChild(halo);
   g.appendChild(dot);

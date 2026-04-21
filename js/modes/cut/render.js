@@ -61,6 +61,9 @@ function renderCutHandles() {
   dom.cutPoints.innerHTML = '';
   if (cutState.confirmed) return;
   const isAngle = cutVariation() === 'angle';
+  const coarse = isCoarsePointer();
+  const haloR = coarse ? 22 : 11;
+  const dotR = coarse ? 11 : 5.5;
   for (let i = 0; i < cutState.cuts.length; i++) {
     const cut = cutState.cuts[i];
     for (let j = 0; j < 2; j++) {
@@ -69,10 +72,10 @@ function renderCutHandles() {
       g.setAttribute('class', 'cut-handle');
       const halo = document.createElementNS(SVG_NS, 'circle');
       halo.setAttribute('cx', p.x); halo.setAttribute('cy', p.y);
-      halo.setAttribute('r', 11); halo.setAttribute('class', 'ch-halo');
+      halo.setAttribute('r', haloR); halo.setAttribute('class', 'ch-halo');
       const dot = document.createElementNS(SVG_NS, 'circle');
       dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y);
-      dot.setAttribute('r', 5.5);
+      dot.setAttribute('r', dotR);
       dot.setAttribute('class', 'ch-dot' + (isAngle ? ' locked' : ''));
       g.appendChild(halo);
       g.appendChild(dot);
