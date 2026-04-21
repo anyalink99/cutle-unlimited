@@ -587,8 +587,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/modes/balance/balance.js"></script>
 <script src="${rel}js/modes/balance/input.js"></script>
 <script src="${rel}js/modes/balance/stats.js"></script>
-<script src="${rel}js/stats.js"></script>
-<script src="${rel}js/mode-runner.js"></script>
+<script src="${rel}js/core/stats.js"></script>
+<script src="${rel}js/core/mode-runner.js"></script>
 <script src="${rel}js/vendor/qrcode.min.js"></script>
 <script src="${rel}js/vendor/gif-encoder.js"></script>
 <script src="${rel}js/share/base.js"></script>
@@ -597,7 +597,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/share/capture.js"></script>
 <script src="${rel}js/share/compose.js"></script>
 <script src="${rel}js/share/gif.js"></script>
-<script src="${rel}js/game.js"></script>
+<script src="${rel}js/core/game.js"></script>
 <script src="${rel}js/main.js"></script>
 </body>
 </html>
