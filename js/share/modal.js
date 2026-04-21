@@ -168,7 +168,12 @@ function downloadBlob(blob, filename) {
 async function nativeShareGif(blob) {
   try {
     const file = new File([blob], 'geometric-games.gif', { type: 'image/gif' });
-    await navigator.share({ files: [file], title: 'geometric.games', text: 'geometric.games' });
+    const url = (typeof sharePuzzleUrl === 'function') ? sharePuzzleUrl() : undefined;
+    // Both `text` and `url` set: platforms handle these differently (iMessage
+    // merges them, WhatsApp uses text as caption + url as preview, Twitter
+    // picks one), so duplicating covers the widest set of targets.
+    const text = url ? `Play this puzzle → ${url}` : 'geometric.games';
+    await navigator.share({ files: [file], title: 'geometric.games', text, url });
     if (typeof trackWithContext === 'function') trackWithContext('share_copied', { method: 'native' });
   } catch (e) {
     // AbortError = user cancelled, fine. Others → toast.
