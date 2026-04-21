@@ -1,0 +1,55 @@
+.cut-line {
+  fill: none;
+  stroke-width: 2.4; stroke-linecap: butt;
+}
+.cut-line.preview      { stroke: var(--pink); stroke-dasharray: 6 8; opacity: 0.7; }
+.cut-line.preview.valid { stroke: var(--accent); opacity: 1; stroke-dasharray: none; stroke-width: 3; }
+
+.cut-segment {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 5px rgba(192,132,252,0.45));
+  pointer-events: none;
+}
+.cut-handle { pointer-events: none; }
+.ch-halo {
+  fill: var(--accent);
+  fill-opacity: 0.14;
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-opacity: 0.55;
+}
+.ch-dot {
+  fill: white;
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 6px rgba(192,132,252,0.55));
+}
+.ch-dot.locked {
+  fill: var(--accent);
+  stroke: white;
+  stroke-width: 1.6;
+}
+.target-banner {
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+.target-banner b { color: var(--accent); }
+.cut-line.final {
+  stroke: white; stroke-width: 2; opacity: 0;
+  stroke-linecap: butt;
+  filter: drop-shadow(0 0 8px rgba(255,255,255,0.65));
+  animation: cutFlash 0.7s ease forwards;
+}
+
+@keyframes cutFlash {
+  0%   { opacity: 0; stroke-width: 6; }
+  30%  { opacity: 1; stroke-width: 4; }
+  100% { opacity: 0.35; stroke-width: 1.5; }
+}

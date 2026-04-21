@@ -1,0 +1,52 @@
+.actions {
+  display: flex; gap: 12px; width: 100%; max-width: 460px;
+  margin-top: 12px; margin-bottom: 6px; justify-content: center;
+  position: relative;
+}
+.share-float {
+  position: absolute;
+  right: 0;
+  bottom: 100%;
+  margin-bottom: 6px;
+  background: transparent;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: color 0.18s, background 0.18s, transform 0.18s;
+}
+.share-float:hover {
+  color: var(--accent);
+  background: rgba(192,132,252,0.12);
+  transform: translateY(-1px);
+}
+.share-float:active { transform: translateY(0); }
+.share-float[hidden] { display: none; }
+.btn {
+  background-color: var(--accent-soft); border: none; color: white;
+  border-radius: 20px; padding: 13px 0; width: 48%;
+  font-weight: 700; font-size: 1rem; letter-spacing: 0.5px; text-align: center;
+  box-shadow: 0 4px 0 var(--accent-deep);
+  transition: all 0.2s; cursor: pointer; font-family: inherit;
+}
+.btn[hidden] { display: none; }
+.btn:hover { filter: brightness(1.08); }
+.btn:active { transform: translateY(2px); box-shadow: 0 2px 0 var(--accent-deep); }
+.btn.secondary { background-color: #4b5563; box-shadow: 0 4px 0 #374151; }
+.btn.secondary:active { box-shadow: 0 2px 0 #374151; }
+.btn.pulse { animation: btnPulse 1.4s ease-in-out infinite; }
+.btn:disabled {
+  background-color: #4b5563;
+  box-shadow: 0 4px 0 #374151;
+  cursor: default;
+  opacity: 0.7;
+}
+.btn:disabled:hover { filter: none; }
+.btn:disabled:active { transform: none; box-shadow: 0 4px 0 #374151; }
+@keyframes btnPulse {
+  0%,100% { box-shadow: 0 4px 0 var(--accent-deep), 0 0 0 0 rgba(192,132,252,0.5); }
+  50%     { box-shadow: 0 4px 0 var(--accent-deep), 0 0 0 10px rgba(192,132,252,0); }
+}

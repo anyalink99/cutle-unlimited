@@ -1,0 +1,25 @@
+.stage {
+  position: relative; width: 100%; flex: 1;
+  display: flex; align-items: center; justify-content: center;
+  min-height: 0;
+}
+.stage svg {
+  width: 100%; height: 100%;
+  display: block;
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.stage svg * {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.hit-pad { fill: transparent; cursor: crosshair; }
+.stage, .stage svg, #board { overflow: visible; }
+#shape-layer, #pole-layer, #centroid-point-layer, #balance-hover-layer,
+#centroid-ideal-layer, #cut-layer, #cut-lines-layer, #cut-points-layer,
+#inscribe-ideal-layer, #inscribe-lines-layer, #inscribe-points-layer,
+#inscribe-hover-layer, #label-layer { overflow: visible; }

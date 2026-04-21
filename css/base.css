@@ -1,0 +1,45 @@
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+/* Modern browsers: smooth cross-fade between same-origin pages. Older
+   browsers ignore this rule and fall back to the body pageIn fade below. */
+@view-transition { navigation: auto; }
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.22s;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes pageIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+:root {
+  --bg-outer: #1a161d;
+  --bg-inner: #2d2631;
+  --accent: #c084fc;
+  --accent-soft: #a855f7;
+  --accent-deep: #6b2ea0;
+  --pink: #f472b6;
+  --muted: #9ca3af;
+  --good: #4ade80;
+  --warn: #f87171;
+  --s-curve: cubic-bezier(0.83, 0, 0.17, 1);
+  --pop: cubic-bezier(0.18, 0.89, 0.35, 1.15);
+}
+
+html, body { margin: 0; padding: 0; }
+body {
+  background-color: var(--bg-inner);
+  color: white;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  min-height: 100vh; min-height: 100dvh;
+  display: flex; flex-direction: column; align-items: center;
+  user-select: none; -webkit-user-select: none;
+  overscroll-behavior-y: contain;
+  animation: pageIn 0.22s ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  body { animation: none; }
+}

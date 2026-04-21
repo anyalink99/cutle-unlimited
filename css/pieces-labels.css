@@ -1,0 +1,25 @@
+.piece {
+  transition: transform 0.95s var(--s-curve);
+  will-change: transform;
+}
+
+.label-leader {
+  stroke: var(--accent); stroke-width: 1.4;
+  opacity: 0; transition: opacity 0.35s ease 0.55s;
+}
+.label-leader.show { opacity: 0.9; }
+
+.label-dot {
+  fill: var(--accent);
+  opacity: 0; transition: opacity 0.3s ease 0.55s;
+}
+.label-dot.show { opacity: 1; }
+
+.label-text {
+  fill: white;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 800; font-size: 16px;
+  text-anchor: middle; dominant-baseline: middle;
+  opacity: 0; transition: opacity 0.4s ease 0.7s;
+}
+.label-text.show { opacity: 1; }

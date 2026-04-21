@@ -1,0 +1,22 @@
+.score-line {
+  margin-top: 12px; min-height: 110px; text-align: center;
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+}
+.verdict {
+  font-size: 1.4rem; font-weight: 900; letter-spacing: 1px;
+  opacity: 0; transform: translateY(8px);
+  transition: opacity 0.45s ease 0.85s, transform 0.5s var(--pop) 0.85s;
+}
+.verdict.show { opacity: 1; transform: translateY(0); }
+.verdict.perfect  { color: var(--good); text-shadow: 0 0 16px rgba(74,222,128,0.55); }
+.verdict.great    { color: var(--accent); text-shadow: 0 0 14px rgba(192,132,252,0.5); }
+.verdict.good     { color: var(--pink); text-shadow: 0 0 12px rgba(244,114,182,0.45); }
+.verdict.fair     { color: #fbbf24; }
+
+.score-stats {
+  font-family: ui-monospace, monospace; color: var(--muted);
+  font-size: 0.95rem; font-weight: 600;
+  opacity: 0; transition: opacity 0.4s ease 1s;
+}
+.score-stats.show, .score-stats.always { opacity: 1; }
+.hint { color: var(--muted); font-size: 0.95rem; transition: color 0.25s; }

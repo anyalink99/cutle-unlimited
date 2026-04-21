@@ -1,0 +1,22 @@
+body[data-mode="cut"]      .help-inscribe,
+body[data-mode="cut"]      .help-balance  { display: none; }
+body[data-mode="inscribe"] .help-cut,
+body[data-mode="inscribe"] .help-balance  { display: none; }
+body[data-mode="balance"]  .help-cut,
+body[data-mode="balance"]  .help-inscribe { display: none; }
+
+body[data-mode="cut"] .help-cut > div { display: none; }
+body[data-mode="cut"][data-cut-variation="half"]  .help-cut-half,
+body[data-mode="cut"][data-cut-variation="ratio"] .help-cut-ratio,
+body[data-mode="cut"][data-cut-variation="quad"]  .help-cut-quad,
+body[data-mode="cut"][data-cut-variation="tri"]   .help-cut-tri,
+body[data-mode="cut"][data-cut-variation="angle"] .help-cut-angle { display: block; }
+
+body[data-mode="inscribe"] .help-inscribe > div { display: none; }
+body[data-mode="inscribe"][data-inscribe-variation="square"]   .help-inscribe-square,
+body[data-mode="inscribe"][data-inscribe-variation="triangle"] .help-inscribe-triangle { display: block; }
+
+body[data-mode="balance"] .help-balance > div { display: none; }
+body[data-mode="balance"][data-balance-variation="centroid"] .help-balance-centroid,
+body[data-mode="balance"][data-balance-variation="pole"]     .help-balance-pole,
+body[data-mode="balance"][data-balance-variation="perch"]    .help-balance-perch    { display: block; }

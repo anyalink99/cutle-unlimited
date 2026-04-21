@@ -1,0 +1,47 @@
+.inscribe-point { pointer-events: none; }
+.sp-halo {
+  fill: var(--accent);
+  fill-opacity: 0.14;
+  stroke: var(--accent);
+  stroke-width: 1.2;
+  stroke-opacity: 0.55;
+}
+.sp-dot {
+  fill: white;
+  stroke: var(--accent);
+  stroke-width: 2.2;
+  filter: drop-shadow(0 0 6px rgba(192,132,252,0.55));
+}
+.sp-hover {
+  fill: var(--pink);
+  fill-opacity: 0.9;
+  stroke: white;
+  stroke-width: 1.5;
+  opacity: 0.85;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(244,114,182,0.55));
+}
+
+.inscribe-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  opacity: 0.95;
+  filter: drop-shadow(0 0 5px rgba(192,132,252,0.45));
+  pointer-events: none;
+}
+
+.ideal-inscribe { opacity: 0; transition: opacity 0.5s ease; pointer-events: none; }
+.ideal-inscribe.show { opacity: 1; }
+.ideal-edge {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 2;
+  stroke-dasharray: 5 5;
+  filter: drop-shadow(0 0 6px rgba(74,222,128,0.5));
+}
+.ideal-corner {
+  fill: var(--good);
+  filter: drop-shadow(0 0 4px rgba(74,222,128,0.7));
+}

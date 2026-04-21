@@ -1,0 +1,20 @@
+.math-note {
+  font-size: 0.82rem;
+  color: #9ca3af;
+  border-top: 1px solid #3a3340;
+  padding-top: 10px;
+  margin-top: 10px;
+  line-height: 1.45;
+}
+.math-note b { color: var(--accent); font-weight: 700; }
+.math-note i { color: #d1d5db; font-style: italic; }
+.math-more {
+  display: inline-block;
+  margin-top: 2px;
+  color: var(--accent);
+  text-decoration: none;
+  border-bottom: 1px solid rgba(192,132,252,0.3);
+  white-space: nowrap;
+  transition: color 0.15s, border-color 0.15s;
+}
+.math-more:hover { color: var(--pink); border-bottom-color: var(--pink); }
