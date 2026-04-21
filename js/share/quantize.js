@@ -10,12 +10,6 @@
 const PALETTE_SIZE_DEFAULT = 64;
 const PALETTE_SIZE_MAX = 256;
 
-// Extract an RGBA Uint8ClampedArray from a CanvasRenderingContext2D region.
-// Caller owns the canvas; we just read pixels.
-function readPixels(ctx, w, h) {
-  return ctx.getImageData(0, 0, w, h).data;
-}
-
 // Build a palette from sampled pixels. Samples 1-in-stride pixels for speed
 // on large canvases; quality loss is minimal because the game uses a limited
 // color range and the sample is still in the tens of thousands.

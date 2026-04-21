@@ -1,8 +1,8 @@
 /* Frame capture pipeline for share-GIF.
-   Each output frame mirrors the static PNG layout (brand header, mode label,
-   board, verdict/stats, QR + URL). Board is a rasterized clone of the live
-   SVG sampled at animation time t, cropped to the same tight viewBox PNG
-   share uses so framing matches 1-to-1. */
+   Snapshots the user's confirmed answer, replays it through modeRunner with
+   a body.gif-capturing flag that suppresses the fresh-shape pop, and samples
+   the live SVG at fixed intervals. The same tight viewBox PNG share uses is
+   applied to every snapshot so framing stays consistent across frames. */
 
 const CAPTURE_WIDTH = 540;
 const CAPTURE_HEIGHT = 540;
@@ -13,39 +13,37 @@ const REVEAL_FRAME_DELAY_MS = CAPTURE_DURATION_MS / CAPTURE_FRAME_COUNT;
 const HOLD_FRAME_DELAY_MS = 70;
 
 // Apply a pre-computed tight viewBox to every captured snapshot so all frames
-// are framed identically (matching the PNG share's crop). Without this the
-// raw board viewBox of "-60 -80 520 560" leaves a lot of empty margin.
+// are framed identically (matching the PNG share's crop). xmlns:xlink is set
+// because drop-to-load custom shapes paint via <image xlink:href="data:..."/>
+// (main.js#paintImageInto) — without the namespace declaration the serialized
+// SVG is invalid XML and <img>-decoding fails with "svg image decode failed".
+// XMLSerializer (not innerHTML) is required: the HTML serializer silently
+// drops namespaced attributes like xlink:href.
 function serializeBoardSnapshot(srcSvg, viewBox) {
   const clone = srcSvg.cloneNode(true);
-  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
-  clone.setAttribute('overflow', 'visible');
   inlineSvgStyles(srcSvg, clone);
   const preview = clone.querySelector('#cut-preview');
   if (preview) preview.remove();
   const hitPad = clone.querySelector('#hit-pad');
   if (hitPad) hitPad.remove();
   clone.querySelectorAll('.sp-hover, .centroid-hover, .pole-hover').forEach(el => el.remove());
+  clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+  clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink');
+  clone.setAttribute('overflow', 'visible');
   if (viewBox) {
     clone.setAttribute('viewBox', `${viewBox.x} ${viewBox.y} ${viewBox.w} ${viewBox.h}`);
     clone.setAttribute('width', viewBox.w);
     clone.setAttribute('height', viewBox.h);
   }
-  const wrap = document.createElement('div');
-  wrap.appendChild(clone);
-  return wrap.innerHTML;
+  return new XMLSerializer().serializeToString(clone);
 }
 
 function resetForCapture() {
   state.locked = false;
-  state._capturing = true;
   document.body.classList.add('gif-capturing');
-  try {
-    resetAllModes();
-    renderShape(state.shape);
-    modeRunner[state.mode].onShapeReady();
-  } finally {
-    state._capturing = false;
-  }
+  resetAllModes();
+  renderShape(state.shape);
+  modeRunner[state.mode].onShapeReady();
 }
 
 function readVerdictState() {

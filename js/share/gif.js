@@ -1,8 +1,8 @@
 /* Top-level share-GIF orchestrator:
      click → open modal with PNG → capture reveal → compose + encode → swap.
-   Capture samples live SVG frames; composition stamps brand/label/verdict
-   into each frame plus a fade-in QR + URL block held for 2× the reveal so
-   viewers have time to read the share link. */
+   Capture samples live SVG frames; composition stamps brand/label/verdict/
+   URL into each frame. Reveal frames play at ~15 FPS; the final frame is
+   held for HOLD_FRAME_COUNT duplicates so viewers can read the share link. */
 
 const GIF_PREFERS_REDUCED_MOTION = () =>
   typeof window !== 'undefined' &&
@@ -54,7 +54,8 @@ async function runShareFlow() {
     if (typeof trackWithContext === 'function') trackWithContext('share_gif_built', { bytes: gifBlob.size });
   } catch (e) {
     console.warn('share: gif build failed', e);
-    setShareModalError("Couldn't build GIF — try Copy image");
+    const msg = (e && (e.name || e.message)) ? `${e.name || 'Error'}: ${e.message || e}` : 'unknown';
+    setShareModalError(`GIF build failed — ${msg}`);
     if (typeof trackWithContext === 'function') trackWithContext('share_failed', { reason: 'gif_build' });
   } finally {
     stopCaptureMode();
@@ -66,9 +67,9 @@ async function runShareFlow() {
 async function buildGif() {
   const capturedFrames = await captureRevealFrames();
 
-  // Compose each captured sample into a full-layout frame. Every frame
-  // already includes QR + URL (no fade-in) so the share link is visible
-  // from the first looped instant.
+  // Compose each captured sample into a full-layout frame. The URL footer
+  // is drawn on every frame so the share link is visible from the first
+  // loop instant.
   const composedPixels = [];
   for (let i = 0; i < capturedFrames.length; i++) {
     const { svg, verdict } = capturedFrames[i];
@@ -81,7 +82,7 @@ async function buildGif() {
   const last = capturedFrames[capturedFrames.length - 1];
   const holdPixels = await buildComposedFrame(last.svg, last.verdict);
 
-  // Palette samples the last frame — it has QR/URL plus the final verdict,
+  // Palette samples the last frame — it has the URL plus the final verdict,
   // so every color that will appear in the GIF is represented. Custom-image
   // puzzles switch to a 256-color palette so photo content survives.
   const palette = buildPalette(holdPixels, gifPaletteSize());

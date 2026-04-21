@@ -1,8 +1,7 @@
 /* Composes a full share-GIF frame on canvas: brand header, mode label, board
-   (rasterized SVG snapshot), verdict/stats, QR + URL. Layout is the static
-   PNG's 1080×1080 scaled to 540×540 — all offsets/fonts multiplied by 0.5
-   so GIF framing matches the shared PNG 1-to-1. QR + URL are drawn on every
-   frame (no fade-in) so the share link is visible even on preview loops. */
+   (rasterized SVG snapshot), verdict/stats, and a URL footer. Layout is the
+   static PNG's 1080×1080 scaled to 540×540 — offsets/fonts multiplied by 0.5
+   so GIF framing matches the shared PNG 1-to-1. */
 
 const COMPOSE_BG = '#2d2631';
 const _COMPOSE_SCALE = CAPTURE_WIDTH / 1080;
@@ -44,29 +43,9 @@ function ensureComposeCanvas() {
   return { canvas: _composeCanvas, ctx: _composeCtx };
 }
 
-// Blob-URL SVGs that contain nested <image href="data:..."> (drop-to-load
-// custom shapes) taint the canvas in Chrome/Safari because the inner data
-// URL is treated as cross-origin relative to the blob origin. Switch to a
-// data-URL outer SVG in that case: both outer + inner are data URLs with
-// null origin, and the canvas stays origin-clean so getImageData works.
-function _composeNeedsDataUrl() {
-  return typeof state !== 'undefined' && !!state.shapeImage;
-}
-
-function _svgStringToUrl(svgStr) {
-  if (_composeNeedsDataUrl()) {
-    return {
-      url: 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svgStr),
-      revoke: null,
-    };
-  }
-  const blob = new Blob([svgStr], { type: 'image/svg+xml' });
-  const url = URL.createObjectURL(blob);
-  return { url, revoke: () => URL.revokeObjectURL(url) };
-}
-
 async function rasterizeSvgToCanvas(svgStr, maxW, maxH) {
-  const { url, revoke } = _svgStringToUrl(svgStr);
+  const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
   try {
     const img = new Image();
     img.decoding = 'async';
@@ -86,7 +65,7 @@ async function rasterizeSvgToCanvas(svgStr, maxW, maxH) {
     _boardCtx.drawImage(img, 0, 0, w, h);
     return { canvas: _boardCanvas, w, h };
   } finally {
-    if (revoke) revoke();
+    URL.revokeObjectURL(url);
   }
 }
 
