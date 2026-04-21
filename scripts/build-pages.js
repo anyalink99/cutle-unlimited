@@ -278,7 +278,7 @@ function postCourantRobbins() {
 
 function postInscribedSquare() {
   return `
-  <h2>Inscribe a square inside a shape</h2>
+  <h2>Inscribe a square on a shape’s outline</h2>
   <p>
     Place <b>four points</b> on the shape’s outline so they form a square. As you move your
     cursor, the nearest outline point follows it — tap to drop a vertex. After four drops the
