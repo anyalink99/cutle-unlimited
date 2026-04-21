@@ -77,8 +77,14 @@ function diagCorners(tA, tC, param) {
 }
 
 function diagCost(tA, tC, param, outer) {
-  const { B, D } = diagCorners(tA, tC, param);
-  return distToOutlineSq(B, outer) + distToOutlineSq(D, outer);
+  const { A, B, C, D, diag } = diagCorners(tA, tC, param);
+  const base = distToOutlineSq(B, outer) + distToOutlineSq(D, outer);
+  // Penalize degenerate (collapsed) diagonals so the optimizer doesn't settle
+  // on tA ≈ tC where B,D coincide with A,C on the outline (cost = 0 but useless).
+  const MIN_DIAG = 14 * Math.SQRT2;
+  if (diag >= MIN_DIAG) return base;
+  const slack = MIN_DIAG - diag;
+  return base + slack * slack * 4;
 }
 
 function diagOptimize(tA, tC, param, outer, iters) {
@@ -103,11 +109,13 @@ function diagOptimize(tA, tC, param, outer, iters) {
   return { tA, tC, cost: diagCost(tA, tC, param, outer) };
 }
 
-function diagValidate(tA, tC, param, outer) {
+function diagValidate(tA, tC, param, outer, relaxed) {
   const { A, B, C, D, diag } = diagCorners(tA, tC, param);
   if (diag < 14 * Math.SQRT2) return null;
-  const mx = (A.x + C.x) / 2, my = (A.y + C.y) / 2;
-  if (!pointInPolygon({ x: mx, y: my }, outer)) return null;
+  if (!relaxed) {
+    const mx = (A.x + C.x) / 2, my = (A.y + C.y) / 2;
+    if (!pointInPolygon({ x: mx, y: my }, outer)) return null;
+  }
   const B2 = projectToOutline(B, outer);
   const D2 = projectToOutline(D, outer);
   return { corners: [A, B2, C, D2], side: diag / Math.SQRT2 };
@@ -118,7 +126,6 @@ function findInscribedSquare(outer, opts) {
   const coarseIters = (opts && opts.coarseIters) || 35;
   const topK = (opts && opts.topK) || 80;
   const refineIters = (opts && opts.refineIters) || 400;
-  const MAX_COST = 200;
   const param = buildOutlineParam(outer);
   const coarse = [];
   for (let i = 0; i < N; i++) {
@@ -128,13 +135,21 @@ function findInscribedSquare(outer, opts) {
     }
   }
   coarse.sort((a, b) => a.cost - b.cost);
+  const refined = coarse.slice(0, topK).map(c =>
+    diagOptimize(c.tA, c.tC, param, outer, refineIters)
+  );
   let best = null;
-  for (const c of coarse.slice(0, topK)) {
-    const r = diagOptimize(c.tA, c.tC, param, outer, refineIters);
-    if (r.cost > MAX_COST) continue;
-    const v = diagValidate(r.tA, r.tC, param, outer);
+  for (const r of refined) {
+    const v = diagValidate(r.tA, r.tC, param, outer, false);
     if (!v) continue;
     if (!best || v.side > best.side) best = v;
+  }
+  if (!best) {
+    for (const r of refined) {
+      const v = diagValidate(r.tA, r.tC, param, outer, true);
+      if (!v) continue;
+      if (!best || v.side > best.side) best = v;
+    }
   }
   return best ? best.corners : null;
 }
@@ -165,6 +180,11 @@ function ngonCost(tA, tB, sign, N, param, outer) {
   if (!n) return Infinity;
   let cost = 0;
   for (let k = 2; k < N; k++) cost += distToOutlineSq(n.corners[k], outer);
+  const MIN_SIDE = 14;
+  if (n.side < MIN_SIDE) {
+    const slack = MIN_SIDE - n.side;
+    cost += slack * slack * 4;
+  }
   return cost;
 }
 
@@ -191,12 +211,12 @@ function ngonOptimize(tA, tB, sign, N, param, outer, iters) {
   return { tA, tB, sign, cost: ngonCost(tA, tB, sign, N, param, outer) };
 }
 
-function ngonValidate(tA, tB, sign, N, param, outer) {
+function ngonValidate(tA, tB, sign, N, param, outer, relaxed) {
   const n = ngonCornersFromEdge(tA, tB, sign, N, param);
   if (!n) return null;
   const { corners, side, center } = n;
   if (side < 14) return null;
-  if (!pointInPolygon(center, outer)) return null;
+  if (!relaxed && !pointInPolygon(center, outer)) return null;
   const out = [corners[0], corners[1]];
   for (let k = 2; k < N; k++) out.push(projectToOutline(corners[k], outer));
   return { corners: out, side };
@@ -207,7 +227,6 @@ function findInscribedRegularNgon(outer, N, opts) {
   const coarseIters = (opts && opts.coarseIters) || 22;
   const topK = (opts && opts.topK) || 50;
   const refineIters = (opts && opts.refineIters) || 240;
-  const MAX_COST = 200;
   const param = buildOutlineParam(outer);
   const coarse = [];
   for (let i = 0; i < Nsamp; i++) {
@@ -217,13 +236,21 @@ function findInscribedRegularNgon(outer, N, opts) {
     }
   }
   coarse.sort((a, b) => a.cost - b.cost);
+  const refined = coarse.slice(0, topK).map(c =>
+    ngonOptimize(c.tA, c.tB, c.sign, N, param, outer, refineIters)
+  );
   let best = null;
-  for (const c of coarse.slice(0, topK)) {
-    const r = ngonOptimize(c.tA, c.tB, c.sign, N, param, outer, refineIters);
-    if (r.cost > MAX_COST) continue;
-    const v = ngonValidate(r.tA, r.tB, c.sign, N, param, outer);
+  for (const r of refined) {
+    const v = ngonValidate(r.tA, r.tB, r.sign, N, param, outer, false);
     if (!v) continue;
     if (!best || v.side > best.side) best = v;
+  }
+  if (!best) {
+    for (const r of refined) {
+      const v = ngonValidate(r.tA, r.tB, r.sign, N, param, outer, true);
+      if (!v) continue;
+      if (!best || v.side > best.side) best = v;
+    }
   }
   return best ? best.corners : null;
 }
