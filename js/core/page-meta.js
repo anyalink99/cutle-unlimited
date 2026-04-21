@@ -32,8 +32,8 @@ const PAGE_META = {
   },
   "inscribe:triangle": {
     "path": "/inscribe/triangle/",
-    "title": "Inscribed equilateral triangle puzzle | geometric.games",
-    "description": "Place three points on a shape’s outline so they form an equilateral triangle — the solved sibling of the Toeplitz problem."
+    "title": "Largest inscribed equilateral triangle puzzle | geometric.games",
+    "description": "Find the largest equilateral triangle that fits inside a shape — three points on the outline, scored on both regularity and size."
   },
   "balance:pole": {
     "path": "/balance/",

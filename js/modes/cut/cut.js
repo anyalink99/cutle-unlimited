@@ -61,7 +61,8 @@ function evaluateCut() {
   if (v === 'half' || v === 'angle') {
     if (pcts.length < 2) return null;
     const off = Math.abs(pcts[0] - pcts[1]) / 2;
-    return { off, pieces, pcts, text: `Off by: ${off.toFixed(2)}%` };
+    const text = off < 0.005 ? 'Perfect cut!' : `Off by: ${off.toFixed(2)}%`;
+    return { off, pieces, pcts, text };
   }
   if (v === 'ratio') {
     if (pcts.length < 2) return null;
@@ -69,7 +70,8 @@ function evaluateCut() {
     const tHi = 100 - tLo;
     const loPct = Math.min(pcts[0], pcts[1]);
     const off = Math.abs(loPct - tLo);
-    return { off, pieces, pcts, text: `Off by: ${off.toFixed(2)}%`, sub: `Target ${tLo.toFixed(0)}/${tHi.toFixed(0)} • got ${loPct.toFixed(1)}/${(100 - loPct).toFixed(1)}` };
+    const text = off < 0.005 ? 'Perfect cut!' : `Off by: ${off.toFixed(2)}%`;
+    return { off, pieces, pcts, text, sub: `Target ${tLo.toFixed(0)}/${tHi.toFixed(0)} • got ${loPct.toFixed(1)}/${(100 - loPct).toFixed(1)}` };
   }
   if (v === 'quad') {
     if (pcts.length !== 4) {
@@ -81,7 +83,8 @@ function evaluateCut() {
     const devs = pcts.map(p => Math.abs(p - target));
     const off = Math.max(...devs);
     const sorted = pcts.slice().sort((a, b) => a - b);
-    return { off, pieces, pcts, text: `Off by: ${off.toFixed(2)}%`, sub: `pieces ${sorted.map(x => x.toFixed(1)).join(' / ')}` };
+    const text = off < 0.005 ? 'Perfect quartering!' : `Off by: ${off.toFixed(2)}%`;
+    return { off, pieces, pcts, text, sub: `pieces ${sorted.map(x => x.toFixed(1)).join(' / ')}` };
   }
   if (v === 'tri') {
     if (pcts.length !== 3) {
@@ -91,7 +94,8 @@ function evaluateCut() {
     const devs = pcts.map(p => Math.abs(p - target));
     const off = Math.max(...devs);
     const sorted = pcts.slice().sort((a, b) => a - b);
-    return { off, pieces, pcts, text: `Off by: ${off.toFixed(2)}%`, sub: `pieces ${sorted.map(x => x.toFixed(1)).join(' / ')}` };
+    const text = off < 0.005 ? 'Perfect thirds!' : `Off by: ${off.toFixed(2)}%`;
+    return { off, pieces, pcts, text, sub: `pieces ${sorted.map(x => x.toFixed(1)).join(' / ')}` };
   }
   return null;
 }
@@ -194,7 +198,7 @@ function finalizeCut(opts) {
     });
   }, 60);
 
-  showCutVerdict(res.text, res.sub);
+  showCutVerdict(res.off, res.text, res.sub);
   if (!replay) {
     recordCutDiff(v, res.off);
     if (state.daily) {

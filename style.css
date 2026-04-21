@@ -197,7 +197,7 @@ h1.title, .title {
 .label-text.show { opacity: 1; }
 
 .score-line {
-  margin-top: 12px; min-height: 80px; text-align: center;
+  margin-top: 12px; min-height: 110px; text-align: center;
   display: flex; flex-direction: column; align-items: center; gap: 6px;
 }
 .verdict {

@@ -397,12 +397,14 @@ function perchRestoreSnapshot(snap) {
 }
 
 function showPerchVerdict(dx, tipped) {
+  const abs = Math.abs(dx);
   const cls = tipped ? 'fair' : 'perfect';
   const side = dx < 0 ? 'left' : 'right';
-  const amount = Math.abs(dx).toFixed(1);
-  const text = tipped
-    ? `Tipped — off to the ${side} by ${amount}`
-    : `Balanced — off to the ${side} by ${amount}`;
+  const amount = abs.toFixed(1);
+  let text;
+  if (tipped) text = `Tipped — off to the ${side} by ${amount}`;
+  else if (abs < 0.05) text = 'Perfect balance!';
+  else text = `Balanced — off to the ${side} by ${amount}`;
   dom.scoreLine.innerHTML = `<div class="verdict ${cls}" id="verdict">${text}</div>`;
   const v = document.getElementById('verdict');
   v.getBoundingClientRect();

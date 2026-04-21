@@ -43,7 +43,7 @@ Shapes are generated from random seeds, so you never run out. Or pick the **Dail
 | Variation | Goal |
 |---|---|
 | **Square** | Place four points on the outline to form the closest possible square. |
-| **Equilateral Triangle** | Place three points forming a triangle with equal sides and 60° angles. |
+| **Equilateral Triangle** | Find the largest equilateral triangle that fits inside the shape — scored on both regularity and size. |
 
 > *Math behind it:* Toeplitz's 1911 Inscribed Square Problem asks whether every closed curve contains 4 points forming a square. Proven for polygons, smooth curves, and piecewise-smooth curves like the ones here — but for arbitrary Jordan curves it's **still open**. The equilateral-triangle case is fully settled (Nielsen & Wright, 1990).
 

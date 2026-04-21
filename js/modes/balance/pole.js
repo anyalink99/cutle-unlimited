@@ -129,12 +129,16 @@ function updatePoleHint() {
 }
 
 function showPoleVerdict(dx, tipped) {
+  const abs = Math.abs(dx);
   const side = dx < 0 ? 'left' : 'right';
-  const amount = Math.abs(dx).toFixed(1);
+  const amount = abs.toFixed(1);
   let cls, text;
   if (tipped) {
     cls = 'fair';
     text = `Tipped — off to the ${side} by ${amount}`;
+  } else if (abs < 0.05) {
+    cls = 'perfect';
+    text = 'Perfect balance!';
   } else {
     cls = 'perfect';
     text = `Balanced — off to the ${side} by ${amount}`;

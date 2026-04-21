@@ -203,8 +203,7 @@ function addCutLabel(c, nx, ny, sign, offset, pct) {
   });
 }
 
-function showCutVerdict(mainText, subText) {
-  const off = parseFloat((mainText.match(/[\d.]+/) || [0])[0]);
+function showCutVerdict(off, mainText, subText) {
   let cls;
   if (off < 0.5) cls = 'perfect';
   else if (off < 2) cls = 'great';

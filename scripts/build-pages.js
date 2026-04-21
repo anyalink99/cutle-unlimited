@@ -96,8 +96,8 @@ const GAME_PAGES = [
     canonicalPath: '/inscribe/triangle/',
     mode: 'inscribe',
     variation: 'triangle',
-    title: 'Inscribed equilateral triangle puzzle | geometric.games',
-    description: 'Place three points on a shape’s outline so they form an equilateral triangle — the solved sibling of the Toeplitz problem.',
+    title: 'Largest inscribed equilateral triangle puzzle | geometric.games',
+    description: 'Find the largest equilateral triangle that fits inside a shape — three points on the outline, scored on both regularity and size.',
   },
   {
     outPath: 'balance/index.html',
@@ -324,12 +324,13 @@ function postInscribedSquare() {
 
 function postInscribedTriangle() {
   return `
-  <h2>Inscribe an equilateral triangle</h2>
+  <h2>Inscribe the largest equilateral triangle</h2>
   <p>
     Drop <b>three points</b> on the shape’s outline so they form an equilateral triangle — all
-    three sides the same length, all three angles 60°. Same placement mechanics as the
-    <a href="/inscribe/">square variation</a>: the nearest boundary point follows your cursor, tap
-    to drop, drag to refine, confirm to score.
+    three sides the same length, all three angles 60° — and make it as <b>large</b> as possible.
+    The puzzle scores you on both regularity and size relative to the maximum inscribed equilateral
+    that fits in the shape. Same placement mechanics as the <a href="/inscribe/">square variation</a>:
+    the nearest boundary point follows your cursor, tap to drop, drag to refine, confirm to score.
   </p>
 
   <h2>The math: Nielsen–Wright and friends</h2>
@@ -664,10 +665,10 @@ const HELP_MODAL = `<div class="modal-back" id="help-modal">
           <p class="math-note"><b>Math:</b> Toeplitz's Inscribed Square Problem (1911) — does every closed curve contain 4 points forming a square? Proven for polygons, smooth curves, and piecewise-smooth curves like the ones here; for arbitrary Jordan curves it's still <i>open</i> after 110+ years. <a class="math-more" href="/blog/inscribed-square-problem/">Read more →</a></p>
         </div>
         <div class="help-inscribe-triangle">
-          <p>Place <b>three points</b> on the outline to form an equilateral triangle.</p>
+          <p>Find the <b>largest equilateral triangle</b> that fits inside the shape — three points on the outline.</p>
           <ul>
             <li>Same controls as Square — tap, drop, and drag to adjust</li>
-            <li>All three sides must be equal and every angle 60°</li>
+            <li>Score = regularity (equal sides, 60° angles) × size relative to the maximum inscribed equilateral</li>
             <li>After three points, press <b>Confirm</b> to score</li>
           </ul>
           <p class="math-note"><b>Math:</b> every Jordan curve contains inscribed equilateral triangles — proven by Nielsen &amp; Wright (1990) and others. Unlike Toeplitz's square, the triangle case is fully settled. <a class="math-more" href="/blog/inscribed-equilateral-triangle/">Read more →</a></p>
@@ -719,7 +720,7 @@ const STATS_MODAL = `<div class="modal-back" id="stats-modal">
         <p>Rounds played: <b id="in-attempts">0</b></p>
         <p>Best score: <b id="in-best">—</b></p>
         <p>Average score: <b id="in-avg">—</b></p>
-        <p>Perfect (&gt;96%): <b id="in-perfect">0</b></p>
+        <p>Perfect (&ge;95%): <b id="in-perfect">0</b></p>
         <p>Daily wins: <b id="in-daily-wins">0</b></p>
       </div>
       <div id="stats-balance-section">
@@ -786,8 +787,8 @@ const PUZZLE_MODAL = `<div class="modal-back" id="puzzle-modal">
             <div class="mode-desc">Four points forming a regular square — the classic inscribed-square challenge.</div>
           </button>
           <button class="var-card" data-var="triangle">
-            <div class="mode-title">Equilateral Triangle</div>
-            <div class="mode-desc">Three points with equal sides and 60° angles.</div>
+            <div class="mode-title">Largest Equilateral Triangle</div>
+            <div class="mode-desc">Find the largest equilateral triangle that fits inside the shape.</div>
           </button>
         </div>
         <div class="var-group" data-mode="balance">

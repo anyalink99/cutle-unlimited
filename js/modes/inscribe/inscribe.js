@@ -347,7 +347,7 @@ function computeIdealNgon(pts, N) {
   return best;
 }
 
-function evaluateNgon(pts, N) {
+function evaluateNgon(pts, N, idealCorners) {
   const ideal = computeIdealNgon(pts, N);
   const o = ideal.ordered;
   const sides = [];
@@ -376,10 +376,23 @@ function evaluateNgon(pts, N) {
   }
   const rms = Math.sqrt(sumSq / N);
   const rel = meanSide > 0 ? rms / meanSide : 1;
-  const score = Math.max(0, Math.min(100, (1 - rel * 2.2) * 100));
+  const baseScore = Math.max(0, Math.min(100, (1 - rel * 2.2) * 100));
+  let sizeRatio = 1;
+  if (N === 3 && idealCorners && idealCorners.length === 3) {
+    let idealMean = 0;
+    for (let i = 0; i < 3; i++) {
+      idealMean += Math.hypot(
+        idealCorners[i].x - idealCorners[(i + 1) % 3].x,
+        idealCorners[i].y - idealCorners[(i + 1) % 3].y
+      );
+    }
+    idealMean /= 3;
+    if (idealMean > 0) sizeRatio = Math.min(1, meanSide / idealMean);
+  }
+  const score = baseScore * sizeRatio;
   const maxS = Math.max(...sides), minS = Math.min(...sides);
-  const sideRatio = maxS > 0 ? minS / maxS : 0;
-  return { ideal, sides, meanSide, angles, angleErr, worstAngle, rms, rel, score, sideRatio, idealAngle };
+  const sideEvenRatio = maxS > 0 ? minS / maxS : 0;
+  return { ideal, sides, meanSide, angles, angleErr, worstAngle, rms, rel, score, sideRatio: sideEvenRatio, sizeRatio, idealAngle };
 }
 
 function drawIdealInscribe(corners) {
@@ -410,31 +423,40 @@ function drawIdealInscribe(corners) {
 }
 
 function showInscribeVerdict(res, N) {
-  const perfectThreshold = N === 3 ? 98 : 95;
+  const perfectThreshold = 95;
   let cls;
   if (res.score >= perfectThreshold) cls = 'perfect';
   else if (res.score >= 90)          cls = 'great';
   else if (res.score >= 75)          cls = 'good';
   else                               cls = 'fair';
   const label = shapeLabel(N);
+  const main = res.score >= 99.95
+    ? `Perfect ${label.toLowerCase()}!`
+    : `${label}: ${res.score.toFixed(1)}%`;
+  const sizeLine = N === 3
+    ? `<div class="score-stats" id="sstats3">size ${(res.sizeRatio * 100).toFixed(1)}% of max</div>`
+    : '';
   dom.scoreLine.innerHTML = `
-    <div class="verdict ${cls}" id="verdict">${label}: ${res.score.toFixed(1)}%</div>
+    <div class="verdict ${cls}" id="verdict">${main}</div>
     <div class="score-stats" id="sstats">
       sides ${(res.sideRatio * 100).toFixed(1)}% even
     </div>
     <div class="score-stats" id="sstats2">
       worst angle ${res.worstAngle.toFixed(1)}°
     </div>
+    ${sizeLine}
   `;
   const v = document.getElementById('verdict');
   const s = document.getElementById('sstats');
   const s2 = document.getElementById('sstats2');
+  const s3 = document.getElementById('sstats3');
   v.getBoundingClientRect();
   requestAnimationFrame(() => {
     requestAnimationFrame(() => {
       v.classList.add('show');
       s.classList.add('show');
       s2.classList.add('show');
+      if (s3) s3.classList.add('show');
     });
   });
 }
@@ -468,18 +490,18 @@ function confirmInscribe(opts) {
   inscribeState.confirmed = true;
   inscribeState.hover = null;
   dom.inscribeHover.innerHTML = '';
-  const res = evaluateNgon(inscribeState.points, N);
   const inscribed = inscribeState.idealCorners || computeInscribedSync(state.shape.outer, N);
   if (inscribed) {
     inscribeState.idealCorners = inscribed;
     drawIdealInscribe(inscribed);
     inscribeState.idealDrawn = true;
   }
+  const res = evaluateNgon(inscribeState.points, N, inscribed);
   showInscribeVerdict(res, N);
   const v = inscribeVariation();
   if (!replay) {
     recordInscribeScore(v, res.score);
-    const winThreshold = v === 'triangle' ? 98 : 95;
+    const winThreshold = 95;
     if (state.daily) {
       recordDailyResult('inscribe', v, inscribeSnapshot(), res.score >= winThreshold);
     }

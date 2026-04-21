@@ -5,7 +5,7 @@ const inscribeStatsBundle = createModeStats({
   bestKey: 'bestScore',
   bestInit: -Infinity,
   isBetter: (value, cur) => value > cur,
-  isPerfect: (variation, score) => score >= (variation === 'triangle' ? 98 : 95),
+  isPerfect: (variation, score) => score >= 95,
   modeName: 'inscribe',
 });
 
