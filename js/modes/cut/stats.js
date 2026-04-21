@@ -7,6 +7,7 @@ const cutStatsBundle = createModeStats({
   isBetter: (value, cur) => value < cur,
   isPerfect: (_v, diff) => diff < 0.5,
   modeName: 'cut',
+  valueRange: [0, 100],
 });
 
 const cutStats       = cutStatsBundle.buckets;

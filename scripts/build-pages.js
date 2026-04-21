@@ -557,6 +557,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
 <script src="${rel}js/core/page-meta.js"></script>
 <script src="${rel}js/core/modes.js"></script>
 <script src="${rel}js/core/router.js"></script>
+<script src="${rel}js/core/signed-storage.js"></script>
 <script src="${rel}js/core/daily-lock.js"></script>
 <script src="${rel}js/core/mode-stats.js"></script>
 <script src="${rel}js/core/workers.js"></script>

@@ -35,18 +35,12 @@ function getTodayLock(mode, variation) {
 }
 
 function loadDailyHistory(mode, variation) {
-  try {
-    const raw = localStorage.getItem(dailyHistoryKey(mode, variation));
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr : [];
-  } catch (e) { return []; }
+  const arr = signedStorageGet(dailyHistoryKey(mode, variation));
+  return Array.isArray(arr) ? arr : [];
 }
 
 function saveDailyHistory(mode, variation, list) {
-  try {
-    localStorage.setItem(dailyHistoryKey(mode, variation), JSON.stringify(list));
-  } catch (e) {}
+  signedStorageSet(dailyHistoryKey(mode, variation), list);
 }
 
 function recordDailyResult(mode, variation, snapshot, won) {

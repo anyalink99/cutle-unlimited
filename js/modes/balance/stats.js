@@ -8,6 +8,7 @@ const balanceStatsBundle = createModeStats({
   isPerfect: (variation, dist) =>
     dist <= (variation === 'pole' ? BALANCE_PERFECT_THRESHOLD : 5),
   modeName: 'balance',
+  valueRange: v => v === 'pole' ? [0, 200] : [0, 400],
 });
 
 const balanceStats        = balanceStatsBundle.buckets;

@@ -4,7 +4,23 @@ function createModeStats(config) {
   const {
     prefix, variations, sumKey, bestKey, bestInit,
     isBetter, isPerfect, modeName,
+    valueRange,
   } = config;
+
+  // valueRange: [min, max] or (variation) => [min, max].
+  // Values outside the range (or non-finite) are dropped from record() —
+  // guards against crafted localStorage restoring and against accidental
+  // NaN/Infinity leaks from a scoring bug.
+  function rangeFor(v) {
+    if (!valueRange) return null;
+    return typeof valueRange === 'function' ? valueRange(v) : valueRange;
+  }
+  function isValidValue(v, value) {
+    if (typeof value !== 'number' || !isFinite(value)) return false;
+    const r = rangeFor(v);
+    if (!r) return true;
+    return value >= r[0] && value <= r[1];
+  }
 
   const buckets = {};
   for (const v of variations) {
@@ -14,29 +30,28 @@ function createModeStats(config) {
 
   function load() {
     for (const v of variations) {
-      try {
-        const raw = localStorage.getItem(keyFor(v));
-        if (!raw) continue;
-        const s = JSON.parse(raw);
-        const b = buckets[v];
-        b.attempts = s.attempts || 0;
-        b.perfect  = s.perfect  || 0;
-        b.sum      = s[sumKey]  || 0;
-        const best = s[bestKey];
-        b.best     = (best != null && isFinite(best)) ? best : bestInit;
-      } catch (e) {}
+      const s = signedStorageGet(keyFor(v));
+      if (!s) continue;
+      const b = buckets[v];
+      b.attempts = s.attempts || 0;
+      b.perfect  = s.perfect  || 0;
+      b.sum      = s[sumKey]  || 0;
+      const best = s[bestKey];
+      b.best     = (best != null && isFinite(best)) ? best : bestInit;
+      // Repair nonsense states from corrupted / legacy storage.
+      if (b.perfect > b.attempts) b.perfect = b.attempts;
+      if (b.attempts < 0) b.attempts = 0;
+      if (b.perfect  < 0) b.perfect  = 0;
     }
   }
 
   function save(v) {
     const b = buckets[v];
     if (!b) return;
-    try {
-      const out = { attempts: b.attempts, perfect: b.perfect };
-      out[sumKey]  = b.sum;
-      out[bestKey] = b.best === bestInit ? null : b.best;
-      localStorage.setItem(keyFor(v), JSON.stringify(out));
-    } catch (e) {}
+    const out = { attempts: b.attempts, perfect: b.perfect };
+    out[sumKey]  = b.sum;
+    out[bestKey] = b.best === bestInit ? null : b.best;
+    signedStorageSet(keyFor(v), out);
   }
 
   function reset(v) {
@@ -52,10 +67,12 @@ function createModeStats(config) {
   function record(v, value) {
     const b = buckets[v];
     if (!b) return;
+    if (!isValidValue(v, value)) return;
     b.attempts++;
     b.sum += value;
     if (isBetter(value, b.best)) b.best = value;
     if (isPerfect(v, value)) b.perfect++;
+    if (b.perfect > b.attempts) b.perfect = b.attempts;
     save(v);
   }
 

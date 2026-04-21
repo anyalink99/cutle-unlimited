@@ -7,6 +7,7 @@ const inscribeStatsBundle = createModeStats({
   isBetter: (value, cur) => value > cur,
   isPerfect: (variation, score) => score >= 95,
   modeName: 'inscribe',
+  valueRange: [0, 100],
 });
 
 const inscribeStats         = inscribeStatsBundle.buckets;

@@ -47,9 +47,14 @@ function dailyIndex(now) {
   return Math.floor((ms - DAILY_EPOCH_MS) / 86400000) + 1;
 }
 
-function dailyHashFor(mode, variation, dateStr) {
-  const key = (dateStr || todayUtc()) + ':' + mode + ':' + variation;
+// Lexical `const` (not `function`) so this doesn't become a window.* property —
+// casual `window.dailyHashFor(...)` from DevTools misses. It's still reachable
+// as a bare identifier from another script, which is fine: game.js needs it.
+// The dateStr parameter was dropped so there's no way to ask for a future day
+// even if the function is called directly.
+const dailyHashFor = function(mode, variation) {
+  const key = todayUtc() + ':' + mode + ':' + variation;
   const a = seedFromString(key).toString(16).padStart(8, '0');
   const b = seedFromString(key + ':b').toString(16).padStart(8, '0');
   return a + b;
-}
+};
