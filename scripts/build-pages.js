@@ -97,7 +97,7 @@ const GAME_PAGES = [
     mode: 'inscribe',
     variation: 'triangle',
     title: 'Largest inscribed equilateral triangle puzzle | geometric.games',
-    description: 'Find the largest equilateral triangle that fits inside a shape — three points on the outline, scored on both regularity and size.',
+    description: 'Find the largest equilateral triangle with all three vertices on a shape’s outline — scored on both regularity and size.',
   },
   {
     outPath: 'balance/index.html',
@@ -328,8 +328,8 @@ function postInscribedTriangle() {
   <p>
     Drop <b>three points</b> on the shape’s outline so they form an equilateral triangle — all
     three sides the same length, all three angles 60° — and make it as <b>large</b> as possible.
-    The puzzle scores you on both regularity and size relative to the maximum inscribed equilateral
-    that fits in the shape. Same placement mechanics as the <a href="/inscribe/">square variation</a>:
+    The puzzle scores you on both regularity and size relative to the maximum equilateral triangle
+    with vertices on the shape’s outline. Same placement mechanics as the <a href="/inscribe/">square variation</a>:
     the nearest boundary point follows your cursor, tap to drop, drag to refine, confirm to score.
   </p>
 
@@ -665,7 +665,7 @@ const HELP_MODAL = `<div class="modal-back" id="help-modal">
           <p class="math-note"><b>Math:</b> Toeplitz's Inscribed Square Problem (1911) — does every closed curve contain 4 points forming a square? Proven for polygons, smooth curves, and piecewise-smooth curves like the ones here; for arbitrary Jordan curves it's still <i>open</i> after 110+ years. <a class="math-more" href="/blog/inscribed-square-problem/">Read more →</a></p>
         </div>
         <div class="help-inscribe-triangle">
-          <p>Find the <b>largest equilateral triangle</b> that fits inside the shape — three points on the outline.</p>
+          <p>Find the <b>largest equilateral triangle</b> with all three vertices on the shape’s outline.</p>
           <ul>
             <li>Same controls as Square — tap, drop, and drag to adjust</li>
             <li>Score = regularity (equal sides, 60° angles) × size relative to the maximum inscribed equilateral</li>
@@ -788,7 +788,7 @@ const PUZZLE_MODAL = `<div class="modal-back" id="puzzle-modal">
           </button>
           <button class="var-card" data-var="triangle">
             <div class="mode-title">Largest Equilateral Triangle</div>
-            <div class="mode-desc">Find the largest equilateral triangle that fits inside the shape.</div>
+            <div class="mode-desc">Find the largest equilateral triangle with all three vertices on the outline.</div>
           </button>
         </div>
         <div class="var-group" data-mode="balance">

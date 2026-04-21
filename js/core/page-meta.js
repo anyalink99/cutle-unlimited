@@ -33,7 +33,7 @@ const PAGE_META = {
   "inscribe:triangle": {
     "path": "/inscribe/triangle/",
     "title": "Largest inscribed equilateral triangle puzzle | geometric.games",
-    "description": "Find the largest equilateral triangle that fits inside a shape — three points on the outline, scored on both regularity and size."
+    "description": "Find the largest equilateral triangle with all three vertices on a shape’s outline — scored on both regularity and size."
   },
   "balance:pole": {
     "path": "/balance/",
