@@ -1,9 +1,14 @@
 /* Palette + pixel quantization for GIF capture.
-   Strategy: histogram-bucket pixels into 16³=4096 bins, pick the 64 heaviest
+   Strategy: histogram-bucket pixels into 16³=4096 bins, pick the N heaviest
    bins as palette entries. Builds a 16³ LUT for O(1) pixel → palette-index
-   lookup so the hot path (540×540 × N frames) stays cheap. */
+   lookup so the hot path (540×540 × N frames) stays cheap.
 
-const PALETTE_SIZE = 64;
+   Default palette is 64 colors — plenty for the game's limited color range
+   (a handful of accent purples + pink + green + text greys). Callers handling
+   user-uploaded images should bump to 256 to avoid muddy banding on photos. */
+
+const PALETTE_SIZE_DEFAULT = 64;
+const PALETTE_SIZE_MAX = 256;
 
 // Extract an RGBA Uint8ClampedArray from a CanvasRenderingContext2D region.
 // Caller owns the canvas; we just read pixels.
@@ -14,7 +19,8 @@ function readPixels(ctx, w, h) {
 // Build a palette from sampled pixels. Samples 1-in-stride pixels for speed
 // on large canvases; quality loss is minimal because the game uses a limited
 // color range and the sample is still in the tens of thousands.
-function buildPalette(pixels, stride = 4) {
+function buildPalette(pixels, paletteSize = PALETTE_SIZE_DEFAULT, stride = 4) {
+  const target = Math.max(2, Math.min(PALETTE_SIZE_MAX, paletteSize | 0));
   const bins = new Uint32Array(4096);
   const sumR = new Uint32Array(4096);
   const sumG = new Uint32Array(4096);
@@ -30,13 +36,13 @@ function buildPalette(pixels, stride = 4) {
     sumB[binIdx] += b;
   }
 
-  // Rank bins by popularity, take the top PALETTE_SIZE.
+  // Rank bins by popularity, take the top N.
   const order = [];
   for (let i = 0; i < 4096; i++) if (bins[i] > 0) order.push(i);
   order.sort((a, b) => bins[b] - bins[a]);
 
   const palette = [];
-  for (let i = 0; i < Math.min(PALETTE_SIZE, order.length); i++) {
+  for (let i = 0; i < Math.min(target, order.length); i++) {
     const bin = order[i];
     const n = bins[bin];
     palette.push([

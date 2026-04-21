@@ -9,6 +9,18 @@ const GIF_PREFERS_REDUCED_MOTION = () =>
   window.matchMedia &&
   window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
+// Drop-to-load custom shapes arrive via main.js with state.hash = "drop-..."
+// and state.shapeImage set. Those frames include a rasterized user image,
+// which can contain thousands of distinct colors — the default 64-color
+// palette bucketizes them into mud. Bump to a full 256-color palette in
+// that case only; stock puzzles keep 64 for compact GIFs.
+function gifPaletteSize() {
+  if (typeof state === 'undefined') return 64;
+  if (state.shapeImage) return 256;
+  if (typeof state.hash === 'string' && state.hash.indexOf('drop-') === 0) return 256;
+  return 64;
+}
+
 let _shareGifInProgress = false;
 
 async function runShareFlow() {
@@ -70,8 +82,9 @@ async function buildGif() {
   const holdPixels = await buildComposedFrame(last.svg, last.verdict);
 
   // Palette samples the last frame — it has QR/URL plus the final verdict,
-  // so every color that will appear in the GIF is represented.
-  const palette = buildPalette(holdPixels);
+  // so every color that will appear in the GIF is represented. Custom-image
+  // puzzles switch to a 256-color palette so photo content survives.
+  const palette = buildPalette(holdPixels, gifPaletteSize());
   const lut = buildPaletteLUT(palette);
 
   const frames = [];
