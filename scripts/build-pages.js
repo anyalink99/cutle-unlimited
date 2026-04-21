@@ -541,7 +541,7 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     <button class="btn secondary" id="gamemode-btn">Change Puzzle</button>
     <button class="btn" id="new-btn" data-action="new">New Shape</button>
     <button id="share-btn" class="share-float" title="Share result" aria-label="Share result" hidden>
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>
     </button>
   </div>
 
