@@ -41,6 +41,7 @@ function initCutInput() {
     if (cutState.confirmed) return;
     if (cutState.activePointerId !== null) return;
     e.preventDefault();
+    dismissGhostBisector();
     const p = svgPoint(e);
     const v = cutVariation();
 

@@ -1,0 +1,36 @@
+.cut-ghost {
+  fill: none;
+  stroke: var(--good);
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-dasharray: 10 10;
+  opacity: 0.78;
+  pointer-events: none;
+  filter: drop-shadow(0 0 6px rgba(74, 222, 128, 0.45));
+  animation: cutGhostFlow 1.6s linear infinite, cutGhostFadeIn 0.5s ease 0.15s backwards;
+}
+.cut-ghost.dismissing {
+  animation: cutGhostFadeOut 0.28s ease forwards;
+}
+
+@keyframes cutGhostFlow {
+  from { stroke-dashoffset: 0; }
+  to   { stroke-dashoffset: -20; }
+}
+
+@keyframes cutGhostFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 0.78; }
+}
+
+@keyframes cutGhostFadeOut {
+  from { opacity: 0.78; }
+  to   { opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cut-ghost {
+    animation: cutGhostFadeIn 0.5s ease backwards;
+    stroke-dasharray: 6 6;
+  }
+}

@@ -155,6 +155,7 @@ function finalizeCut(opts) {
 
   cutState.confirmed = true;
   state.locked = true;
+  if (v === 'half') markCutGhostSeen();
   dom.cutPoints.innerHTML = '';
   dom.cutLines.innerHTML = '';
   drawCutFlash(cutState.cuts);
@@ -268,6 +269,7 @@ function cutOnNewShape() {
     setupAngleChord(offsetRatio);
   }
   renderCutAll();
+  renderGhostBisector();
 }
 
 function translateCutLine(idx, delta, constrainPerp) {
