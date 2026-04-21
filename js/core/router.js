@@ -1,4 +1,4 @@
-const HASH_RE = /^[a-z0-9]{6,64}$/i;
+const HASH_RE = /^(drop-)?[a-z0-9]{6,64}$/i;
 
 function parseLocation() {
   const parts = window.location.pathname.split('/').filter(Boolean);
