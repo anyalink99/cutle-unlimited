@@ -390,6 +390,24 @@
   const MIN_SEG_PX = 6;
   const DEFAULT_CIRCLE_R = 25;
 
+  // Mode/variation → canonical URL path. Mirrors router.js#variationPath:
+  // the default variation of each mode lives at its rootPath (e.g.
+  // /balance/, /inscribe/, /), while non-default variations live at
+  // /mode/variation/. The editor doesn't load router.js, so we hardcode
+  // the mapping to keep the share URL matching the routes the build emits.
+  const TARGET_PATH = {
+    'cut/half':          '/',
+    'cut/ratio':         '/cut/ratio/',
+    'cut/quad':          '/cut/quad/',
+    'cut/tri':           '/cut/tri/',
+    'cut/angle':         '/cut/angle/',
+    'inscribe/square':   '/inscribe/',
+    'inscribe/triangle': '/inscribe/triangle/',
+    'balance/pole':      '/balance/',
+    'balance/centroid':  '/balance/centroid/',
+    'balance/perch':     '/balance/perch/',
+  };
+
   // ─── State ──────────────────────────────────────────────────────
   const state = {
     mode: 'outer',              // 'outer' | 'hole' | null
@@ -871,8 +889,7 @@
     try {
       const tok = encodeCustomShape(currentDesign());
       const target = document.getElementById('target-variation').value;
-      const path = target === 'cut/half' ? '' : target + '/';
-      urlOut.value = 'https://geometric.games/' + path + '?s=' + tok;
+      urlOut.value = 'https://geometric.games' + TARGET_PATH[target] + '?s=' + tok;
     } catch (e) {
       urlOut.value = '';
       setError(e.message || String(e));
