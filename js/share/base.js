@@ -392,6 +392,7 @@ async function buildSharePng() {
 }
 
 function showToast(msg, isError) {
+  if (window.Kit && Kit.toast) { Kit.toast.show(msg, { type: isError ? 'danger' : 'default' }); return; }
   const el = document.getElementById('toast');
   if (!el) return;
   el.textContent = msg;

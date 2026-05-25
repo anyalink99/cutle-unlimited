@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="geometric">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -67,6 +67,10 @@ j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
     window.__CANONICAL_PATH = "/";
     window.__ASSET_BASE = "";
   </script>
+<!-- niokit tokens (pinned by version) — drives the palette via data-theme -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/anyalink99/niokit@v0.1.0/css/tokens.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/anyalink99/niokit@v0.1.0/css/motion.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/anyalink99/niokit@v0.1.0/css/components.css">
 <link rel="stylesheet" href="css/index.css">
 </head>
 <body data-mode="cut" data-cut-variation="half" data-inscribe-variation="square" data-balance-variation="pole">
@@ -123,6 +127,9 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
     </button>
   </div>
 
+  <!-- niokit-modal migration reverted: native markup kept so this matches the
+       other modals' style. To re-enable, restore .k-modal/.k-modal__backdrop/
+       .k-modal__panel and uncomment the adapter in js/ui/modals.js. -->
   <div class="modal-back" id="help-modal">
     <div class="modal">
       <h2>HOW TO PLAY</h2>
@@ -326,6 +333,8 @@ height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 </div>
 
+<!-- niokit runtime (pinned) — provides Kit.modal / Kit.toast used below -->
+<script src="https://cdn.jsdelivr.net/gh/anyalink99/niokit@v0.1.0/dist/niokit.js"></script>
 <script src="js/core/constants.js"></script>
 <script src="js/core/random.js"></script>
 <script src="js/core/seed.js"></script>

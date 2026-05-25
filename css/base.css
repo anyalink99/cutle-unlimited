@@ -16,15 +16,17 @@
 }
 
 :root {
-  --bg-outer: #1a161d;
-  --bg-inner: #2d2631;
-  --accent: #c084fc;
+  /* core palette now sourced from niokit tokens (data-theme="geometric").
+     values are identical to before; change the theme to retheme the whole app. */
+  --bg-outer: var(--k-bg);
+  --bg-inner: var(--k-surface);
+  --accent: var(--k-accent);
   --accent-soft: #a855f7;
   --accent-deep: #6b2ea0;
   --pink: #f472b6;
   --muted: #9ca3af;
-  --good: #4ade80;
-  --warn: #f87171;
+  --good: var(--k-good);
+  --warn: var(--k-danger);
   --s-curve: cubic-bezier(0.83, 0, 0.17, 1);
   --pop: cubic-bezier(0.18, 0.89, 0.35, 1.15);
 }
